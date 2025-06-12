@@ -1,0 +1,26 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $this->call([
+            UserSeeder::class,
+            
+            GalaxySeeder::class,
+            
+            StarSeeder::class,
+            PlanetSeeder::class,
+            MoonSeeder::class,
+            
+            // Seeders de likes (dans cet ordre)
+            LikerStarSeeder::class,
+            LikerPlanetSeeder::class,
+            LikerMoonSeeder::class,
+        ]);
+    }
+}

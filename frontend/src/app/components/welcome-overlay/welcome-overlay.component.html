@@ -1,0 +1,9 @@
+@if (showWelcomeOverlay){
+  <div class="welcome-overlay" (click)="showWelcomeOverlay = false">
+      <div class="welcome-card" (click)="$event.stopPropagation()">
+        <h2>Welcome to CosmiCrowd!</h2>
+        <p>Explore collaborative galaxies and create your own solar systems</p>
+        <button (click)="showWelcomeOverlay = false" class="start-btn">Start Exploring</button>
+      </div>
+ </div>
+}

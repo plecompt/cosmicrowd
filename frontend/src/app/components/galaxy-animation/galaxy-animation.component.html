@@ -1,0 +1,8 @@
+<div #canvasContainer class="galaxy-container"></div>`
+
+<div class="fps-counter" *ngIf="showFps">
+  <div class="fps-display">
+    FPS: {{ fps }}
+    <button (click)="toggleFps()" class="fps-toggle">✕</button>
+  </div>
+</div>
