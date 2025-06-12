@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Galaxy extends Model
 {
@@ -14,10 +15,10 @@ class Galaxy extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'galaxy_size',
         'galaxy_name',
         'galaxy_desc',
-        'galaxy_age',
+        'galaxy_size',
+        'galaxy_age'
     ];
 
     protected $casts = [
@@ -26,34 +27,34 @@ class Galaxy extends Model
     ];
 
     // Relations
-    public function stars()
+    public function solarSystems(): HasMany
     {
-        return $this->hasMany(Star::class, 'galaxy_id', 'galaxy_id');
+        return $this->hasMany(SolarSystem::class, 'galaxy_id');
     }
 
     // Méthodes utiles
-    public function starsCount()
+    public function solarSystemsCount()
     {
-        return $this->stars()->count();
+        return $this->solarSystems()->count();
     }
 
-    public function activeStarsCount()
-    {
-        return $this->stars()->whereHas('user', function ($query) {
-            $query->where('user_active', true);
-        })->count();
-    }
+    // public function activeSolarSystemsCount()
+    // {
+    //     return $this->solarSystems()->whereHas('user', function ($query) {
+    //         $query->where('user_active', true);
+    //     })->count();
+    // }
 
     // Obtenir toutes les planètes de la galaxie
     public function planets()
     {
-        return $this->hasManyThrough(Planet::class, Star::class, 'galaxy_id', 'star_id', 'galaxy_id', 'star_id');
+        return $this->hasManyThrough(Planet::class, SolarSystem::class, 'galaxy_id', 'solar_system_id', 'galaxy_id', 'solar_system_id');
     }
 
     // Obtenir toutes les lunes de la galaxie
     public function moons()
     {
-        return Moon::whereHas('planet.star', function($query) {
+        return Moon::whereHas('planet.solarSystem', function($query) {
             $query->where('galaxy_id', $this->galaxy_id);
         });
     }
@@ -61,6 +62,6 @@ class Galaxy extends Model
     // Statistiques de la galaxie
     public function getTotalObjectsCount()
     {
-        return $this->starsCount() + $this->planets()->count() + $this->moons()->count();
+        return $this->solarSystemsCount() + $this->planets()->count() + $this->moons()->count();
     }
 }

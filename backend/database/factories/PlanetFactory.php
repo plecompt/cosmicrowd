@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Star;
+use App\Models\SolarSystem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PlanetFactory extends Factory
@@ -26,7 +26,7 @@ class PlanetFactory extends Factory
             'distance_from_star' => fake()->numberBetween(100, 800),
             'orbital_period' => fake()->numberBetween(10, 365),
             'description' => fake()->optional()->sentence(8),
-            'star_id' => Star::factory(),
+            'solar_system_id' => SolarSystem::factory(),
         ];
     }
 }

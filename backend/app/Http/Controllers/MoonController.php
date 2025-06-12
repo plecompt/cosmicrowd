@@ -4,70 +4,81 @@ namespace App\Http\Controllers;
 
 use App\Models\Moon;
 use App\Models\Planet;
+use App\Models\UserSolarSystemOwnership;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class MoonController extends Controller
 {
-    // Récupérer toutes les lunes
-    public function index(Request $request)
+    /**
+     * Vérifie si l'utilisateur a le droit de modifier cette lune
+     * Un utilisateur ne peut modifier que les lunes des planètes appartenant à ses systèmes claim
+     */
+    private function checkMoonOwnership($planetId)
     {
-        $query = Moon::with(['planet.star.user', 'likes']);
-
-        // Filtrer par planète
-        if ($request->has('planet_id')) {
-            $query->where('planet_id', $request->planet_id);
+        $userId = Auth::id();
+        
+        // Récupère la planète et son système solaire
+        $planet = Planet::with('solarSystem')->findOrFail($planetId);
+        
+        // Vérifie si l'utilisateur est propriétaire du système solaire
+        $ownership = UserSolarSystemOwnership::where('solar_system_id', $planet->solar_system_id)
+            ->where('user_id', $userId)
+            ->first();
+            
+        if (!$ownership) {
+            return false;
         }
-
-        // Recherche par nom
-        if ($request->has('search')) {
-            $query->where('moon_name', 'LIKE', '%' . $request->search . '%');
-        }
-
-        $moons = $query->orderBy('moon_average_distance', 'asc')
-                      ->paginate($request->get('per_page', 15));
-
-        return response()->json([
-            'success' => true,
-            'moons' => $moons
-        ]);
+        
+        return true;
     }
 
-    // Récupérer une lune spécifique
-    public function show($id)
+    /**
+     * Affiche la liste des lunes d'une planète
+     */
+    public function index($galaxyId, $solarSystemId, $planetId)
     {
-        $moon = Moon::with(['planet.star.user', 'likes.user'])
-                   ->find($id);
-
-        if (!$moon) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lune non trouvée'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'moon' => $moon
-        ]);
+        $moons = Moon::where('planet_id', $planetId)->get();
+        return response()->json($moons);
     }
 
-    // Créer une nouvelle lune
-    public function store(Request $request)
+    /**
+     * Affiche les détails d'une lune
+     */
+    public function show($galaxyId, $solarSystemId, $planetId, $moonId)
     {
-        $validator = Validator::make($request->all(), [
-            'moon_name' => 'required|string|max:100',
-            'moon_type' => 'required|string|max:50',
-            'moon_gravity' => 'required|numeric|min:0.01|max:10',
-            'moon_surface_temp' => 'required|numeric',
-            'moon_orbital_longitude' => 'required|numeric',
+        $moon = Moon::where('planet_id', $planetId)
+            ->where('moon_id', $moonId)
+            ->firstOrFail();
+            
+        return response()->json($moon);
+    }
+
+    /**
+     * Crée une nouvelle lune
+     */
+    public function store(Request $request, $galaxyId, $solarSystemId, $planetId)
+    {
+        // Vérifie si l'utilisateur peut créer une lune pour cette planète
+        if (!$this->checkMoonOwnership($planetId)) {
+            return response()->json(['message' => 'Vous n\'avez pas la permission de créer une lune pour cette planète'], 403);
+        }
+
+        $validated = $request->validate([
+            'moon_name' => 'required|string|max:50',
+            'moon_desc' => 'nullable|string|max:255',
+            'moon_type' => 'required|in:rocky,icy,mixed,primitive,regular,irregular,trojan,coorbital',
+            'moon_gravity' => 'required|numeric|min:0',
+            'moon_surface_temp' => 'required|numeric|min:-273.15',
+            'moon_orbital_longitude' => 'required|numeric|min:0|max:360',
             'moon_eccentricity' => 'required|numeric|min:0|max:1',
             'moon_apogee' => 'required|integer|min:0',
             'moon_perigee' => 'required|integer|min:0',
-            'moon_orbital_inclination' => 'required|integer',
+            'moon_orbital_inclination' => 'required|integer|min:0|max:360',
             'moon_average_distance' => 'required|integer|min:0',
             'moon_orbital_period' => 'required|integer|min:0',
-            'moon_inclination_angle' => 'required|integer',
+            'moon_inclination_angle' => 'required|integer|min:0|max:360',
             'moon_rotation_period' => 'required|integer|min:0',
             'moon_mass' => 'required|integer|min:0',
             'moon_diameter' => 'required|integer|min:0',
@@ -75,154 +86,83 @@ class MoonController extends Controller
             'moon_initial_x' => 'required|integer',
             'moon_initial_y' => 'required|integer',
             'moon_initial_z' => 'required|integer',
-            'planet_id' => 'required|integer|exists:planet,planet_id',
-            'user_id' => 'required|integer|exists:user,user_id'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 400);
+        // Vérifie que le périgée est inférieur à l'apogée
+        if ($validated['moon_perigee'] > $validated['moon_apogee']) {
+            return response()->json(['message' => 'Le périgée doit être inférieur à l\'apogée'], 422);
         }
 
-        // Vérifier que la planète existe
-        $planet = Planet::find($request->planet_id);
-        if (!$planet) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Planète non trouvée'
-            ], 404);
-        }
+        $validated['planet_id'] = $planetId;
+        $validated['user_id'] = Auth::id();
 
-        $moon = Moon::create([
-            'moon_name' => $request->moon_name,
-            'moon_type' => $request->moon_type,
-            'moon_gravity' => $request->moon_gravity,
-            'moon_surface_temp' => $request->moon_surface_temp,
-            'moon_orbital_longitude' => $request->moon_orbital_longitude,
-            'moon_eccentricity' => $request->moon_eccentricity,
-            'moon_apogee' => $request->moon_apogee,
-            'moon_perigee' => $request->moon_perigee,
-            'moon_orbital_inclination' => $request->moon_orbital_inclination,
-            'moon_average_distance' => $request->moon_average_distance,
-            'moon_orbital_period' => $request->moon_orbital_period,
-            'moon_inclination_angle' => $request->moon_inclination_angle,
-            'moon_rotation_period' => $request->moon_rotation_period,
-            'moon_mass' => $request->moon_mass,
-            'moon_diameter' => $request->moon_diameter,
-            'moon_rings' => $request->moon_rings,
-            'moon_initial_x' => $request->moon_initial_x,
-            'moon_initial_y' => $request->moon_initial_y,
-            'moon_initial_z' => $request->moon_initial_z,
-            'planet_id' => $request->planet_id,
-            'user_id' => $request->user_id
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lune créée avec succès',
-            'moon' => $moon->load(['planet.star.user'])
-        ], 201);
+        $moon = Moon::create($validated);
+        return response()->json($moon, 201);
     }
 
-    // Mettre à jour une lune
-    public function update(Request $request, $id)
+    /**
+     * Met à jour une lune
+     */
+    public function update(Request $request, $galaxyId, $solarSystemId, $planetId, $moonId)
     {
-        $moon = Moon::find($id);
-
-        if (!$moon) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lune non trouvée'
-            ], 404);
+        // Vérifie si l'utilisateur peut modifier cette lune
+        if (!$this->checkMoonOwnership($planetId)) {
+            return response()->json(['message' => 'Vous n\'avez pas la permission de modifier cette lune'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
-            'moon_name' => 'sometimes|required|string|max:100',
-            'moon_type' => 'sometimes|required|string|max:50',
-            'moon_gravity' => 'sometimes|required|numeric|min:0.01|max:10',
-            'moon_surface_temp' => 'sometimes|required|numeric',
-            'moon_orbital_longitude' => 'sometimes|required|numeric',
+        $moon = Moon::where('planet_id', $planetId)
+            ->where('moon_id', $moonId)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'moon_name' => 'sometimes|required|string|max:50',
+            'moon_desc' => 'nullable|string|max:255',
+            'moon_type' => 'sometimes|required|in:rocky,icy,mixed,primitive,regular,irregular,trojan,coorbital',
+            'moon_gravity' => 'sometimes|required|numeric|min:0',
+            'moon_surface_temp' => 'sometimes|required|numeric|min:-273.15',
+            'moon_orbital_longitude' => 'sometimes|required|numeric|min:0|max:360',
             'moon_eccentricity' => 'sometimes|required|numeric|min:0|max:1',
             'moon_apogee' => 'sometimes|required|integer|min:0',
             'moon_perigee' => 'sometimes|required|integer|min:0',
-            'moon_orbital_inclination' => 'sometimes|required|integer',
+            'moon_orbital_inclination' => 'sometimes|required|integer|min:0|max:360',
             'moon_average_distance' => 'sometimes|required|integer|min:0',
             'moon_orbital_period' => 'sometimes|required|integer|min:0',
-            'moon_inclination_angle' => 'sometimes|required|integer',
+            'moon_inclination_angle' => 'sometimes|required|integer|min:0|max:360',
             'moon_rotation_period' => 'sometimes|required|integer|min:0',
             'moon_mass' => 'sometimes|required|integer|min:0',
             'moon_diameter' => 'sometimes|required|integer|min:0',
             'moon_rings' => 'sometimes|required|integer|min:0',
             'moon_initial_x' => 'sometimes|required|integer',
             'moon_initial_y' => 'sometimes|required|integer',
-            'moon_initial_z' => 'sometimes|required|integer'
+            'moon_initial_z' => 'sometimes|required|integer',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 400);
+        // Vérifie que le périgée est inférieur à l'apogée si les deux sont fournis
+        if (isset($validated['moon_perigee']) && isset($validated['moon_apogee'])) {
+            if ($validated['moon_perigee'] > $validated['moon_apogee']) {
+                return response()->json(['message' => 'Le périgée doit être inférieur à l\'apogée'], 422);
+            }
         }
 
-        $moon->update($request->only([
-            'moon_name', 'moon_type', 'moon_gravity', 'moon_surface_temp',
-            'moon_orbital_longitude', 'moon_eccentricity', 'moon_apogee',
-            'moon_perigee', 'moon_orbital_inclination', 'moon_average_distance',
-            'moon_orbital_period', 'moon_inclination_angle', 'moon_rotation_period',
-            'moon_mass', 'moon_diameter', 'moon_rings', 'moon_initial_x',
-            'moon_initial_y', 'moon_initial_z'
-        ]));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lune mise à jour avec succès',
-            'moon' => $moon->load(['planet.star.user'])
-        ]);
+        $moon->update($validated);
+        return response()->json($moon);
     }
 
-    // Supprimer une lune
-    public function destroy($id)
+    /**
+     * Supprime une lune
+     */
+    public function destroy($galaxyId, $solarSystemId, $planetId, $moonId)
     {
-        $moon = Moon::find($id);
-
-        if (!$moon) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lune non trouvée'
-            ], 404);
+        // Vérifie si l'utilisateur peut supprimer cette lune
+        if (!$this->checkMoonOwnership($planetId)) {
+            return response()->json(['message' => 'Vous n\'avez pas la permission de supprimer cette lune'], 403);
         }
+
+        $moon = Moon::where('planet_id', $planetId)
+            ->where('moon_id', $moonId)
+            ->firstOrFail();
 
         $moon->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lune supprimée avec succès'
-        ]);
-    }
-
-    // Récupérer les lunes d'une planète spécifique
-    public function getByPlanetId($planetId)
-    {
-        $planet = Planet::find($planetId);
-        if (!$planet) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Planète non trouvée'
-            ], 404);
-        }
-
-        $moons = Moon::with(['likes'])
-                     ->where('planet_id', $planetId)
-                     ->orderBy('moon_average_distance', 'asc')
-                     ->get();
-
-        return response()->json([
-            'success' => true,
-            'planet' => $planet,
-            'moons' => $moons
-        ]);
+        return response()->json(null, 204);
     }
 }

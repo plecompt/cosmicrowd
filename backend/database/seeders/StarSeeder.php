@@ -127,17 +127,14 @@ class StarSeeder extends Seeder
         return $starsCreated;
     }
 
-    /**
-     * 🛠️ Crée une seule étoile
-     */
     private function createSingleStar(int $userId, Galaxy $galaxy)
     {
-        // Type d'étoile aléatoire
         $starType = array_rand($this->starTypeData);
         $typeData = $this->starTypeData[$starType];
-        
-        // Nom aléatoire unique
         $starName = $this->starNames[array_rand($this->starNames)] . '-' . uniqid();
+        
+        // 🌌 COORDONNÉES GALAXIE SPIRALE RÉALISTE
+        $coordinates = $this->generateGalaxyCoordinates($galaxy);
         
         Star::create([
             'star_name' => $starName,
@@ -148,14 +145,135 @@ class StarSeeder extends Seeder
             'star_luminosity' => $this->randomFloat($typeData['luminosity'][0], $typeData['luminosity'][1]),
             'star_mass' => $this->randomFloat($typeData['mass'][0], $typeData['mass'][1]),
             'star_diameter' => $this->randomFloat($typeData['radius'][0], $typeData['radius'][1]) * 2 * 6371,
-            'star_initial_x' => rand(-1000, 1000),
-            'star_initial_y' => rand(-1000, 1000),
-            'star_initial_z' => rand(-1000, 1000),
+            
+            // ✅ COORDONNÉES GALAXIE RÉALISTE
+            'star_initial_x' => $coordinates['x'],
+            'star_initial_y' => $coordinates['y'],
+            'star_initial_z' => $coordinates['z'],
+            
             'user_id' => $userId,
             'galaxy_id' => $galaxy->galaxy_id,
         ]);
     }
 
+    /**
+     * 🌌 Génère des coordonnées de galaxie spirale réaliste
+     */
+    private function generateGalaxyCoordinates(Galaxy $galaxy): array
+    {
+        $galaxyRadius = $galaxy->galaxy_size / 10; // Échelle adaptée à Three.js
+        
+        // 🎯 CHOIX DU TYPE DE RÉGION
+        $regionType = $this->chooseGalaxyRegion();
+        
+        switch ($regionType) {
+            case 'core':
+                return $this->generateCoreCoordinates($galaxyRadius);
+            case 'spiral_arm':
+                return $this->generateSpiralArmCoordinates($galaxyRadius);
+            case 'disk':
+                return $this->generateDiskCoordinates($galaxyRadius);
+            case 'halo':
+                return $this->generateHaloCoordinates($galaxyRadius);
+            default:
+                return $this->generateDiskCoordinates($galaxyRadius);
+        }
+    }
+
+    /**
+     * 🎲 Choisit la région de la galaxie (répartition réaliste)
+     */
+    private function chooseGalaxyRegion(): string
+    {
+        $rand = rand(1, 100);
+        
+        if ($rand <= 15) return 'core';        // 15% centre galactique
+        if ($rand <= 65) return 'spiral_arm';  // 50% bras spiraux  
+        if ($rand <= 90) return 'disk';        // 25% disque
+        return 'halo';                         // 10% halo
+    }
+
+    /**
+     * 🔥 CENTRE GALACTIQUE (dense, étoiles massives)
+     */
+    private function generateCoreCoordinates(float $galaxyRadius): array
+    {
+        $coreRadius = $galaxyRadius * 0.05; // 5% du rayon total
+        
+        $distance = $this->randomFloat(0, $coreRadius);
+        $angle = $this->randomFloat(0, 2 * M_PI);
+        $height = $this->randomFloat(-50, 50); // Zone plate
+        
+        return [
+            'x' => round($distance * cos($angle)),
+            'y' => round($height),
+            'z' => round($distance * sin($angle))
+        ];
+    }
+
+    /**
+     * 🌀 BRAS SPIRAUX (structure caractéristique)
+     */
+    private function generateSpiralArmCoordinates(float $galaxyRadius): array
+    {
+        $numberOfArms = 4; // Galaxie à 4 bras
+        $armIndex = rand(0, $numberOfArms - 1);
+        
+        // Distance du centre (plus d'étoiles au milieu des bras)
+        $distance = $this->randomFloat($galaxyRadius * 0.2, $galaxyRadius * 0.8);
+        
+        // Angle de base du bras + courbure spirale
+        $baseAngle = ($armIndex * 2 * M_PI) / $numberOfArms;
+        $spiralTightness = 2; // Serrage de la spirale
+        $spiralAngle = $baseAngle + ($distance / $galaxyRadius) * $spiralTightness;
+        
+        // Variation aléatoire pour épaisseur du bras
+        $armWidth = $galaxyRadius * 0.1;
+        $offsetAngle = $this->randomFloat(-$armWidth/$distance, $armWidth/$distance);
+        $finalAngle = $spiralAngle + $offsetAngle;
+        
+        // Hauteur (disque mince)
+        $height = $this->randomFloat(-100, 100);
+        
+        return [
+            'x' => round($distance * cos($finalAngle)),
+            'y' => round($height),
+            'z' => round($distance * sin($finalAngle))
+        ];
+    }
+
+    /**
+     * 💫 DISQUE GALACTIQUE (répartition uniforme)
+     */
+    private function generateDiskCoordinates(float $galaxyRadius): array
+    {
+        $distance = sqrt($this->randomFloat(0, 1)) * $galaxyRadius * 0.9;
+        $angle = $this->randomFloat(0, 2 * M_PI);
+        $height = $this->randomFloat(-150, 150); // Plus épais que les bras
+        
+        return [
+            'x' => round($distance * cos($angle)),
+            'y' => round($height),
+            'z' => round($distance * sin($angle))
+        ];
+    }
+
+    /**
+     * ⭐ HALO GALACTIQUE (étoiles anciennes)
+     */
+    private function generateHaloCoordinates(float $galaxyRadius): array
+    {
+        $distance = $this->randomFloat($galaxyRadius * 0.8, $galaxyRadius * 2);
+        $angle = $this->randomFloat(0, 2 * M_PI);
+        $elevation = $this->randomFloat(-M_PI/2, M_PI/2);
+        
+        return [
+            'x' => round($distance * cos($elevation) * cos($angle)),
+            'y' => round($distance * sin($elevation)),
+            'z' => round($distance * cos($elevation) * sin($angle))
+        ];
+    }
+    
     private function randomFloat($min, $max)
     {
         return $min + mt_rand() / mt_getrandmax() * ($max - $min);

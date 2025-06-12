@@ -47,20 +47,21 @@ class User extends Authenticatable
         return $this->user_email;
     }
 
-    // Relation avec les étoiles créées par l'utilisateur
-    public function stars()
+    // Systèmes solaires possédés
+    public function ownedSolarSystems()
     {
-        return $this->hasMany(Star::class, 'user_id', 'user_id');
+        return $this->belongsToMany(SolarSystem::class, 'user_solar_system_ownership', 'user_id', 'solar_system_id')
+                    ->withPivot('ownership_type', 'owned_at');
     }
 
    // ========== RELATIONS LIKES ==========
     
-    // Systèmes stellaires likés
-    public function likedStars()
+    // Systèmes solaires likés
+    public function likedSolarSystems()
     {
-        return $this->belongsToMany(Star::class, 'liker_star', 'user_id', 'star_id')
-                    ->withPivot('liker_star_date')
-                    ->orderByPivot('liker_star_date', 'desc');
+        return $this->belongsToMany(SolarSystem::class, 'liker_solar_system', 'user_id', 'solar_system_id')
+                    ->withPivot('liker_solar_system_date')
+                    ->orderByPivot('liker_solar_system_date', 'desc');
     }
 
     // Planètes likées
@@ -80,9 +81,9 @@ class User extends Authenticatable
     }
 
     // Relations directes avec les tables de likes
-    public function starLikes()
+    public function solarSystemLikes()
     {
-        return $this->hasMany(LikerStar::class, 'user_id', 'user_id');
+        return $this->hasMany(LikerSolarSystem::class, 'user_id', 'user_id');
     }
 
     public function planetLikes()
@@ -97,9 +98,9 @@ class User extends Authenticatable
 
     // ========== MÉTHODES UTILES ==========
 
-    public function hasLikedStar($starId)
+    public function hasLikedSolarSystem($solarSystemId)
     {
-        return $this->starLikes()->where('star_id', $starId)->exists();
+        return $this->solarSystemLikes()->where('solar_system_id', $solarSystemId)->exists();
     }
 
     public function hasLikedPlanet($planetId)
@@ -112,9 +113,9 @@ class User extends Authenticatable
         return $this->moonLikes()->where('moon_id', $moonId)->exists();
     }
 
-    public function toggleStarLike($starId)
+    public function toggleSolarSystemLike($solarSystemId)
     {
-        return LikerStar::toggleLike($starId, $this->user_id);
+        return LikerSolarSystem::toggleLike($solarSystemId, $this->user_id);
     }
 
     public function togglePlanetLike($planetId)
@@ -130,10 +131,10 @@ class User extends Authenticatable
     public function getLikeStats()
     {
         return [
-            'stars_liked' => $this->starLikes()->count(),
+            'solar_systems_liked' => $this->solarSystemLikes()->count(),
             'planets_liked' => $this->planetLikes()->count(),
             'moons_liked' => $this->moonLikes()->count(),
-            'total_likes' => $this->starLikes()->count() + 
+            'total_likes' => $this->solarSystemLikes()->count() + 
                             $this->planetLikes()->count() + 
                             $this->moonLikes()->count(),
             'recent_activity' => $this->getRecentLikes(10)
@@ -142,37 +143,37 @@ class User extends Authenticatable
 
     public function getRecentLikes($limit = 5)
     {
-        $starLikes = $this->starLikes()->with('star')->get()->map(function ($like) {
+        $solarSystemLikes = $this->solarSystemLikes()->with('solarSystem')->get()->map(function ($like) {
             return [
-                'type' => 'star',
-                'item' => $like->star,
-                'date' => $like->liker_star_date,
-                'name' => $like->star->star_name
+                'type' => 'solar_system',
+                'item' => $like->solarSystem,
+                'date' => $like->liker_solar_system_date,
+                'name' => $like->solarSystem->solar_system_name
             ];
         });
 
-        $planetLikes = $this->planetLikes()->with('planet.star')->get()->map(function ($like) {
+        $planetLikes = $this->planetLikes()->with('planet.solarSystem')->get()->map(function ($like) {
             return [
                 'type' => 'planet',
                 'item' => $like->planet,
                 'date' => $like->liker_planet_date,
                 'name' => $like->planet->planet_name,
-                'system' => $like->planet->star->star_name
+                'system' => $like->planet->solarSystem->solar_system_name
             ];
         });
 
-        $moonLikes = $this->moonLikes()->with('moon.planet.star')->get()->map(function ($like) {
+        $moonLikes = $this->moonLikes()->with('moon.planet.solarSystem')->get()->map(function ($like) {
             return [
                 'type' => 'moon',
                 'item' => $like->moon,
                 'date' => $like->liker_moon_date,
                 'name' => $like->moon->moon_name,
                 'planet' => $like->moon->planet->planet_name,
-                'system' => $like->moon->planet->star->star_name
+                'system' => $like->moon->planet->solarSystem->solar_system_name
             ];
         });
 
-        return $starLikes->concat($planetLikes)
+        return $solarSystemLikes->concat($planetLikes)
                         ->concat($moonLikes)
                         ->sortByDesc('date')
                         ->take($limit)

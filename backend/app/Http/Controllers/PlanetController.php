@@ -4,11 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Models\Planet;
 use App\Models\Star;
+use App\Models\SolarSystem;
+use App\Models\UserSolarSystemOwnership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PlanetController extends Controller
 {
+    /**
+     * Vérifie si l'utilisateur a le droit de modifier cette planète
+     * Un utilisateur ne peut modifier que les planètes des systèmes qu'il a claim
+     */
+    private function checkPlanetOwnership($solarSystemId)
+    {
+        $userId = Auth::id();
+        
+        // Vérifie si l'utilisateur est propriétaire du système solaire
+        $ownership = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)
+            ->where('user_id', $userId)
+            ->first();
+            
+        if (!$ownership) {
+            return false;
+        }
+        
+        return true;
+    }
+
     // Récupérer toutes les planètes
     public function index(Request $request)
     {
@@ -55,6 +78,11 @@ class PlanetController extends Controller
     // Créer une nouvelle planète
     public function store(Request $request)
     {
+        // Vérifie si l'utilisateur peut créer une planète
+        if (!$this->checkPlanetOwnership($request->solar_system_id)) {
+            return response()->json(['message' => 'Vous n\'avez pas la permission de créer une planète dans ce système'], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'planet_name' => 'required|string|max:100',
             'planet_type' => 'required|string|max:50',
@@ -75,7 +103,6 @@ class PlanetController extends Controller
             'planet_initial_x' => 'required|integer',
             'planet_initial_y' => 'required|integer',
             'planet_initial_z' => 'required|integer',
-            'star_id' => 'required|integer|exists:star,star_id',
             'user_id' => 'required|integer|exists:user,user_id'
         ]);
 
@@ -115,7 +142,6 @@ class PlanetController extends Controller
             'planet_initial_x' => $request->planet_initial_x,
             'planet_initial_y' => $request->planet_initial_y,
             'planet_initial_z' => $request->planet_initial_z,
-            'star_id' => $request->star_id,
             'user_id' => $request->user_id
         ]);
 
@@ -129,6 +155,11 @@ class PlanetController extends Controller
     // Mettre à jour une planète
     public function update(Request $request, $id)
     {
+        // Vérifie si l'utilisateur peut modifier cette planète
+        if (!$this->checkPlanetOwnership($request->solar_system_id)) {
+            return response()->json(['message' => 'Vous n\'avez pas la permission de modifier cette planète'], 403);
+        }
+
         $planet = Planet::find($id);
 
         if (!$planet) {
@@ -186,6 +217,11 @@ class PlanetController extends Controller
     // Supprimer une planète
     public function destroy($id)
     {
+        // Vérifie si l'utilisateur peut supprimer cette planète
+        if (!$this->checkPlanetOwnership($request->solar_system_id)) {
+            return response()->json(['message' => 'Vous n\'avez pas la permission de supprimer cette planète'], 403);
+        }
+
         $planet = Planet::find($id);
 
         if (!$planet) {

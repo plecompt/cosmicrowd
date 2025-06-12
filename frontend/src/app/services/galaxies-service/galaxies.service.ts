@@ -23,21 +23,22 @@ export class GalaxiesService {
 
   // Récupérer les étoiles pour l'animation
   getStarsForAnimation(limit: number = 50, offset: number = 0): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxy/stars/animation?limit=${limit}&offset=${offset}`);
+    return this.http.get(`${this.apiUrl}/galaxy/solar-systems/animation?limit=${limit}&offset=${offset}`);
   }
 
   // Étoiles les plus likées
   getMostLikedStars(limit: number = 10): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxy/stars/most-liked?limit=${limit}`);
+    return this.http.get(`${this.apiUrl}/galaxy/solar-systems/most-liked?limit=${limit}`);
   }
 
   // Étoiles récentes
   getRecentStars(limit: number = 10): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxy/stars/recent?limit=${limit}`);
+    return this.http.get(`${this.apiUrl}/galaxy/solar-systems/recent?limit=${limit}`);
   }
 
   // Recherche
   searchStars(query: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/search?q=${encodeURIComponent(query)}`);
   }
+
 }

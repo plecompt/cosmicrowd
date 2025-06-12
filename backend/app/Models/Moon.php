@@ -58,30 +58,41 @@ class Moon extends Model
         'moon_initial_z' => 'integer'
     ];
 
- // ========== RELATIONS LIKES ==========
-    
-    // Utilisateurs qui ont liké cette lune
-    public function likers()
+    // Relations
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function planet()
+    {
+        return $this->belongsTo(Planet::class, 'planet_id', 'planet_id');
+    }
+
+    public function solarSystem()
+    {
+        return $this->planet->solarSystem();
+    }
+
+    public function galaxy()
+    {
+        return $this->planet->galaxy();
+    }
+
+    // Relations de likes
+    public function likes()
+    {
+        return $this->hasMany(LikerMoon::class, 'moon_id', 'moon_id');
+    }
+
+    public function likedBy()
     {
         return $this->belongsToMany(User::class, 'liker_moon', 'moon_id', 'user_id')
                     ->withPivot('liker_moon_date')
                     ->orderByPivot('liker_moon_date', 'desc');
     }
 
-    // Relation directe avec la table de likes
-    public function likes()
-    {
-        return $this->hasMany(LikerMoon::class, 'moon_id', 'moon_id');
-    }
-
-    // Relation avec la planète parente
-    public function planet()
-    {
-        return $this->belongsTo(Planet::class, 'planet_id', 'planet_id');
-    }
-
-    // ========== MÉTHODES UTILES ==========
-
+    // Méthodes utiles
     public function getLikesCount()
     {
         return $this->likes()->count();
@@ -91,6 +102,28 @@ class Moon extends Model
     {
         return $this->likes()->where('user_id', $userId)->exists();
     }
+
+    public function getPlanetName()
+    {
+        return $this->planet->planet_name;
+    }
+
+    public function getSystemName()
+    {
+        return $this->planet->getSystemName();
+    }
+
+    public function getGalaxyName()
+    {
+        return $this->planet->getGalaxyName();
+    }
+
+    public function getFullPath()
+    {
+        return $this->getGalaxyName() . ' > ' . $this->getSystemName() . ' > ' . $this->getPlanetName() . ' > ' . $this->moon_name;
+    }
+
+    // ========== MÉTHODES UTILES ==========
 
     public function getRecentLikers($limit = 5)
     {

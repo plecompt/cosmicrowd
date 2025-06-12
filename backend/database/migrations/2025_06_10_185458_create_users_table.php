@@ -15,8 +15,8 @@ return new class extends Migration
             $table->string('user_email', 100)->unique();
             $table->boolean('user_active')->default(true);
             $table->enum('user_role', ['admin', 'member'])->default('member');
-            $table->datetime('user_last_login')->nullable();
-            $table->datetime('user_date_inscription')->default(\DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('user_last_login')->nullable();
+            $table->timestamp('user_date_inscription')->useCurrent();
         });
     }
 

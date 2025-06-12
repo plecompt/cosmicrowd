@@ -5,21 +5,21 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class LikerMoonSeeder extends Seeder
+class LikerSolarSystemSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('liker_moon')->insert([
+        DB::table('liker_solar_system')->insert([
             [
                 'user_id' => 1,
-                'moon_id' => 1,
-                'liker_moon_date' => now(),
+                'solar_system_id' => 1,
+                'liker_solar_system_date' => now(),
             ],
             [
                 'user_id' => 2,
-                'moon_id' => 1,
-                'liker_moon_date' => now(),
+                'solar_system_id' => 1,
+                'liker_solar_system_date' => now(),
             ],
         ]);
     }
-}
+} 

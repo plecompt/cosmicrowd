@@ -37,29 +37,27 @@ CREATE TABLE user(
 
 
 #------------------------------------------------------------
-# Table: star
+# Table: solar_system
 #------------------------------------------------------------
 
-CREATE TABLE star(
-        star_id           Int  AUTO_INCREMENT  NOT NULL ,
-        star_desc         Varchar (255) ,
-        star_name         Varchar (50) NOT NULL ,
-        star_type ENUM('brown_dwarf', 'red_dwarf', 'yellow_dwarf', 'white_dwarf', 'red_giant', 'blue_giant',
+CREATE TABLE solar_system(
+        solar_system_id           Int  AUTO_INCREMENT  NOT NULL ,
+        solar_system_name         Varchar (50) NOT NULL ,
+        solar_system_desc         Varchar (255) ,
+        solar_system_type ENUM('brown_dwarf', 'red_dwarf', 'yellow_dwarf', 'white_dwarf', 'red_giant', 'blue_giant',
     'red_supergiant', 'blue_supergiant', 'hypergiant', 'neutron_star', 'pulsar', 'variable', 'binary', 'ternary', 'black_hole') NOT NULL  ,
-        star_gravity      Float NOT NULL CHECK (star_gravity >= 0) /* Doit être supérieur ou égal à 0 */  ,
-        star_surface_temp Float NOT NULL CHECK (star_surface_temp >= -273.15) /* Doit être supérieur ou égal à -273.15°C */  ,
-        star_diameter     Int NOT NULL CHECK (star_diameter >= 0) /* Doit être supérieur ou égal à 0 */  ,
-        star_mass         BigInt NOT NULL CHECK (star_mass >= 0) /* Doit être supérieur ou égal à 0 */  ,
-        star_luminosity   Int NOT NULL CHECK (star_luminosity >= 0) /* Doit être supérieur ou égal à 0 */  ,
-        star_initial_x    Int NOT NULL ,
-        star_initial_y    Int NOT NULL ,
-        star_initial_z    Int NOT NULL ,
-        galaxy_id         Int NOT NULL ,
-        user_id           Int NOT NULL
-    ,CONSTRAINT star_PK PRIMARY KEY (star_id)
+        solar_system_gravity      Float NOT NULL CHECK (solar_system_gravity >= 0) /* Doit être supérieur ou égal à 0 */  ,
+        solar_system_surface_temp Float NOT NULL CHECK (solar_system_surface_temp >= -273.15) /* Doit être supérieur ou égal à -273.15°C */  ,
+        solar_system_diameter     Int NOT NULL CHECK (solar_system_diameter >= 0) /* Doit être supérieur ou égal à 0 */  ,
+        solar_system_mass         BigInt NOT NULL CHECK (solar_system_mass >= 0) /* Doit être supérieur ou égal à 0 */  ,
+        solar_system_luminosity   Int NOT NULL CHECK (solar_system_luminosity >= 0) /* Doit être supérieur ou égal à 0 */  ,
+        solar_system_initial_x    Int NOT NULL ,
+        solar_system_initial_y    Int NOT NULL ,
+        solar_system_initial_z    Int NOT NULL ,
+        galaxy_id         Int NOT NULL
+    ,CONSTRAINT solar_system_PK PRIMARY KEY (solar_system_id)
 
-    ,CONSTRAINT star_galaxy_FK FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
-    ,CONSTRAINT star_user0_FK FOREIGN KEY (user_id) REFERENCES user(user_id)
+    ,CONSTRAINT solar_system_galaxy_FK FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
 )ENGINE=InnoDB;
 
 
@@ -89,11 +87,11 @@ CREATE TABLE planet(
         planet_initial_x           Int NOT NULL ,
         planet_initial_y           Int NOT NULL ,
         planet_initial_z           Int NOT NULL ,
-        star_id                    Int NOT NULL ,
+        solar_system_id            Int NOT NULL ,
         user_id                    Int NOT NULL
     ,CONSTRAINT planet_PK PRIMARY KEY (planet_id)
 
-    ,CONSTRAINT planet_star_FK FOREIGN KEY (star_id) REFERENCES star(star_id)
+    ,CONSTRAINT planet_solar_system_FK FOREIGN KEY (solar_system_id) REFERENCES solar_system(solar_system_id)
     ,CONSTRAINT planet_user0_FK FOREIGN KEY (user_id) REFERENCES user(user_id)
 
     ,CONSTRAINT planet_check_perigee_apogee CHECK (planet_perigee <= planet_apogee)
@@ -138,17 +136,17 @@ CREATE TABLE moon(
 
 
 #------------------------------------------------------------
-# Table: liker_star
+# Table: liker_solar_system
 #------------------------------------------------------------
 
-CREATE TABLE liker_star(
-        star_id         Int NOT NULL ,
-        user_id         Int NOT NULL ,
-        liker_star_date Datetime NOT NULL
-    ,CONSTRAINT liker_star_PK PRIMARY KEY (star_id,user_id)
+CREATE TABLE liker_solar_system(
+        solar_system_id         Int NOT NULL ,
+        user_id                 Int NOT NULL ,
+        liker_solar_system_date Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ,CONSTRAINT liker_solar_system_PK PRIMARY KEY (solar_system_id,user_id)
 
-    ,CONSTRAINT liker_star_star_FK FOREIGN KEY (star_id) REFERENCES star(star_id)
-    ,CONSTRAINT liker_star_user0_FK FOREIGN KEY (user_id) REFERENCES user(user_id)
+    ,CONSTRAINT liker_solar_system_system_FK FOREIGN KEY (solar_system_id) REFERENCES solar_system(solar_system_id)
+    ,CONSTRAINT liker_solar_system_user_FK FOREIGN KEY (user_id) REFERENCES user(user_id)
 )ENGINE=InnoDB;
 
 
@@ -159,7 +157,7 @@ CREATE TABLE liker_star(
 CREATE TABLE liker_planet(
         planet_id         Int NOT NULL ,
         user_id           Int NOT NULL ,
-        liker_planet_date Datetime NOT NULL
+        liker_planet_date Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ,CONSTRAINT liker_planet_PK PRIMARY KEY (planet_id,user_id)
 
     ,CONSTRAINT liker_planet_planet_FK FOREIGN KEY (planet_id) REFERENCES planet(planet_id)
@@ -174,7 +172,7 @@ CREATE TABLE liker_planet(
 CREATE TABLE liker_moon(
         moon_id         Int NOT NULL ,
         user_id         Int NOT NULL ,
-        liker_moon_date Datetime NOT NULL
+        liker_moon_date Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ,CONSTRAINT liker_moon_PK PRIMARY KEY (moon_id,user_id)
 
     ,CONSTRAINT liker_moon_moon_FK FOREIGN KEY (moon_id) REFERENCES moon(moon_id)
@@ -195,4 +193,22 @@ CREATE TABLE recovery_token(
     recovery_token_created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT recovery_token_PK PRIMARY KEY (recovery_token_id),
     CONSTRAINT recovery_token_user_FK FOREIGN KEY (recovery_token_user_id) REFERENCES user(user_id) ON DELETE CASCADE
+)ENGINE=InnoDB;
+
+
+#------------------------------------------------------------
+# Table: user_solar_system_ownership
+#------------------------------------------------------------
+# Future-proof: if we allow users to create solar systems, ownership is switchable
+
+CREATE TABLE user_solar_system_ownership(
+    user_id             Int NOT NULL,
+    solar_system_id     Int NOT NULL,
+    ownership_type      ENUM('claimed', 'created') NOT NULL,
+    owned_at            Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT ownership_PK PRIMARY KEY (ownership_id),
+    CONSTRAINT ownership_user_FK FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    CONSTRAINT ownership_solar_system_FK FOREIGN KEY (solar_system_id) REFERENCES solar_system(solar_system_id) ON DELETE CASCADE,
+    CONSTRAINT ownership_solar_system_unique UNIQUE (solar_system_id)
 )ENGINE=InnoDB;

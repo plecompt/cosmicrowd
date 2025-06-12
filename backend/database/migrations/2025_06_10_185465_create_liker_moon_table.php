@@ -9,14 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('liker_moon', function (Blueprint $table) {
-            $table->unsignedBigInteger('moon_id');
-            $table->unsignedBigInteger('user_id');
-            $table->datetime('liker_moon_date');
-
-            $table->primary(['moon_id', 'user_id']);
+            $table->foreignId('moon_id')->references('moon_id')->on('moon');
+            $table->foreignId('user_id')->references('user_id')->on('user');
+            $table->timestamp('liker_moon_date')->useCurrent();
             
-            $table->foreign('moon_id')->references('moon_id')->on('moon');
-            $table->foreign('user_id')->references('user_id')->on('user');
+            $table->primary(['moon_id', 'user_id']);
         });
     }
 

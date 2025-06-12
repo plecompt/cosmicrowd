@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::create('galaxy', function (Blueprint $table) {
             $table->id('galaxy_id');
-            $table->integer('galaxy_size')->unsigned();
+            $table->integer('galaxy_size');
             $table->string('galaxy_name', 50);
-            $table->string('galaxy_desc', 255)->nullable();
-            $table->integer('galaxy_age')->unsigned();
+            $table->string('galaxy_desc', 255);
+            $table->integer('galaxy_age');
         });
     }
 
@@ -21,4 +21,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('galaxy');
     }
-};
+}; 

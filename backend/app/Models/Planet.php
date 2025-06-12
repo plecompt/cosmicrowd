@@ -34,7 +34,7 @@ class Planet extends Model
         'planet_initial_x',
         'planet_initial_y',
         'planet_initial_z',
-        'star_id',
+        'solar_system_id',
         'user_id'
     ];
 
@@ -58,7 +58,7 @@ class Planet extends Model
         'planet_initial_z' => 'integer'
     ];
 
-    // ========== RELATIONS PRINCIPALES (MANQUANTES) ==========
+    // ========== RELATIONS PRINCIPALES ==========
     
     // Relation avec l'utilisateur créateur
     public function user()
@@ -66,10 +66,10 @@ class Planet extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    // Relation avec l'étoile parent (CELLE QUI MANQUAIT)
-    public function star()
+    // Relation avec le système solaire parent
+    public function solarSystem()
     {
-        return $this->belongsTo(Star::class, 'star_id', 'star_id');
+        return $this->belongsTo(SolarSystem::class, 'solar_system_id', 'solar_system_id');
     }
 
     // Relation avec les lunes
@@ -80,18 +80,18 @@ class Planet extends Model
 
     // ========== RELATIONS LIKES ==========
     
-    // Utilisateurs qui ont liké cette planète
-    public function likers()
-    {
-        return $this->belongsToMany(User::class, 'liker_planet', 'planet_id', 'user_id')
-                    ->withPivot('liker_planet_date')
-                    ->orderByPivot('liker_planet_date', 'desc');
-    }
-
     // Relation directe avec la table de likes
     public function likes()
     {
         return $this->hasMany(LikerPlanet::class, 'planet_id', 'planet_id');
+    }
+
+    // Utilisateurs qui ont liké cette planète
+    public function likedBy()
+    {
+        return $this->belongsToMany(User::class, 'liker_planet', 'planet_id', 'user_id')
+                    ->withPivot('liker_planet_date')
+                    ->orderByPivot('liker_planet_date', 'desc');
     }
 
     // ========== MÉTHODES UTILES ==========
@@ -106,49 +106,24 @@ class Planet extends Model
         return $this->likes()->where('user_id', $userId)->exists();
     }
 
-    public function getPlanetLikesStats()
+    public function getMoonsCount()
     {
-        return [
-            'planet_likes' => $this->getLikesCount(),
-            'moon_likes' => $this->moons()->withCount('likes')->get()->sum('likes_count'),
-            'total_likes' => $this->getTotalLikes(),
-            'recent_likers' => $this->getRecentLikers(5),
-            'most_liked_moons' => $this->getMostLikedMoons(3)
-        ];
+        return $this->moons()->count();
     }
 
-    public function getTotalLikes()
+    public function getSystemName()
     {
-        $planetLikes = $this->getLikesCount();
-        $moonLikes = LikerMoon::whereHas('moon', function ($q) {
-            $q->where('planet_id', $this->planet_id);
-        })->count();
-
-        return $planetLikes + $moonLikes;
+        return $this->solarSystem->solar_system_name;
     }
 
-    public function getRecentLikers($limit = 5)
+    public function getGalaxyName()
     {
-        return $this->likes()
-                   ->with('user')
-                   ->orderBy('liker_planet_date', 'desc')
-                   ->limit($limit)
-                   ->get()
-                   ->map(function ($like) {
-                       return [
-                           'user' => $like->user,
-                           'date' => $like->liker_planet_date
-                       ];
-                   });
+        return $this->solarSystem->galaxy->galaxy_name;
     }
 
-    public function getMostLikedMoons($limit = 3)
+    public function getFullPath()
     {
-        return $this->moons()
-                   ->withCount('likes')
-                   ->orderBy('likes_count', 'desc')
-                   ->limit($limit)
-                   ->get();
+        return $this->getGalaxyName() . ' > ' . $this->getSystemName() . ' > ' . $this->planet_name;
     }
 
     // ========== SCOPES ==========
@@ -183,8 +158,8 @@ class Planet extends Model
         return $query->where('user_id', $userId);
     }
 
-    public static function scopeInSystem($query, $starId)
+    public static function scopeInSystem($query, $solarSystemId)
     {
-        return $query->where('star_id', $starId);
+        return $query->where('solar_system_id', $solarSystemId);
     }
 }

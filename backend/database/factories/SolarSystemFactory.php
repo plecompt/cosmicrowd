@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class StarFactory extends Factory
+class SolarSystemFactory extends Factory
 {
     protected static $starTypes = [
         ['name' => 'Naine rouge', 'color' => '#FF6B6B'],
@@ -35,8 +35,7 @@ class StarFactory extends Factory
             'position_x' => fake()->numberBetween(-1000, 1000),
             'position_y' => fake()->numberBetween(-1000, 1000),
             'position_z' => fake()->numberBetween(-100, 100),
-            'description' => fake()->optional()->sentence(10),
-            'user_id' => User::factory(),
+            'description' => fake()->optional()->sentence(10)
         ];
     }
 }

@@ -8,70 +8,112 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'user_pseudo' => 'required|string|max:50|unique:user,user_pseudo',
-            'user_email' => 'required|string|email|max:100|unique:user,user_email',
-            'user_password' => 'required|string|min:6',
-            'user_avatar' => 'nullable|string|max:255'
+        $request->validate([
+            'user_login' => 'required|string|unique:user,user_login',
+            'user_email' => 'required|email|unique:user,user_email',
+            'user_password' => 'required|string|min:8',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 400);
-        }
 
         $user = User::create([
-            'user_pseudo' => $request->user_pseudo,
+            'user_login' => $request->user_login,
             'user_email' => $request->user_email,
             'user_password' => Hash::make($request->user_password),
-            'user_avatar' => $request->user_avatar,
-            'user_registration_date' => now(),
-            'user_is_admin' => false
         ]);
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'success' => true,
-            'message' => 'Utilisateur créé avec succès',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
             'user' => $user
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'user_email' => 'required|email',
-            'user_password' => 'required|string'
+        $request->validate([
+            'user_login' => 'required|string',
+            'user_password' => 'required|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 400);
-        }
-
-        $user = User::where('user_email', $request->user_email)->first();
+        $user = User::where('user_login', $request->user_login)->first();
 
         if (!$user || !Hash::check($request->user_password, $user->user_password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Identifiants invalides'
-            ], 401);
+            throw ValidationException::withMessages([
+                'user_login' => ['Les identifiants fournis sont incorrects.'],
+            ]);
         }
 
-        // Ici vous pourrez ajouter la génération de token JWT plus tard
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'success' => true,
-            'message' => 'Connexion réussie',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
             'user' => $user
         ]);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Déconnexion réussie']);
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json($request->user());
+    }
+
+    public function changePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|different:current_password',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->user_password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Le mot de passe actuel est incorrect.'],
+            ]);
+        }
+
+        $user->update([
+            'user_password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json(['message' => 'Mot de passe modifié avec succès']);
+    }
+
+    public function changeEmail(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_email' => 'required|email|unique:user,user_email',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->user_password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Le mot de passe actuel est incorrect.'],
+            ]);
+        }
+
+        $user->update([
+            'user_email' => $request->new_email
+        ]);
+
+        return response()->json(['message' => 'Email modifié avec succès']);
     }
 
     public function forgotPassword(Request $request)
