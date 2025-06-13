@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\RecoveryToken;
+use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -14,18 +15,30 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        // Routes publiques
+        $this->middleware('guest')->only(['register', 'login', 'forgotPassword', 'resetPassword']);
+        
+        // Routes protégées
+        $this->middleware('auth:sanctum')->only(['logout', 'me', 'changePassword', 'changeEmail']);
+    }
+
     public function register(Request $request): JsonResponse
     {
         $request->validate([
-            'user_login' => 'required|string|unique:user,user_login',
-            'user_email' => 'required|email|unique:user,user_email',
-            'user_password' => 'required|string|min:8',
+            'user_login' => 'required|string|max:50|unique:user,user_login',
+            'user_email' => 'required|email|max:100|unique:user,user_email',
+            'user_password' => ['required', new StrongPassword],
         ]);
 
         $user = User::create([
             'user_login' => $request->user_login,
             'user_email' => $request->user_email,
             'user_password' => Hash::make($request->user_password),
+            'user_active' => true,
+            'user_role' => 'member',
+            'user_date_inscription' => now()
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -52,6 +65,18 @@ class AuthController extends Controller
             ]);
         }
 
+        // Vérifie si le compte est actif
+        if (!$user->user_active) {
+            throw ValidationException::withMessages([
+                'user_login' => ['Ce compte a été désactivé.'],
+            ]);
+        }
+
+        // Met à jour la dernière connexion
+        $user->update([
+            'user_last_login' => now()
+        ]);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -76,7 +101,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|different:current_password',
+            'new_password' => ['required', 'different:current_password', new StrongPassword],
         ]);
 
         $user = $request->user();
@@ -98,7 +123,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required|string',
-            'new_email' => 'required|email|unique:user,user_email',
+            'new_email' => 'required|email|max:100|unique:user,user_email',
         ]);
 
         $user = $request->user();
@@ -116,10 +141,10 @@ class AuthController extends Controller
         return response()->json(['message' => 'Email modifié avec succès']);
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'user_email' => 'required|email|exists:user,user_email'
+            'user_email' => 'required|email|max:100|exists:user,user_email'
         ]);
 
         if ($validator->fails()) {
@@ -130,6 +155,14 @@ class AuthController extends Controller
         }
 
         $user = User::where('user_email', $request->user_email)->first();
+        
+        if (!$user->user_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce compte a été désactivé.'
+            ], 403);
+        }
+
         $recoveryToken = RecoveryToken::createForUser($user->user_id);
 
         // Ici vous pourrez ajouter l'envoi d'email plus tard
@@ -142,11 +175,11 @@ class AuthController extends Controller
         ]);
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'token' => 'required|string',
-            'new_password' => 'required|string|min:6'
+            'new_password' => ['required', new StrongPassword]
         ]);
 
         if ($validator->fails()) {
@@ -166,6 +199,14 @@ class AuthController extends Controller
         }
 
         $user = $recoveryToken->user;
+        
+        if (!$user->user_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce compte a été désactivé.'
+            ], 403);
+        }
+
         $user->update([
             'user_password' => Hash::make($request->new_password)
         ]);

@@ -15,9 +15,9 @@ class LikerPlanet extends Model
     protected $primaryKey = ['planet_id', 'user_id']; // Clé composite
 
     protected $fillable = [
-        'liker_planet_date',
-        'user_id',
         'planet_id',
+        'user_id',
+        'liker_planet_date'
     ];
 
     protected $casts = [

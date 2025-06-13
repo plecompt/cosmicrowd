@@ -15,6 +15,7 @@ use App\Http\Controllers\LikerSolarSystemController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserSolarSystemOwnershipController;
 use App\Http\Controllers\RecoveryTokenController;
+use App\Http\Controllers\UserSystemOwnershipController;
 
 // Routes publiques (pas d'authentification requise)
 Route::prefix('v1')->group(function () {
@@ -23,36 +24,39 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login']);
     Route::post('auth/reset-password', [RecoveryTokenController::class, 'resetPassword']);
     
-    // Galaxies et leurs systèmes solaires
+    // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
     Route::get('galaxies/{id}', [GalaxyController::class, 'show']); //une galaxie avec ses stats
     Route::get('galaxies/{id}/animation', [GalaxyController::class, 'getSolarSystemsForAnimation']); //liste des systemes solaires pour l'animation
     Route::get('galaxies/{id}/most-liked', [GalaxyController::class, 'getMostLikedSolarSystems']); //les x systemes solaires les plus aimés
     Route::get('galaxies/{id}/recent', [GalaxyController::class, 'getRecentSolarSystems']); //les x systemes solaires les plus récents
     
-    // Systèmes solaires d'une galaxie
+    // SOLAR SYSTEMS d'une galaxie
     Route::get('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'index']); //liste des systemes solaire pour cette galaxie
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'show']); //le systeme solaire avec ses stats pour cette galaxie
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes', [LikeController::class, 'count']); //nombre de likes pour ce systeme solaire
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes-stats', [LikeController::class, 'stats']); //stats des likes (infos plus completes) pour ce systeme solaire
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/owner', [SolarSystemController::class, 'getOwner']); //le propriétaire du systeme solaire
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes', [LikeController::class, 'countSolarSystemLikes']); //nombre de likes pour ce systeme solaire
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes-stats', [LikeController::class, 'getSolarSystemLikesStats']); //stats des likes (infos plus completes) pour ce systeme solaire
     
-    // Planètes d'un système solaire
+    // PLANETES d'un systeme solaire
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'index']); //liste des planetes pour ce systeme solaire
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'show']); //une planète avec ses stats
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes', [LikeController::class, 'count']); //nombre de likes pour cette planete
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes-stats', [LikeController::class, 'stats']); //stats des likes (infos plus completes) pour cette planete
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/owner', [PlanetController::class, 'getOwner']); //le propriétaire de la planete
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes', [LikeController::class, 'countPlanetLikes']); //nombre de likes pour cette planete
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes-stats', [LikeController::class, 'getPlanetLikesStats']); //stats des likes (infos plus completes) pour cette planete
     
-    // Lunes d'une planète
+    // MOONS d'une planète
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'index']); //liste des lunes pour cette planete
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'show']); //une lune avec ses stats
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes', [LikeController::class, 'count']); //nombre de likes pour cette lune
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes-stats', [LikeController::class, 'stats']); //stats des likes (infos plus completes) pour cette lune
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/owner', [MoonController::class, 'getOwner']); //le propriétaire de la lune
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes', [LikeController::class, 'countMoonLikes']); //nombre de likes pour cette lune
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes-stats', [LikeController::class, 'getMoonLikesStats']); //stats des likes (infos plus completes) pour cette lune
     
     // Search
     Route::get('search', [SearchController::class, 'search']); //retourne une liste de systemes solaires, planetes, lunes, galaxies, etc.
     
     // User Solar System Ownership (lecture seule)
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/ownership', [UserSolarSystemOwnershipController::class, 'show']); //retourne si le système est claim ou non
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [UserSystemOwnershipController::class, 'isClaimable']);
 });
 
 // Routes protégées (authentification requise)
@@ -88,10 +92,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function 
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/to-like', [LikeController::class, 'togglePlanet']); //to like ou unlike une planete
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon']); //to like ou unlike une lune
     
-    // User Solar System Ownership (modification)
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/ownership', [UserSolarSystemOwnershipController::class, 'store']);
-    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/ownership', [UserSolarSystemOwnershipController::class, 'update']);
-    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/ownership', [UserSolarSystemOwnershipController::class, 'destroy']);
+    // Routes pour les claims de systèmes solaires
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [UserSystemOwnershipController::class, 'claim']);
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [UserSystemOwnershipController::class, 'unclaim']);
+
 });
 
 

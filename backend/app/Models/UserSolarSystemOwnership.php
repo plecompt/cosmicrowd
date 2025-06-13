@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserSolarSystemOwnership extends Model
 {
@@ -20,16 +19,16 @@ class UserSolarSystemOwnership extends Model
     ];
 
     protected $casts = [
-        'owned_at' => 'datetime',
+        'owned_at' => 'datetime'
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function solarSystem(): BelongsTo
+    public function solarSystem()
     {
-        return $this->belongsTo(SolarSystem::class);
+        return $this->belongsTo(SolarSystem::class, 'solar_system_id', 'solar_system_id');
     }
 } 

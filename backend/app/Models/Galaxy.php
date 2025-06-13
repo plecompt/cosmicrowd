@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Galaxy extends Model
 {
@@ -46,17 +47,22 @@ class Galaxy extends Model
     // }
 
     // Obtenir toutes les planètes de la galaxie
-    public function planets()
+    public function planets(): HasManyThrough
     {
         return $this->hasManyThrough(Planet::class, SolarSystem::class, 'galaxy_id', 'solar_system_id', 'galaxy_id', 'solar_system_id');
     }
 
     // Obtenir toutes les lunes de la galaxie
-    public function moons()
+    public function moons(): HasManyThrough
     {
-        return Moon::whereHas('planet.solarSystem', function($query) {
-            $query->where('galaxy_id', $this->galaxy_id);
-        });
+        return $this->hasManyThrough(
+            Moon::class,
+            Planet::class,
+            'solar_system_id',
+            'planet_id',
+            'galaxy_id',
+            'solar_system_id'
+        )->join('solar_system', 'planet.solar_system_id', '=', 'solar_system.solar_system_id');
     }
 
     // Statistiques de la galaxie

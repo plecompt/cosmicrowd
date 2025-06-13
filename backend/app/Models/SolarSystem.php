@@ -14,8 +14,9 @@ class SolarSystem extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'solar_system_desc',
+        'galaxy_id',
         'solar_system_name',
+        'solar_system_desc',
         'solar_system_type',
         'solar_system_gravity',
         'solar_system_surface_temp',
@@ -24,8 +25,7 @@ class SolarSystem extends Model
         'solar_system_luminosity',
         'solar_system_initial_x',
         'solar_system_initial_y',
-        'solar_system_initial_z',
-        'galaxy_id'
+        'solar_system_initial_z'
     ];
 
     protected $casts = [
@@ -39,51 +39,31 @@ class SolarSystem extends Model
         'solar_system_initial_z' => 'integer'
     ];
 
-    // Relation avec l'utilisateur qui a créé le système solaire
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
-    // }
-
-    // Relation avec la galaxie
     public function galaxy()
     {
         return $this->belongsTo(Galaxy::class, 'galaxy_id', 'galaxy_id');
     }
 
-    // ========== RELATIONS LIKES ==========
-    
-    // Utilisateurs qui ont liké ce système solaire
-    // public function likers()
-    // {
-    //     return $this->belongsToMany(User::class, 'liker_solar_system', 'solar_system_id', 'user_id')
-    //                 ->withPivot('liker_solar_system_date')
-    //                 ->orderByPivot('liker_solar_system_date', 'desc');
-    // }
-
-    // Relation directe avec la table de likes
-    public function likes()
-    {
-        return $this->hasMany(LikerSolarSystem::class, 'solar_system_id', 'solar_system_id');
-    }
-
-    // Relation avec les planètes
-    public function planets()
-    {
-        return $this->hasMany(Planet::class, 'solar_system_id', 'solar_system_id');
-    }
-
-    // Relation avec les ownership
     public function owner()
     {
         return $this->hasOneThrough(
             User::class,
-            'user_solar_system_ownership',
+            UserSolarSystemOwnership::class,
             'solar_system_id', // Foreign key sur ownership table
             'user_id', // Foreign key sur users table
             'solar_system_id', // Local key sur solar_systems table
             'user_id' // Local key sur ownership table
         );
+    }
+
+    public function planets()
+    {
+        return $this->hasMany(Planet::class, 'solar_system_id', 'solar_system_id');
+    }
+
+    public function likers()
+    {
+        return $this->hasMany(LikerSolarSystem::class, 'solar_system_id', 'solar_system_id');
     }
 
     // ========== MÉTHODES UTILES ==========
@@ -128,20 +108,20 @@ class SolarSystem extends Model
         return $solarSystemLikes + $planetLikes + $moonLikes;
     }
 
-    // public function getRecentLikers($limit = 5)
-    // {
-    //     return $this->likes()
-    //                ->with('user')
-    //                ->orderBy('liker_solar_system_date', 'desc')
-    //                ->limit($limit)
-    //                ->get()
-    //                ->map(function ($like) {
-    //                    return [
-    //                        'user' => $like->user,
-    //                        'date' => $like->liker_solar_system_date
-    //                    ];
-    //                });
-    // }
+    public function getRecentLikers($limit = 5)
+    {
+        return $this->likes()
+                   ->with('user')
+                   ->orderBy('liker_solar_system_date', 'desc')
+                   ->limit($limit)
+                   ->get()
+                   ->map(function ($like) {
+                       return [
+                           'user' => $like->user,
+                           'date' => $like->liker_solar_system_date
+                       ];
+                   });
+    }
 
     public function getMostLikedPlanets($limit = 3)
     {

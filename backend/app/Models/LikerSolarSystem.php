@@ -15,9 +15,9 @@ class LikerSolarSystem extends Model
     protected $primaryKey = ['solar_system_id', 'user_id']; // Clé composite
 
     protected $fillable = [
-        'liker_solar_system_date',
-        'user_id',
         'solar_system_id',
+        'user_id',
+        'liker_solar_system_date'
     ];
 
     protected $casts = [

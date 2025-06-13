@@ -15,9 +15,9 @@ class LikerMoon extends Model
     protected $primaryKey = ['moon_id', 'user_id']; // Clé composite
 
     protected $fillable = [
-        'liker_moon_date',
-        'user_id',
         'moon_id',
+        'user_id',
+        'liker_moon_date'
     ];
 
     protected $casts = [
