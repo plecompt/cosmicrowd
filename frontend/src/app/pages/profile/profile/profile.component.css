@@ -1,0 +1,25 @@
+.profile-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background: rgba(20, 20, 40, 0.8);
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    width: 90%;
+    height: 80%;
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.change-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}

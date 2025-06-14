@@ -35,7 +35,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   private userIsInteracting = false;
 
   public fps = 0;
-  public showFps = true;
+  public showFps = false;
   private lastTime = 0;
   private frameCount = 0;
 
@@ -69,7 +69,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
   private initThreeJS(): void {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x000010);
+    this.scene.background = new THREE.Color(0x000010); //same a global background
 
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
     this.camera.position.set(0, 800, 0);
@@ -331,10 +331,8 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
       if (intersects.length > 0) {
         const clickedSystem = intersects[0].object as any;
-        console.log(clickedSystem)
-        if (clickedSystem.systemData) {
-          this.solarSystemClick.emit(clickedSystem.systemData);
-        }
+        console.log(clickedSystem.userData.systemData)
+        this.solarSystemClick.emit(clickedSystem.userData.systemData);
       }
     });
   }

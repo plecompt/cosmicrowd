@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth-service/auth-service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,7 +13,7 @@ export class NavigationBarComponent {
   searchQuery: string = '';
   searchResults: any[] = [];
 
-  constructor(private galaxiesService: GalaxiesService, private router: Router){}
+  constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService){}
 
   onSearch(): void {
     if (this.searchQuery.trim()) {
@@ -35,5 +36,4 @@ export class NavigationBarComponent {
    navigateTo(url: string){
     this.router.navigateByUrl(url)
    }
-
 }

@@ -1,1 +1,15 @@
-<p>login works!</p>
+<div class="container">
+
+    <form (ngSubmit)="onLoginSubmit(loginForm)" [formGroup]="loginForm">
+            <h1>CosmiCrowd</h1>
+
+            <input type="email" placeholder="Email" required formControlName="email">
+            <input type="password" placeholder="Password" required formControlName="password">
+
+            <button type="submit">Sign In</button>
+            <a (click)="navigateTo('forgot-password')">Forgot password?</a>
+    </form>
+
+    <div class="stars-container"></div>
+</div>
+

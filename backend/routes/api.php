@@ -14,7 +14,6 @@ use App\Http\Controllers\LikerPlanetController;
 use App\Http\Controllers\LikerSolarSystemController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserSolarSystemOwnershipController;
-use App\Http\Controllers\RecoveryTokenController;
 use App\Http\Controllers\UserSystemOwnershipController;
 
 // Routes publiques (pas d'authentification requise)
@@ -22,7 +21,9 @@ Route::prefix('v1')->group(function () {
     // Authentification
     Route::post('auth/register', [AuthController::class, 'register']);
     Route::post('auth/login', [AuthController::class, 'login']);
-    Route::post('auth/reset-password', [RecoveryTokenController::class, 'resetPassword']);
+    Route::post('auth/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('auth/verify-token', [AuthController::class, 'verifyToken']);
+    Route::post('auth/reset-password', [AuthController::class, 'resetPassword']);
     
     // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
@@ -63,7 +64,6 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function () {
     // Authentification
     Route::post('auth/logout', [AuthController::class, 'logout']);
-    Route::get('auth/me', [AuthController::class, 'me']);
     Route::post('auth/change-password', [AuthController::class, 'changePassword']);
     Route::post('auth/change-email', [AuthController::class, 'changeEmail']);
     

@@ -1,14 +1,18 @@
 .floating-navbar {
+  display: flex;
+  justify-content: space-between;
+
   position: fixed;
   top: 20px;
   left: 20px;
   right: 20px;
   z-index: 1000;
-  background: rgba(0, 0, 10, 0.0);
+  /* background-color: rgb(0, 0, 0);
+  background-color: rgba(10, 10, 10, 0.7); */
   border-radius: 12px;
   padding: 1rem;
 
-  .navbar-content {
+  .left-part {
     display: flex;
     align-items: center;
     gap: 2rem;
@@ -37,11 +41,11 @@
         color: #fff;
 
         &::placeholder {
-          color: rgba(255, 255, 255, 0.6);
+          color: rgba(255, 255, 255, );
         }
       }
 
-      .search-btn {
+      button {
         padding: 0.5rem 1rem;
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-left: none;
@@ -51,26 +55,12 @@
         cursor: pointer;
       }
     }
+  }
 
-    .nav-actions {
-      display: flex;
-      gap: 1rem;
-
-      button {
-        padding: 0.5rem 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-        cursor: pointer;
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: translateY(-2px);
-        }
-      }
-    }
+  .right-part {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
   }
 }
 

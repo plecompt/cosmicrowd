@@ -1,0 +1,25 @@
+.systems-container {
+    width: 90%;
+    height: 80%;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+}
+
+.system-container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid gray;
+    border-radius: 15px;
+    padding: 10px;
+}

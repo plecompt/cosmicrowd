@@ -5,12 +5,11 @@ import { GalaxyAnimationComponent } from '../../components/galaxy-animation/gala
 import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
 import { SolarSystemAnimation } from '../../interfaces/solar-system/solar-system.interface';
 import { GalaxyStats } from '../../interfaces/galaxy/galaxy.interface'
-import { WelcomeOverlayComponent } from '../../components/welcome-overlay/welcome-overlay.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, GalaxyAnimationComponent, WelcomeOverlayComponent],
+  imports: [CommonModule, FormsModule, GalaxyAnimationComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })

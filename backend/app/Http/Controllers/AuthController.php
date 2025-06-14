@@ -15,15 +15,6 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function __construct()
-    {
-        // Routes publiques
-        $this->middleware('guest')->only(['register', 'login', 'forgotPassword', 'resetPassword']);
-        
-        // Routes protégées
-        $this->middleware('auth:sanctum')->only(['logout', 'me', 'changePassword', 'changeEmail']);
-    }
-
     public function register(Request $request): JsonResponse
     {
         $request->validate([
@@ -53,26 +44,24 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'user_login' => 'required|string',
+            'user_email' => 'required|string',
             'user_password' => 'required|string',
         ]);
 
-        $user = User::where('user_login', $request->user_login)->first();
+        $user = User::where('user_email', $request->user_email)->first();
 
         if (!$user || !Hash::check($request->user_password, $user->user_password)) {
             throw ValidationException::withMessages([
-                'user_login' => ['Les identifiants fournis sont incorrects.'],
+                'error' => ['Invalid credentials.'],
             ]);
         }
 
-        // Vérifie si le compte est actif
         if (!$user->user_active) {
             throw ValidationException::withMessages([
-                'user_login' => ['Ce compte a été désactivé.'],
+                'error' => ['Account has been disabled.'],
             ]);
         }
 
-        // Met à jour la dernière connexion
         $user->update([
             'user_last_login' => now()
         ]);
@@ -89,12 +78,7 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Déconnexion réussie']);
-    }
-
-    public function me(Request $request): JsonResponse
-    {
-        return response()->json($request->user());
+        return response()->json(['message' => 'Successfully logged out.']);
     }
 
     public function changePassword(Request $request): JsonResponse
@@ -108,7 +92,7 @@ class AuthController extends Controller
 
         if (!Hash::check($request->current_password, $user->user_password)) {
             throw ValidationException::withMessages([
-                'current_password' => ['Le mot de passe actuel est incorrect.'],
+                'current_password' => ['Current password is incorrect.'],
             ]);
         }
 
@@ -116,7 +100,7 @@ class AuthController extends Controller
             'user_password' => Hash::make($request->new_password)
         ]);
 
-        return response()->json(['message' => 'Mot de passe modifié avec succès']);
+        return response()->json(['message' => 'Password successfully changed.']);
     }
 
     public function changeEmail(Request $request): JsonResponse
@@ -130,7 +114,7 @@ class AuthController extends Controller
 
         if (!Hash::check($request->current_password, $user->user_password)) {
             throw ValidationException::withMessages([
-                'current_password' => ['Le mot de passe actuel est incorrect.'],
+                'current_password' => ['Current password is incorrect.'],
             ]);
         }
 
@@ -138,7 +122,7 @@ class AuthController extends Controller
             'user_email' => $request->new_email
         ]);
 
-        return response()->json(['message' => 'Email modifié avec succès']);
+        return response()->json(['message' => 'Email successfully changed.']);
     }
 
     public function forgotPassword(Request $request): JsonResponse
@@ -155,23 +139,47 @@ class AuthController extends Controller
         }
 
         $user = User::where('user_email', $request->user_email)->first();
-        
+
         if (!$user->user_active) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce compte a été désactivé.'
+                'message' => 'This account has been disabled.'
             ], 403);
         }
 
         $recoveryToken = RecoveryToken::createForUser($user->user_id);
 
-        // Ici vous pourrez ajouter l'envoi d'email plus tard
-        // Mail::send('emails.recovery', ['token' => $recoveryToken->recovery_token_value], ...);
+        Mail::send('emails.recovery', ['token' => $recoveryToken->recovery_token_value], function ($message) use ($user) {
+            $message->to($user->user_email);
+            $message->subject('Password reset request');
+        });
 
         return response()->json([
             'success' => true,
-            'message' => 'Token de récupération envoyé',
-            'token' => $recoveryToken->recovery_token_value // À retirer en production
+            'message' => 'Recovery email sent.'
+        ]);
+    }
+
+    public function verifyToken(Request $request): JsonResponse
+    {
+        $token = RecoveryToken::where('recovery_token_value', $request->token)->first();
+
+        if (!$token) {
+            return response()->json(['success' => false, 'message' => 'Token not found.'], 404);
+        }
+
+        if ($token->recovery_token_used) {
+            return response()->json(['success' => false, 'message' => 'Token already used.'], 409);
+        }
+
+        if ($token->recovery_token_expires_at <= now()) {
+            return response()->json(['success' => false, 'message' => 'Token expired.'], 410);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Valid token.',
+            'user_id' => $token->recovery_token_user_id
         ]);
     }
 
@@ -194,16 +202,15 @@ class AuthController extends Controller
         if (!$recoveryToken) {
             return response()->json([
                 'success' => false,
-                'message' => 'Token invalide ou expiré'
+                'message' => 'Invalid or expired token.'
             ], 400);
         }
 
         $user = $recoveryToken->user;
-        
         if (!$user->user_active) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ce compte a été désactivé.'
+                'message' => 'This account has been disabled.'
             ], 403);
         }
 
@@ -215,7 +222,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Mot de passe réinitialisé avec succès'
+            'message' => 'Password successfully reset.'
         ]);
     }
 }

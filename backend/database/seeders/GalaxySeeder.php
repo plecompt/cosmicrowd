@@ -43,7 +43,7 @@ class GalaxySeeder extends Seeder
     // Config galaxie simple
 
     private const CONFIG = [
-        'NUM_SYSTEMS' => 2000, // per ARMS!
+        'NUM_SYSTEMS' => 1000, // per ARMS!
         'NUM_ARMS' => 4,
         'GALAXY_THICKNESS' => 5,
         'CORE_X_DIST' => 33,
@@ -58,15 +58,15 @@ class GalaxySeeder extends Seeder
 
     public function run()
     {
-        echo "🌌 Génération galaxie CosmiCrowd...\n";
+        echo "Génération galaxie CosmiCrowd...\n";
         
         // 1. Créer la galaxie
         $galaxy = $this->createGalaxy();
-        echo "✅ Galaxie créée : {$galaxy->galaxy_name}\n";
+        echo "Galaxie créée : {$galaxy->galaxy_name}\n";
         
         // 2. Générer les systèmes solaires
         $this->generateSolarSystems($galaxy->galaxy_id);
-        echo "✅ " . self::CONFIG['NUM_SYSTEMS'] * self::CONFIG['NUM_ARMS'] . " systèmes générés !\n";
+        echo "" . self::CONFIG['NUM_SYSTEMS'] * self::CONFIG['NUM_ARMS'] . " systèmes générés !\n";
         
         // 3. Statistiques
         $this->showStatistics();
@@ -214,6 +214,6 @@ class GalaxySeeder extends Seeder
             echo "  🌟 {$type}: {$count} ({$percentage}%)\n";
         }
         
-        echo "\n🎯 Galaxie CosmiCrowd générée avec succès !\n";
+        echo "\nGalaxie CosmiCrowd générée avec succès !\n";
     }
 }

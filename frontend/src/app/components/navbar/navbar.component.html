@@ -1,13 +1,20 @@
 <nav class="floating-navbar">
-  <div class="navbar-content">
-    <h1 class="logo" (click)="navigateTo('home')">CosmiCrowd</h1>
-    <div class="search-container">
-      <input type="text" placeholder="Search solar systems..." class="search-input">
-      <button class="search-btn" (click)="onSearch()">🔍</button>
+  
+    <div class="left-part">
+      <h1 class="logo" (click)="navigateTo('home')">CosmiCrowd</h1>
+      <div class="search-container">
+        <input type="text" placeholder="Search solar systems..." class="search-input">
+        <button class="search-btn" (click)="onSearch()">🔍</button>
+      </div>
     </div>
-    <div class="nav-actions">
-      <button class="create-btn">Create System</button>
-      <button class="profile-btn">Profile</button>
+
+    <div class="right-part">
+      @if(this.authService.isLoggedIn()){
+        <button class="create-btn" (click)="navigateTo('/systems')">Systems</button>
+        <button class="profile-btn" (click)="navigateTo('/profile')">Profile</button>
+        <button class="login-btn" (click)="this.authService.logout().subscribe()">Disconnect</button>
+      } @else {
+        <button class="login-btn" (click)="navigateTo('/login')">Login / Sign In</button>
+      }
     </div>
-  </div>
 </nav>
