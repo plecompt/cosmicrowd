@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  onLoginSubmit(form: any){
+  onLoginSubmit(){
     //Here we need to check form, wont do it here, because i'll have to redo it
     //let's just check inputs are not empty
     if (this.loginForm.value.email && this.loginForm.value.email.length > 0 && this.loginForm.value.password && this.loginForm.value.password.length > 0){

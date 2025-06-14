@@ -63,6 +63,7 @@ Route::prefix('v1')->group(function () {
 // Routes protégées (authentification requise)
 Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function () {
     // Authentification
+    Route::get('auth/me', [AuthController::class, 'me']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::post('auth/change-password', [AuthController::class, 'changePassword']);
     Route::post('auth/change-email', [AuthController::class, 'changeEmail']);

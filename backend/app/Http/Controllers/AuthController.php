@@ -81,6 +81,11 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out.']);
     }
 
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json(['succes' => true, 'user' => $request->user()]);
+    }
+
     public function changePassword(Request $request): JsonResponse
     {
         $request->validate([

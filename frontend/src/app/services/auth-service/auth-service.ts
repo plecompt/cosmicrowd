@@ -55,6 +55,11 @@ export class AuthService {
     );
   }
 
+  //return connected user.
+  me(){
+    return this.http.get('http://localhost:8000/api/v1/auth/me');
+  }
+
   //3 step forgotten password
   //send email to user with the token in the url
   forgotPassword(email: string){
@@ -72,12 +77,12 @@ export class AuthService {
   }
 
   //password modify
-  changePassword(oldPassword: string, newPassword: string, email: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/change-password', {oldPassword, newPassword, email});
+  changePassword(current_password: string, new_password: string){
+    return this.http.post('http://localhost:8000/api/v1/auth/change-password', {current_password, new_password});
   }
 
   //email modify
-  changeEmail(email: string, userId: number){
-    return this.http.post('http://localhost:8000/api/v1/auth/change-email', {email, userId});
+  changeEmail(current_password: string, new_email: string){
+    return this.http.post('http://localhost:8000/api/v1/auth/change-email', {current_password, new_email});
   }
 }

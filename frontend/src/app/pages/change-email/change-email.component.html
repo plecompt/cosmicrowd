@@ -1,1 +1,30 @@
-<p>change-email works!</p>
+@if (this.authService.isLoggedIn()){
+<div class="change-email-container">
+    <h2>Change your email address</h2>
+    <p>
+        To update the email address associated with your account, please complete the form below.
+        You will need to confirm your current password for security reasons.
+        After submitting the request, you will be automatically logged out, and you’ll need to log in again using your
+        new email address.
+    </p>
+
+    <form [formGroup]="changeEmailForm" (ngSubmit)="onEmailChangeSubmit()" >
+        <input type="password" formControlName="currentPassword" placeholder="Current password">
+        <input type="password" formControlName="currentPasswordBis" placeholder="Repeat current password">
+
+        @if (changeEmailForm.hasError('passwordsMismatch') && changeEmailForm.touched) {
+        <small class="error">Passwords do not match</small>
+        }
+
+        <input type="email" formControlName="newEmail" placeholder="New email">
+        <input type="email" formControlName="newEmailBis" placeholder="Repeat new email">
+
+        @if (changeEmailForm.hasError('emailsMismatch') && changeEmailForm.touched) {
+        <small class="error">Emails do not match</small>
+        }
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+<div class="stars-container"></div>
+}
