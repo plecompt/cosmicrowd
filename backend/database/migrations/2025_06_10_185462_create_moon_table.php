@@ -18,7 +18,7 @@ return new class extends Migration
                 'regular', 'irregular', 'trojan', 'coorbital'
             ]);
             $table->float('moon_gravity')->unsigned();
-            $table->decimal('moon_surface_temp', 8, 2); //decimal pour les températures
+            $table->float('moon_surface_temp');
             $table->float('moon_orbital_longitude')->unsigned();
             $table->float('moon_eccentricity')->unsigned();
             $table->integer('moon_apogee')->unsigned();
@@ -40,7 +40,7 @@ return new class extends Migration
 
         // Ajout des contraintes CHECK pour MariaDB
         DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_gravity CHECK (moon_gravity >= 0)');
-        DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_surface_temp CHECK (moon_surface_temp >= -273.15)');
+        DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_surface_temp CHECK (moon_surface_temp >= 0)');
         DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_orbital_longitude CHECK (moon_orbital_longitude >= 0 AND moon_orbital_longitude <= 360)');
         DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_eccentricity CHECK (moon_eccentricity >= 0 AND moon_eccentricity <= 1)');
         DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_apogee CHECK (moon_apogee >= 0)');

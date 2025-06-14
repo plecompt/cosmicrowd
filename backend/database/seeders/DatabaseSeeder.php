@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             LikerSolarSystemSeeder::class,
             LikerPlanetSeeder::class,
             LikerMoonSeeder::class,
-            //UserSolarSystemOwnershipSeeder::class,
+            UserSolarSystemOwnershipSeeder::class,
         ]);
     }
 }

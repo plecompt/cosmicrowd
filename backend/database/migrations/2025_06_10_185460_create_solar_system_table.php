@@ -20,7 +20,7 @@ return new class extends Migration
                 'binary', 'ternary', 'black_hole'
             ]);
             $table->float('solar_system_gravity')->unsigned();
-            $table->decimal('solar_system_surface_temp', 8, 2); //decimal pour les températures
+            $table->float('solar_system_surface_temp');
             $table->integer('solar_system_diameter')->unsigned();
             $table->bigInteger('solar_system_mass')->unsigned();
             $table->integer('solar_system_luminosity')->unsigned();
@@ -32,7 +32,7 @@ return new class extends Migration
 
         // Ajout des contraintes CHECK pour MariaDB
         DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_gravity CHECK (solar_system_gravity >= 0)');
-        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_surface_temp CHECK (solar_system_surface_temp >= -273.15)');
+        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_surface_temp CHECK (solar_system_surface_temp >= 0)');
         DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_diameter CHECK (solar_system_diameter >= 0)');
         DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_mass CHECK (solar_system_mass >= 0)');
         DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_luminosity CHECK (solar_system_luminosity >= 0)');

@@ -28,14 +28,14 @@ class GalaxyController extends Controller
     }
 
     /**
-     * Retourne les systèmes solaires pour l'animation (positions uniquement)
+     * Retourne les systèmes solaires pour l'animation (données complètes)
      */
     public function getSolarSystemsForAnimation($id)
     {
         $galaxy = Galaxy::findOrFail($id);
         
         $solarSystems = $galaxy->solarSystems()
-            ->select('solar_system_id', 'solar_system_name', 'solar_system_initial_x', 'solar_system_initial_y', 'solar_system_initial_z')
+            ->select('*')
             ->get();
             
         return response()->json($solarSystems);

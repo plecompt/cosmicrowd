@@ -47,7 +47,7 @@ CREATE TABLE solar_system(
         solar_system_type ENUM('brown_dwarf', 'red_dwarf', 'yellow_dwarf', 'white_dwarf', 'red_giant', 'blue_giant',
     'red_supergiant', 'blue_supergiant', 'hypergiant', 'neutron_star', 'pulsar', 'variable', 'binary', 'ternary', 'black_hole') NOT NULL  ,
         solar_system_gravity      Float NOT NULL CHECK (solar_system_gravity >= 0) /* Doit être supérieur ou égal à 0 */  ,
-        solar_system_surface_temp Float NOT NULL CHECK (solar_system_surface_temp >= -273.15) /* Doit être supérieur ou égal à -273.15°C */  ,
+        solar_system_surface_temp Float NOT NULL CHECK (solar_system_surface_temp >= 0) /* Doit être supérieur ou égal à 0°K */  ,
         solar_system_diameter     Int NOT NULL CHECK (solar_system_diameter >= 0) /* Doit être supérieur ou égal à 0 */  ,
         solar_system_mass         BigInt NOT NULL CHECK (solar_system_mass >= 0) /* Doit être supérieur ou égal à 0 */  ,
         solar_system_luminosity   Int NOT NULL CHECK (solar_system_luminosity >= 0) /* Doit être supérieur ou égal à 0 */  ,
@@ -71,7 +71,7 @@ CREATE TABLE planet(
         planet_name                Varchar (50) NOT NULL ,
         planet_type ENUM('terrestrial', 'gas', 'ice', 'super_earth', 'sub_neptune', 'dwarf', 'lava', 'carbon', 'ocean') NOT NULL ,
         planet_gravity             Float NOT NULL CHECK (planet_gravity >= 0) /* Doit être supérieur ou égal à 0 */  ,
-        planet_surface_temp        Float NOT NULL CHECK (planet_surface_temp >= -273.15) /* Doit être supérieur ou égal à -273.15°C */  ,
+        planet_surface_temp        Float NOT NULL CHECK (planet_surface_temp >= 0) /* Doit être supérieur ou égal à 0°K */  ,
         planet_orbital_longitude   Float NOT NULL CHECK (planet_orbital_longitude >= 0 AND planet_orbital_longitude <= 360) /* Angle doit être compris entre 0 et 360°*/  ,
         planet_eccentricity        Float NOT NULL CHECK (planet_eccentricity >= 0 AND planet_eccentricity <= 1) /* Doit etre compris entre 0 et 1 */ ,
         planet_apogee              Int NOT NULL CHECK (planet_apogee >= 0) /* Doit être supérieur ou égal à 0 */  ,
@@ -108,7 +108,7 @@ CREATE TABLE moon(
         moon_name                Varchar (50) NOT NULL ,
         moon_type ENUM('rocky', 'icy', 'mixed', 'primitive', 'regular', 'irregular', 'trojan', 'coorbital') NOT NULL  ,
         moon_gravity             Float NOT NULL CHECK (moon_gravity >= 0) /* Doit être supérieur ou égal à 0 */  ,
-        moon_surface_temp        Float NOT NULL CHECK (moon_surface_temp >= -273.15) /* Doit être supérieur ou égal à -273.15°C */  ,
+        moon_surface_temp        Float NOT NULL CHECK (moon_surface_temp >= 0) /* Doit être supérieur ou égal à 0°K */  ,
         moon_orbital_longitude   Float NOT NULL CHECK (moon_orbital_longitude >= 0 AND moon_orbital_longitude <= 360) /* Angle doit être compris entre 0 et 360°*/  ,
         moon_eccentricity        Float NOT NULL CHECK (moon_eccentricity >= 0 AND moon_eccentricity <= 1) /* Doit etre compris entre 0 et 1 */ ,
         moon_apogee              Int NOT NULL CHECK (moon_apogee >= 0) /* Doit être supérieur ou égal à 0 */  ,
@@ -201,14 +201,15 @@ CREATE TABLE recovery_token(
 #------------------------------------------------------------
 # Future-proof: if we allow users to create solar systems, ownership is switchable
 
+-- CORRECTION user_solar_system_ownership
 CREATE TABLE user_solar_system_ownership(
     user_id             Int NOT NULL,
     solar_system_id     Int NOT NULL,
     ownership_type      ENUM('claimed', 'created') NOT NULL,
     owned_at            Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
-    CONSTRAINT ownership_PK PRIMARY KEY (ownership_id),
+    -- CLÉ PRIMAIRE COMPOSÉE (comme les tables liker_*)
+    CONSTRAINT ownership_PK PRIMARY KEY (user_id, solar_system_id),
     CONSTRAINT ownership_user_FK FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
-    CONSTRAINT ownership_solar_system_FK FOREIGN KEY (solar_system_id) REFERENCES solar_system(solar_system_id) ON DELETE CASCADE,
-    CONSTRAINT ownership_solar_system_unique UNIQUE (solar_system_id)
+    CONSTRAINT ownership_solar_system_FK FOREIGN KEY (solar_system_id) REFERENCES solar_system(solar_system_id) ON DELETE CASCADE
 )ENGINE=InnoDB;

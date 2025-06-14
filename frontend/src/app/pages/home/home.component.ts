@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalaxyAnimationComponent } from '../../components/galaxy-animation/galaxy-animation.component';
 import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
-import { StarAnimation } from '../../interfaces/stars/star.interface';
-import { GalaxyStats } from '../../interfaces/galaxies/galaxy.interface'
+import { SolarSystemAnimation } from '../../interfaces/solar-system/solar-system.interface';
+import { GalaxyStats } from '../../interfaces/galaxy/galaxy.interface'
 import { WelcomeOverlayComponent } from '../../components/welcome-overlay/welcome-overlay.component';
 
 @Component({
@@ -16,9 +16,9 @@ import { WelcomeOverlayComponent } from '../../components/welcome-overlay/welcom
 })
 export class HomeComponent implements OnInit {
   stats: GalaxyStats | null = null;
-  selectedStar: StarAnimation | null = null;
-  recentStars: StarAnimation[] = [];
-  mostLikedStars: StarAnimation[] = [];
+  selectedSolarSystem: SolarSystemAnimation | null = null;
+  recentSolarSystems: SolarSystemAnimation[] = [];
+  mostLikedSolarSystems: SolarSystemAnimation[] = [];
 
   constructor(private galaxiesService: GalaxiesService) { }
 
@@ -46,29 +46,29 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  loadRecentStars(): void {
-    this.galaxiesService.getRecentStars(5).subscribe({
+  loadRecentSolarSystems(): void {
+    this.galaxiesService.getRecentSolarSystems().subscribe({
       next: (response) => {
-        if (response.success) {
-          this.recentStars = response.recent_stars;
+        if (response) {
+          this.recentSolarSystems = response.recent_solar_systems;
         }
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des étoiles récentes:', error);
+        console.error('Erreur lors du chargement des system solaires récents:', error);
       }
     });
   }
 
-  onStarClick(star: StarAnimation): void {
-    this.selectedStar = star;
-    console.log('Étoile cliquée:', star);
+  onSolarSystemClick(solarSystem: SolarSystemAnimation): void {
+    this.selectedSolarSystem = solarSystem;
+    console.log('Solar System clicked:', solarSystem);
   }
 
-  loadMostLikedStars(): void {
-    this.galaxiesService.getMostLikedStars(5).subscribe({
+  loadMostLikedSolarSytems(): void {
+    this.galaxiesService.getMostLikedSolarSystems().subscribe({
       next: (response) => {
-        if (response.success) {
-          this.mostLikedStars = response.most_liked_stars;
+        if (response) {
+          this.mostLikedSolarSystems = response.most_liked_solar_systems;
         }
       },
       error: (error) => {

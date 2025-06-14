@@ -1,10 +1,14 @@
-// src/app/components/galaxy-animation/galaxy-animation.component.ts
 import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as THREE from 'three';
 import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
-import { StarAnimation } from '../../interfaces/stars/star.interface';
+import { SolarSystemAnimation } from '../../interfaces/solar-system/solar-system.interface';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+type StarType = 'brown_dwarf' | 'red_dwarf' | 'yellow_dwarf' | 'white_dwarf' | 'red_giant' | 'blue_giant' | 'red_supergiant' | 'blue_supergiant' | 'hypergiant' | 'neutron_star' | 'pulsar' | 'variable' | 'binary' | 'ternary' | 'black_hole';
 
 @Component({
   selector: 'app-galaxy-animation',
@@ -15,17 +19,18 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 })
 export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   @ViewChild('canvasContainer', { static: true }) canvasContainer!: ElementRef;
-  @Output() starClick = new EventEmitter<StarAnimation>();
+  @Output() solarSystemClick = new EventEmitter<SolarSystemAnimation>();
   @Output() userInteractionStart = new EventEmitter<void>();
   @Output() userInteractionEnd = new EventEmitter<void>();
 
+  private composer!: EffectComposer;
+  private bloomPass!: UnrealBloomPass;
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
   private animationId!: number;
-  private starMeshes: THREE.Mesh[] = [];
-  private starsData: StarAnimation[] = [];
-
+  private solarSystemMeshes: THREE.Sprite[] = [];
+  private solarSystemsData: SolarSystemAnimation[] = [];
   private controls!: OrbitControls;
   private userIsInteracting = false;
 
@@ -34,198 +39,281 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   private lastTime = 0;
   private frameCount = 0;
 
-  constructor(private galaxiesService: GalaxiesService) { }
+  constructor(private galaxiesService: GalaxiesService) {}
 
   ngAfterViewInit(): void {
     this.initThreeJS();
-    this.loadStarsData();
     this.setupControls();
+    this.setupPostProcessing();
+    this.loadSolarSystemsData();
     this.animate();
   }
 
   ngOnDestroy(): void {
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
+    if (this.animationId) cancelAnimationFrame(this.animationId);
+    if (this.controls) this.controls.dispose();
+    if (this.renderer) this.renderer.dispose();
+    
+    if (this.composer) {
+      this.composer.dispose();
     }
 
-    if (this.controls) {
-      this.controls.dispose();
-    }
+    this.solarSystemMeshes.forEach(mesh => {
+      if (mesh.material) {
+        (mesh.material as THREE.Material).dispose();
+      }
+    });
 
-    if (this.renderer) {
-      this.renderer.dispose();
-    }
-
-    // Nettoyage des event listeners
-    window.removeEventListener('resize', () => this.onWindowResize());
+    window.removeEventListener('resize', this.onWindowResize.bind(this));
   }
 
   private initThreeJS(): void {
-    // Configuration de la scène
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x000010);
 
-    // Configuration de la caméra
-    this.camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      10000
-    );
-    this.camera.position.set(0, 0, 200);
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    this.camera.position.set(0, 800, 0);
 
-    // Configuration du renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
 
-    // Gestion du redimensionnement
-    window.addEventListener('resize', () => this.onWindowResize());
+    window.addEventListener('resize', this.onWindowResize.bind(this));
+  }
+
+  private setupPostProcessing(): void {
+    this.composer = new EffectComposer(this.renderer);
+    
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+    
+    this.bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.2,
+      0.8,
+      0.1
+    );
+    
+    this.composer.addPass(this.bloomPass);
   }
 
   private setupControls(): void {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    // Configuration pour une galaxie
-    this.controls.enableDamping = true; // Animation fluide
+    this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.screenSpacePanning = false;
-
-    // Limites de zoom (éviter de sortir de la galaxie)
-    this.controls.minDistance = 10;
-    this.controls.maxDistance = 500;
-
-    // Limites de rotation verticale
+    this.controls.screenSpacePanning = true;
+    this.controls.minDistance = 0;
+    this.controls.maxDistance = 300;
     this.controls.maxPolarAngle = Math.PI;
     this.controls.minPolarAngle = 0;
-
-    // Vitesse de rotation
     this.controls.rotateSpeed = 0.5;
     this.controls.zoomSpeed = 1.0;
-
-    // Point de focus au centre de la galaxie
     this.controls.target.set(0, 0, 0);
-
-    // Listen controls to hide overlay
-    this.setupControlsListeners();
-  }
-
-  private setupControlsListeners(): void {
-    // Quand l'utilisateur commence à interagir
+    
     this.controls.addEventListener('start', () => {
       this.userIsInteracting = true;
       this.userInteractionStart.emit();
     });
 
-    // Quand l'utilisateur arrête d'interagir
     this.controls.addEventListener('end', () => {
       this.userIsInteracting = false;
       this.userInteractionEnd.emit();
     });
   }
 
-  private loadStarsData(): void {
-    this.galaxiesService.getStarsForAnimation(10000, 0).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.starsData = response.stars;
-          //here we may call createStarsWithLOD if galaxy is too big
-          this.createStars();
+  private loadSolarSystemsData(): void {
+    this.galaxiesService.getSolarSystemsForAnimation(1).subscribe({
+      next: (response: SolarSystemAnimation[]) => {
+        console.log('Solar systems received:', response);
+        
+        if (response?.length > 0) {
+          this.solarSystemsData = response;
+          this.createSolarSystemsWithSprites();
+          this.adjustCameraForGalaxy();
+          this.setupClickHandler();
+        } else {
+          console.warn('No solar systems received');
         }
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des étoiles:', error);
-        this.createDefaultStars();
+        console.error('Error loading solar systems:', error);
       }
     });
   }
 
-  private createStars(): void {
-    this.starsData.forEach((starData, index) => {
-      const geometry = new THREE.SphereGeometry(
-        this.getStarSize(starData.star_diameter),
-        16,
-        16
-      );
-
-      const material = new THREE.MeshBasicMaterial({
-        color: this.getStarColor(starData.star_surface_temp),
+  private createSolarSystemsWithSprites(): void {
+    if (!this.solarSystemsData?.length) return;
+    
+    // Nettoyer les anciens sprites
+    this.solarSystemMeshes.forEach(mesh => {
+      if (mesh.material) {
+        (mesh.material as THREE.Material).dispose();
+      }
+      this.scene.remove(mesh);
+    });
+    this.solarSystemMeshes = [];
+    
+    // Créer les nouveaux sprites
+    this.solarSystemsData.forEach((system) => {
+      const position = this.getSystemPosition(system);
+      const color = new THREE.Color(this.getStarColorMap()[system.solar_system_type]);
+      const size = this.getStarSize(system.solar_system_type);
+      
+      const texture = this.createStarTexture(color, size, system.solar_system_type);
+      
+      const material = new THREE.SpriteMaterial({
+        map: texture,
         transparent: true,
-        opacity: 0.9
+        blending: THREE.AdditiveBlending
       });
-
-      const star = new THREE.Mesh(geometry, material);
-
-      // Position basée sur les données réelles ou générée
-      star.position.set(
-        starData.star_initial_x || (Math.random() - 0.5) * 100,
-        starData.star_initial_y || (Math.random() - 0.5) * 100,
-        starData.star_initial_z || (Math.random() - 0.5) * 100
-      );
-
-      // Stockage des données pour l'interaction
-      (star as any).starData = starData;
-
-      this.starMeshes.push(star);
-      this.scene.add(star);
+      
+      const sprite = new THREE.Sprite(material);
+      sprite.position.copy(position);
+      sprite.scale.setScalar(size); // A voir
+      sprite.userData = { systemData: system };
+      
+      this.solarSystemMeshes.push(sprite);
+      this.scene.add(sprite);
     });
-    // Ajout d'un gestionnaire de clic
-    this.setupClickHandler();
+    
+    console.log(`${this.solarSystemMeshes.length} sprites created`);
   }
 
-  private createStarWithLOD(starData: any): THREE.Mesh {
-    const geometry = new THREE.SphereGeometry(this.getStarSize(starData.star_diameter), 12, 8);
-    const material = new THREE.MeshBasicMaterial({
-      color: this.getStarColor(starData.surface_temperature)
-    });
+  private getSystemPosition(system: SolarSystemAnimation): THREE.Vector3 {
+    return new THREE.Vector3(
+      system.solar_system_initial_x || 0,
+      system.solar_system_initial_y || 0, 
+      system.solar_system_initial_z || 0
+    );
+  }
 
-    const star = new THREE.Mesh(geometry, material);
-
-    // LOD : simplifier les étoiles lointaines
-    star.onBeforeRender = (renderer, scene, camera) => {
-      const distance = camera.position.distanceTo(star.position);
-      if (distance > 100) {
-        // Géométrie simplifiée pour les étoiles lointaines
-        star.geometry = new THREE.SphereGeometry(this.getStarSize(starData.star_diameter), 6, 4);
-      }
+  private getStarSize(type: StarType): number {
+    const baseSizes: Record<StarType, number> = {
+      'brown_dwarf': 0.3,
+      'red_dwarf': 0.4,
+      'yellow_dwarf': 1,
+      'white_dwarf': 0.2,
+      'red_giant': 1.5,
+      'blue_giant': 1.2,
+      'red_supergiant': 2,
+      'blue_supergiant': 2,
+      'hypergiant': 2.5,
+      'neutron_star': 0.1,
+      'pulsar': 0.15,
+      'variable': 0.8,
+      'binary': 1.0,
+      'ternary': 1.2,
+      'black_hole': 1.8
     };
-
-    return star;
+    return baseSizes[type];
   }
 
-  private createDefaultStars(): void {
-    // Création d'étoiles par défaut si le chargement échoue
-    for (let i = 0; i < 100; i++) {
-      const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-      const material = new THREE.MeshBasicMaterial({
-        color: new THREE.Color().setHSL(Math.random(), 0.8, 0.8)
-      });
-
-      const star = new THREE.Mesh(geometry, material);
-      star.position.set(
-        (Math.random() - 0.5) * 100,
-        (Math.random() - 0.5) * 100,
-        (Math.random() - 0.5) * 100
-      );
-
-      this.starMeshes.push(star);
-      this.scene.add(star);
+  private createStarTexture(color: THREE.Color, size: number, type: StarType): THREE.Texture {
+    const canvas = document.createElement('canvas');
+    const canvasSize = 64;
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    
+    const ctx = canvas.getContext('2d')!;
+    const center = canvasSize / 2;
+    const radius = center * 0.8;
+    
+    const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
+    
+    switch(type) {
+      case 'brown_dwarf':
+        gradient.addColorStop(0, '#8B4513');
+        gradient.addColorStop(0.7, '#4A1810');
+        gradient.addColorStop(1, 'transparent');
+        break;
+      case 'red_dwarf':
+        gradient.addColorStop(0, '#FF6B47');
+        gradient.addColorStop(0.6, '#CC4125');
+        gradient.addColorStop(1, 'transparent');
+        break;
+      case 'yellow_dwarf':
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(0.3, '#FFF2A6');
+        gradient.addColorStop(0.7, '#FFE066');
+        gradient.addColorStop(1, 'transparent');
+        break;
+      case 'white_dwarf':
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(0.5, '#F5F5FF');
+        gradient.addColorStop(1, 'transparent');
+        break;
+      case 'red_giant':
+      case 'red_supergiant':
+        gradient.addColorStop(0, '#FFB366');
+        gradient.addColorStop(0.4, '#E85D2A');
+        gradient.addColorStop(0.8, '#C41E3A');
+        gradient.addColorStop(1, 'transparent');
+        break;
+      case 'blue_giant':
+      case 'blue_supergiant':
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(0.4, '#B3CCFF');
+        gradient.addColorStop(0.7, '#9BB5FF');
+        gradient.addColorStop(1, 'transparent');
+        break;
+      case 'black_hole':
+        gradient.addColorStop(0, '#FF8C00');
+        gradient.addColorStop(0.5, '#FF4500');
+        gradient.addColorStop(0.8, '#DC143C');
+        gradient.addColorStop(1, 'transparent');
+        break;
+      default:
+        const colorHex = `#${color.getHexString()}`;
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(0.3, colorHex);
+        gradient.addColorStop(0.7, colorHex);
+        gradient.addColorStop(1, 'transparent');
     }
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    
+    return texture;
   }
 
-  private getStarSize(diameter: number): number {
-    // Conversion du diamètre réel en taille pour l'affichage
-    return Math.max(0.2, Math.min(2, diameter / 100000));
+  private getStarColorMap(): { [key in StarType]: number } {
+    return {
+      'brown_dwarf': 0x4A1810,
+      'red_dwarf': 0xCC4125,
+      'yellow_dwarf': 0xFFF2A6,
+      'white_dwarf': 0xF5F5FF,
+      'red_giant': 0xE85D2A,
+      'blue_giant': 0xB3CCFF,
+      'red_supergiant': 0xC41E3A,
+      'blue_supergiant': 0x9BB5FF,
+      'hypergiant': 0xFFB347,
+      'neutron_star': 0xE0E0FF,
+      'pulsar': 0x7FFFD4,
+      'variable': 0xFFE135,
+      'binary': 0xFF9500,
+      'ternary': 0xFFB84D,
+      'black_hole': 0xFF4500
+    };
   }
 
-  private getStarColor(temperature: number): THREE.Color {
-    // Couleur basée sur la température de surface
-    if (temperature > 10000) return new THREE.Color(0x9bb0ff); // Bleu
-    if (temperature > 7500) return new THREE.Color(0xaabfff);  // Blanc-bleu
-    if (temperature > 6000) return new THREE.Color(0xccccff);  // Blanc
-    if (temperature > 5200) return new THREE.Color(0xffcccc);  // Blanc-jaune
-    if (temperature > 3700) return new THREE.Color(0xffcc99);  // Orange
-    return new THREE.Color(0xff9999); // Rouge
+  private adjustCameraForGalaxy(): void {
+    if (this.solarSystemMeshes.length === 0) return;
+
+    const bounds = new THREE.Box3();
+    this.solarSystemMeshes.forEach(mesh => bounds.expandByObject(mesh));
+
+    const center = bounds.getCenter(new THREE.Vector3());
+    const size = bounds.getSize(new THREE.Vector3());
+    const distance = Math.max(size.x, size.y, size.z);
+
+    console.log('distance: ',distance)
+
+    this.camera.position.set(center.x, center.y + distance, center.z);
+    this.camera.lookAt(center);
+    this.camera.updateProjectionMatrix();
   }
 
   private setupClickHandler(): void {
@@ -233,16 +321,19 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     const mouse = new THREE.Vector2();
 
     this.renderer.domElement.addEventListener('click', (event) => {
+      if (this.userIsInteracting) return;
+
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
       raycaster.setFromCamera(mouse, this.camera);
-      const intersects = raycaster.intersectObjects(this.starMeshes);
+      const intersects = raycaster.intersectObjects(this.solarSystemMeshes);
 
       if (intersects.length > 0) {
-        const clickedStar = intersects[0].object as any;
-        if (clickedStar.starData) {
-          this.starClick.emit(clickedStar.starData);
+        const clickedSystem = intersects[0].object as any;
+        console.log(clickedSystem)
+        if (clickedSystem.systemData) {
+          this.solarSystemClick.emit(clickedSystem.systemData);
         }
       }
     });
@@ -250,34 +341,44 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
   private animate(): void {
     this.animationId = requestAnimationFrame((time) => {
-      // Calcul des FPS
       this.calculateFPS(time);
 
-      // Updating controls
-      if (this.controls) {
-        this.controls.update();
-      }
+      if (this.controls) this.controls.update();
 
-      // Rotation lente de la galaxie SEULEMENT si pas d'interaction
       if (!this.userIsInteracting) {
-        this.scene.rotation.y += 0.001;
+        this.scene.rotation.z += 0.0003;
       }
 
-      // Animation des étoiles
-      this.starMeshes.forEach((star) => {
-        star.rotation.x += 0.01;
-        star.rotation.y += 0.01;
-      });
+      // Optimisation : calcul tous les 3 frames
+      // if (this.solarSystemMeshes.length > 0 && this.frameCount % 10 === 0) {
+      //   this.solarSystemMeshes.forEach((sprite, index) => {
+      //     const distance = this.camera.position.distanceTo(sprite.position);
+      //     this.adjustSpriteGlowForDistance(sprite, distance);
+          
+      //     // if (index % 5 === 0) {
+      //     //   sprite.rotation.z += 0.002;
+      //     // }
+      //   });
+      // }
 
-      this.renderer.render(this.scene, this.camera);
-
-      // Récursion pour la prochaine frame
+      this.composer.render();
       this.animate();
     });
   }
 
+  private adjustSpriteGlowForDistance(sprite: THREE.Sprite, distance: number): void {
+    const minDistance = 1;
+    const maxDistance = 250;
+    const minScale = 1.0;
+    const maxScale = 2.5;
+    
+    const normalizedDistance = Math.min(Math.max((distance - minDistance) / (maxDistance - minDistance), 0), 1);
+    const scale = minScale + (normalizedDistance * (maxScale - minScale));
+    
+    sprite.scale.setScalar(scale);
+  }
+
   private calculateFPS(time: number): void {
-    // Protection contre les valeurs invalides
     if (!time || time <= 0) return;
 
     this.frameCount++;
@@ -287,7 +388,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    if (time - this.lastTime >= 1000) { // Chaque seconde
+    if (time - this.lastTime >= 1000) {
       this.fps = Math.round((this.frameCount * 1000) / (time - this.lastTime));
       this.frameCount = 0;
       this.lastTime = time;
@@ -302,5 +403,9 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+    if (this.composer) {
+      this.composer.setSize(window.innerWidth, window.innerHeight);
+    }
   }
 }

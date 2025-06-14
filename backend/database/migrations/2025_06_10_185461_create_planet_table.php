@@ -18,7 +18,7 @@ return new class extends Migration
                 'sub_neptune', 'dwarf', 'lava', 'carbon', 'ocean'
             ]);
             $table->float('planet_gravity')->unsigned();
-            $table->decimal('planet_surface_temp', 8, 2); //decimal pour les températures
+            $table->float('planet_surface_temp');
             $table->float('planet_orbital_longitude')->unsigned();
             $table->float('planet_eccentricity')->unsigned();
             $table->integer('planet_apogee')->unsigned();
@@ -40,7 +40,7 @@ return new class extends Migration
 
         // Ajout des contraintes CHECK pour MariaDB
         DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_gravity CHECK (planet_gravity >= 0)');
-        DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_surface_temp CHECK (planet_surface_temp >= -273.15)');
+        DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_surface_temp CHECK (planet_surface_temp >= 0)');
         DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_orbital_longitude CHECK (planet_orbital_longitude >= 0 AND planet_orbital_longitude <= 360)');
         DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_eccentricity CHECK (planet_eccentricity >= 0 AND planet_eccentricity <= 1)');
         DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_apogee CHECK (planet_apogee >= 0)');

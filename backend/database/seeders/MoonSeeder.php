@@ -15,7 +15,7 @@ class MoonSeeder extends Seeder
                 'moon_desc' => 'Le seul satellite naturel de la Terre.',
                 'moon_type' => 'rocky',
                 'moon_gravity' => 1.62,
-                'moon_surface_temp' => -20.0,
+                'moon_surface_temp' => 20,
                 'moon_orbital_longitude' => 0.0,
                 'moon_eccentricity' => 0.0549,
                 'moon_apogee' => 405,
