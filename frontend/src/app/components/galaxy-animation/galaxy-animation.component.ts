@@ -299,7 +299,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     };
   }
 
-  private adjustCameraForGalaxy(): void {
+private adjustCameraForGalaxy(): void {
     if (this.solarSystemMeshes.length === 0) return;
 
     const bounds = new THREE.Box3();
@@ -307,14 +307,26 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
     const center = bounds.getCenter(new THREE.Vector3());
     const size = bounds.getSize(new THREE.Vector3());
-    const distance = Math.max(size.x, size.y, size.z);
-
-    console.log('distance: ',distance)
-
-    this.camera.position.set(center.x, center.y + distance, center.z);
+    
+    const maxDim = Math.max(size.x, size.y);
+    const distanceFromCenter = maxDim * 0.7;
+    
+    const elevationAngle = Math.PI / 6; // 30° d'élévation
+    const rotationAngle = Math.PI / 6;  // 30° de rotation du plan
+    
+    // Position avec rotation du plan
+    const x = center.x + distanceFromCenter * Math.cos(rotationAngle) * Math.cos(elevationAngle);
+    const y = center.y + distanceFromCenter * Math.sin(rotationAngle) * Math.cos(elevationAngle);
+    const z = center.z + distanceFromCenter * Math.sin(elevationAngle);
+    
+    this.camera.position.set(x, y, z);
+    
+    this.controls.target.copy(center);
     this.camera.lookAt(center);
-    this.camera.updateProjectionMatrix();
-  }
+    this.controls.update();
+}
+
+
 
   private setupClickHandler(): void {
     const raycaster = new THREE.Raycaster();
@@ -347,34 +359,11 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
         this.scene.rotation.z += 0.0003;
       }
 
-      // Optimisation : calcul tous les 3 frames
-      // if (this.solarSystemMeshes.length > 0 && this.frameCount % 10 === 0) {
-      //   this.solarSystemMeshes.forEach((sprite, index) => {
-      //     const distance = this.camera.position.distanceTo(sprite.position);
-      //     this.adjustSpriteGlowForDistance(sprite, distance);
-          
-      //     // if (index % 5 === 0) {
-      //     //   sprite.rotation.z += 0.002;
-      //     // }
-      //   });
-      // }
-
       this.composer.render();
       this.animate();
     });
   }
 
-  private adjustSpriteGlowForDistance(sprite: THREE.Sprite, distance: number): void {
-    const minDistance = 1;
-    const maxDistance = 250;
-    const minScale = 1.0;
-    const maxScale = 2.5;
-    
-    const normalizedDistance = Math.min(Math.max((distance - minDistance) / (maxDistance - minDistance), 0), 1);
-    const scale = minScale + (normalizedDistance * (maxScale - minScale));
-    
-    sprite.scale.setScalar(scale);
-  }
 
   private calculateFPS(time: number): void {
     if (!time || time <= 0) return;
