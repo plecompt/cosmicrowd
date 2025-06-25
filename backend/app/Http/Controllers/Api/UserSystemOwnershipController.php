@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\SolarSystem;
 use App\Models\UserSolarSystemOwnership;
@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UserSystemOwnershipController extends Controller
 {
-    /**
-     * Vérifie si un système solaire est claimable par l'utilisateur
-     */
+    // Check if given SolarSystemId is claimable for user
     public function isClaimable($galaxyId, $solarSystemId)
     {
         try {
@@ -28,7 +26,7 @@ class UserSystemOwnershipController extends Controller
                 ]);
             }
             
-            // Compte le nombre de systèmes claimés par l'utilisateur
+            // Compte le nombre de systèmes claimés par l'utilisateur A REVOIR POUR RECUPERER LUSER
             $userClaimsCount = UserSolarSystemOwnership::where('user_id', Auth::id())->count();
             if ($userClaimsCount >= 3) {
                 return response()->json([

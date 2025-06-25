@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\LikerMoon;
 use App\Models\LikerPlanet;
@@ -17,9 +17,7 @@ class LikeController extends Controller
 {
 
 
-    /**
-     * Ajoute ou retire un like pour un système solaire
-     */
+    // Add or Delete a like for given SolarSystemId
     public function toggleSolarSystem($galaxyId, $solarSystemId): JsonResponse
     {
         try {
@@ -34,22 +32,20 @@ class LikeController extends Controller
                 
             if ($existingLike) {
                 $existingLike->delete();
-                return response()->json(['message' => 'Like retiré', 'liked' => false]);
+                return response()->json(['message' => 'Like deleted', 'liked' => false]);
             } else {
                 LikerSolarSystem::create([
                     'solar_system_id' => $solarSystemId,
                     'user_id' => $userId
                 ]);
-                return response()->json(['message' => 'Like ajouté', 'liked' => true]);
+                return response()->json(['message' => 'Like added', 'liked' => true]);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erreur lors de la modification du like'], 500);
+            return response()->json(['error' => 'Error while adding/deleting like'], 500);
         }
     }
 
-    /**
-     * Ajoute ou retire un like pour une planète
-     */
+    // Add or Delete a like for given Planet
     public function togglePlanet($galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
@@ -66,22 +62,20 @@ class LikeController extends Controller
                 
             if ($existingLike) {
                 $existingLike->delete();
-                return response()->json(['message' => 'Like retiré', 'liked' => false]);
+                return response()->json(['message' => 'Like added', 'liked' => false]);
             } else {
                 LikerPlanet::create([
                     'planet_id' => $planetId,
                     'user_id' => $userId
                 ]);
-                return response()->json(['message' => 'Like ajouté', 'liked' => true]);
+                return response()->json(['message' => 'Like deleted', 'liked' => true]);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erreur lors de la modification du like'], 500);
+            return response()->json(['error' => 'Error while adding/deleting like'], 500);
         }
     }
 
-    /**
-     * Ajoute ou retire un like pour une lune
-     */
+    // Add or Delete a like for given moon
     public function toggleMoon($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
@@ -99,22 +93,20 @@ class LikeController extends Controller
                 
             if ($existingLike) {
                 $existingLike->delete();
-                return response()->json(['message' => 'Like retiré', 'liked' => false]);
+                return response()->json(['message' => 'Like added', 'liked' => false]);
             } else {
                 LikerMoon::create([
                     'moon_id' => $moonId,
                     'user_id' => $userId
                 ]);
-                return response()->json(['message' => 'Like ajouté', 'liked' => true]);
+                return response()->json(['message' => 'Like deleted', 'liked' => true]);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erreur lors de la modification du like'], 500);
+            return response()->json(['error' => 'Error while adding/deleting like'], 500);
         }
     }
 
-    /**
-     * Compte le nombre de likes pour un système solaire
-     */
+    // Count the number of like for given SolarSystem
     public function countSolarSystemLikes($galaxyId, $solarSystemId): JsonResponse
     {
         try {
@@ -127,15 +119,11 @@ class LikeController extends Controller
                 'likes_count' => $likesCount
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erreur lors du comptage des likes'
-            ], 500);
+            return response()->json(['error' => 'Error while getting likes count'], 500);
         }
     }
 
-    /**
-     * Compte le nombre de likes pour une planète
-     */
+    // Count the number of like for given Planet
     public function countPlanetLikes($galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
@@ -150,15 +138,11 @@ class LikeController extends Controller
                 'likes_count' => $likesCount
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erreur lors du comptage des likes'
-            ], 500);
+            return response()->json(['error' => 'Error while getting likes count'], 500);
         }
     }
 
-    /**
-     * Compte le nombre de likes pour une lune
-     */
+    // Count the number of like for given Moon
     public function countMoonLikes($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
@@ -174,15 +158,11 @@ class LikeController extends Controller
                 'likes_count' => $likesCount
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erreur lors du comptage des likes'
-            ], 500);
+            return response()->json(['error' => 'Error while getting likes count'], 500);
         }
     }
 
-    /**
-     * Retourne les statistiques des likes d'un système solaire
-     */
+    // Return the list of like for given SolarSystem
     public function getSolarSystemLikesStats($galaxyId, $solarSystemId): JsonResponse
     {
         try {
@@ -204,19 +184,11 @@ class LikeController extends Controller
                 'likes' => $likes
             ]);
         } catch (\Exception $e) {
-            Log::error('Erreur dans getSolarSystemLikesStats: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            
-            return response()->json([
-                'error' => 'Erreur lors de la récupération des likes',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Error while getting likes counts'], 500);
         }
     }
 
-    /**
-     * Retourne les statistiques des likes d'une planète
-     */
+    // Return the list of like for given Planet
     public function getPlanetLikesStats($galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
@@ -240,19 +212,11 @@ class LikeController extends Controller
                 'likes' => $likes
             ]);
         } catch (\Exception $e) {
-            Log::error('Erreur dans getPlanetLikesStats: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            
-            return response()->json([
-                'error' => 'Erreur lors de la récupération des likes',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Error while getting likes count'], 500);
         }
     }
 
-    /**
-     * Retourne les statistiques des likes d'une lune
-     */
+    // Return the list of like for given Moon
     public function getMoonLikesStats($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
@@ -277,13 +241,7 @@ class LikeController extends Controller
                 'likes' => $likes
             ]);
         } catch (\Exception $e) {
-            Log::error('Erreur dans getMoonLikesStats: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            
-            return response()->json([
-                'error' => 'Erreur lors de la récupération des likes',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Error while getting likes count'], 500);
         }
     }
 } 

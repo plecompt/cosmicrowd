@@ -169,7 +169,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       
       const sprite = new THREE.Sprite(material);
       sprite.position.copy(position);
-      sprite.scale.setScalar(size); // A voir
+      sprite.scale.setScalar(size * 1.5); // A voir
       sprite.userData = { systemData: system };
       
       this.solarSystemMeshes.push(sprite);

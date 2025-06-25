@@ -1,24 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\Galaxy;
 use Illuminate\Http\Request;
 
 class GalaxyController extends Controller
 {
-    /**
-     * Affiche la liste des galaxies avec leurs stats
-     */
+    // Return the list of all galaxy with their solarSystems, their planets and moons
     public function index()
     {
         $galaxies = Galaxy::withCount(['solarSystems', 'planets', 'moons'])->get();
+        
         return response()->json($galaxies);
     }
 
-    /**
-     * Affiche les détails d'une galaxie avec ses stats
-     */
+    // Return the given galaxy with galaxy's solarSystems, planets and moons
     public function show($id)
     {
         $galaxy = Galaxy::withCount(['solarSystems', 'planets', 'moons'])
@@ -27,9 +24,7 @@ class GalaxyController extends Controller
         return response()->json($galaxy);
     }
 
-    /**
-     * Retourne les systèmes solaires pour l'animation (données complètes)
-     */
+    // Return the list of SolarSystems in the given galaxy, used for main animation
     public function getSolarSystemsForAnimation($id)
     {
         $galaxy = Galaxy::findOrFail($id);
@@ -41,9 +36,7 @@ class GalaxyController extends Controller
         return response()->json($solarSystems);
     }
 
-    /**
-     * Retourne les systèmes solaires les plus likés
-     */
+    // Return the most liked solarSystems
     public function getMostLikedSolarSystems($id)
     {
         $galaxy = Galaxy::findOrFail($id);
@@ -57,9 +50,7 @@ class GalaxyController extends Controller
         return response()->json($solarSystems);
     }
 
-    /**
-     * Retourne les systèmes solaires les plus récents
-     */
+    // Return the most recent solarSystems
     public function getRecentSolarSystems($id)
     {
         $galaxy = Galaxy::findOrFail($id);

@@ -2,19 +2,19 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\GalaxyController;
-use App\Http\Controllers\SolarSystemController;
-use App\Http\Controllers\PlanetController;
-use App\Http\Controllers\MoonController;
-use App\Http\Controllers\LikeController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\LikerMoonController;
-use App\Http\Controllers\LikerPlanetController;
-use App\Http\Controllers\LikerSolarSystemController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserSolarSystemOwnershipController;
-use App\Http\Controllers\UserSystemOwnershipController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GalaxyController;
+use App\Http\Controllers\Api\SolarSystemController;
+use App\Http\Controllers\Api\PlanetController;
+use App\Http\Controllers\Api\MoonController;
+use App\Http\Controllers\Api\LikeController;
+use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\LikerMoonController;
+use App\Http\Controllers\Api\LikerPlanetController;
+use App\Http\Controllers\Api\LikerSolarSystemController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserSolarSystemOwnershipController;
+use App\Http\Controllers\Api\UserSystemOwnershipController;
 
 // Routes publiques (pas d'authentification requise)
 Route::prefix('v1')->group(function () {
@@ -58,6 +58,10 @@ Route::prefix('v1')->group(function () {
     
     // User Solar System Ownership (lecture seule)
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [UserSystemOwnershipController::class, 'isClaimable']);
+
+    // User
+    Route::get('/user/{userId}', [UserController::class, 'view']);
+    Route::delete('/user/{userId}', [UserController::class, 'delete']);
 });
 
 // Routes protégées (authentification requise)
@@ -97,10 +101,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function 
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [UserSystemOwnershipController::class, 'claim']);
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [UserSystemOwnershipController::class, 'unclaim']);
 
-});
-
-
-// Route catch-all pour les endpoints non existants
-Route::fallback(function () {
-    return response()->json(['message' => 'Endpoint not found'], 404);
+    // User
+    Route::delete('/user/{userId}', [UserController::class, 'delete']);
 });

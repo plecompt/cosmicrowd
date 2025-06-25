@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\Planet;
 use App\Models\Star;
@@ -14,29 +14,7 @@ use Illuminate\Http\JsonResponse;
 
 class PlanetController extends Controller
 {
-    /**
-     * Vérifie si l'utilisateur a le droit de modifier cette planète
-     * Un utilisateur ne peut modifier que les planètes des systèmes qu'il a claim
-     */
-    private function checkPlanetOwnership($solarSystemId)
-    {
-        $userId = Auth::id();
-        
-        // Vérifie si l'utilisateur est propriétaire du système solaire
-        $ownership = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)
-            ->where('user_id', $userId)
-            ->first();
-            
-        if (!$ownership) {
-            return false;
-        }
-        
-        return true;
-    }
-
-    /**
-     * Retourne la liste des planètes d'un système solaire
-     */
+    // Return the list of planets for given SolarSystemId
     public function index($galaxyId, $solarSystemId)
     {
         try {
@@ -47,9 +25,7 @@ class PlanetController extends Controller
         }
     }
 
-    /**
-     * Retourne une planète spécifique
-     */
+    // Return the planet for given planetId
     public function show($galaxyId, $solarSystemId, $planetId)
     {
         try {
@@ -60,13 +36,11 @@ class PlanetController extends Controller
         }
     }
 
-    /**
-     * Crée une nouvelle planète
-     */
+    // Create a new planet for given solarSystemId
     public function store(Request $request, $galaxyId, $solarSystemId)
     {
         try {
-            // Vérifie que l'utilisateur possède le système solaire
+            // Verify owner own solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -98,7 +72,7 @@ class PlanetController extends Controller
                 'planet_initial_z' => 'required|integer'
             ]);
 
-            // Vérifie que le périgée est inférieur à l'apogée
+            // Checking perigee < apogee
             if ($validated['planet_perigee'] > $validated['planet_apogee']) {
                 return response()->json(['error' => 'Perigee must be less than apogee'], 422);
             }
@@ -134,13 +108,11 @@ class PlanetController extends Controller
         }
     }
 
-    /**
-     * Met à jour une planète
-     */
+    // Update planet for given solarSystemId
     public function update(Request $request, $galaxyId, $solarSystemId, $planetId)
     {
         try {
-            // Vérifie que l'utilisateur possède le système solaire
+            // Verify owner own solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -174,7 +146,7 @@ class PlanetController extends Controller
                 'planet_initial_z' => 'sometimes|integer'
             ]);
 
-            // Vérifie que le périgée est inférieur à l'apogée si les deux sont fournis
+            // Check perigee < apogee
             if (isset($validated['planet_perigee']) && isset($validated['planet_apogee'])) {
                 if ($validated['planet_perigee'] > $validated['planet_apogee']) {
                     return response()->json(['error' => 'Perigee must be less than apogee'], 422);
@@ -189,13 +161,11 @@ class PlanetController extends Controller
         }
     }
 
-    /**
-     * Supprime une planète
-     */
+    // Delete a planet with planetId
     public function destroy($galaxyId, $solarSystemId, $planetId)
     {
         try {
-            // Vérifie que l'utilisateur possède le système solaire
+            // Check owner own this solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -213,9 +183,7 @@ class PlanetController extends Controller
         }
     }
 
-    /**
-     * Retourne le propriétaire d'une planète
-     */
+    // get planet owner
     public function getOwner($galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
@@ -241,26 +209,19 @@ class PlanetController extends Controller
         }
     }
 
-    // Récupérer les planètes d'une étoile spécifique
-    public function getByStarId($starId)
+    //Verify that user own solarSystem
+    private function checkPlanetOwnership($solarSystemId)
     {
-        $star = Star::find($starId);
-        if (!$star) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Étoile non trouvée'
-            ], 404);
+        $userId = Auth::id();
+
+        $ownership = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)
+            ->where('user_id', $userId)
+            ->first();
+            
+        if (!$ownership) {
+            return false;
         }
-
-        $planets = Planet::with(['moons', 'likes'])
-                         ->where('star_id', $starId)
-                         ->orderBy('planet_distance_from_star', 'asc')
-                         ->get();
-
-        return response()->json([
-            'success' => true,
-            'star' => $star,
-            'planets' => $planets
-        ]);
+        
+        return true;
     }
 }

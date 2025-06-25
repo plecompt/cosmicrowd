@@ -43,7 +43,7 @@ class GalaxySeeder extends Seeder
     // Config galaxie simple
 
     private const CONFIG = [
-        'NUM_SYSTEMS' => 1000, // per ARMS!
+        'NUM_SYSTEMS' => 2000, // per ARMS!
         'NUM_ARMS' => 4,
         'GALAXY_THICKNESS' => 5,
         'CORE_X_DIST' => 33,

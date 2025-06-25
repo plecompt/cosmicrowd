@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\Moon;
 use App\Models\Planet;
@@ -11,9 +11,7 @@ use Illuminate\Http\JsonResponse;
 
 class MoonController extends Controller
 {
-    /**
-     * Retourne la liste des lunes d'une planète
-     */
+    // Return the list of moons for given planetId
     public function index($galaxyId, $solarSystemId, $planetId)
     {
         try {
@@ -24,9 +22,7 @@ class MoonController extends Controller
         }
     }
 
-    /**
-     * Retourne une lune spécifique
-     */
+    // Return the moon for given moonId
     public function show($galaxyId, $solarSystemId, $planetId, $moonId)
     {
         try {
@@ -37,13 +33,11 @@ class MoonController extends Controller
         }
     }
 
-    /**
-     * Crée une nouvelle lune
-     */
+    // Create a new moon for given galaxyId/solarSystemId/planetId
     public function store(Request $request, $galaxyId, $solarSystemId, $planetId)
     {
         try {
-            // Vérifie que l'utilisateur possède le système solaire
+            // Verify that user own the current solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -75,7 +69,7 @@ class MoonController extends Controller
                 'moon_initial_z' => 'required|integer'
             ]);
 
-            // Vérifie que le périgée est inférieur à l'apogée
+            // Verify perigee is lower than apogee
             if ($validated['moon_perigee'] > $validated['moon_apogee']) {
                 return response()->json(['error' => 'Perigee must be less than apogee'], 422);
             }
@@ -111,13 +105,11 @@ class MoonController extends Controller
         }
     }
 
-    /**
-     * Met à jour une lune
-     */
+    // Updating a moon for given galaxyId/solarSystemId/planetId
     public function update(Request $request, $galaxyId, $solarSystemId, $planetId, $moonId)
     {
         try {
-            // Vérifie que l'utilisateur possède le système solaire
+            // Verify that owner own the solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -151,7 +143,7 @@ class MoonController extends Controller
                 'moon_initial_z' => 'sometimes|integer'
             ]);
 
-            // Vérifie que le périgée est inférieur à l'apogée si les deux sont fournis
+            // perigee must be lower than apogee
             if (isset($validated['moon_perigee']) && isset($validated['moon_apogee'])) {
                 if ($validated['moon_perigee'] > $validated['moon_apogee']) {
                     return response()->json(['error' => 'Perigee must be less than apogee'], 422);
@@ -166,13 +158,11 @@ class MoonController extends Controller
         }
     }
 
-    /**
-     * Supprime une lune
-     */
+    // Delete moon for given galaxyId/solarSystemId/planetId
     public function destroy($galaxyId, $solarSystemId, $planetId, $moonId)
     {
         try {
-            // Vérifie que l'utilisateur possède le système solaire
+            // Verify owner own solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -190,9 +180,7 @@ class MoonController extends Controller
         }
     }
 
-    /**
-     * Retourne le propriétaire d'une lune
-     */
+    // Get current owner for given galaxyId/solarSystemId/planetId/moonId
     public function getOwner($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
@@ -204,7 +192,7 @@ class MoonController extends Controller
 
             if (!$moon) {
                 return response()->json([
-                    'error' => 'Lune non trouvée'
+                    'error' => 'Moon not found'
                 ], 404);
             }
 
@@ -213,7 +201,7 @@ class MoonController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Erreur lors de la récupération du propriétaire'
+                'error' => 'Error while getting owner'
             ], 500);
         }
     }

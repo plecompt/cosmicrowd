@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use App\Models\RecoveryToken;
@@ -15,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    // Register
     public function register(Request $request): JsonResponse
     {
         $request->validate([
@@ -41,6 +42,7 @@ class AuthController extends Controller
         ], 201);
     }
 
+    // Login
     public function login(Request $request): JsonResponse
     {
         $request->validate([
@@ -75,17 +77,21 @@ class AuthController extends Controller
         ]);
     }
 
+    // Logout
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
+
         return response()->json(['message' => 'Successfully logged out.']);
     }
 
+    // me, return current user using token in header
     public function me(Request $request): JsonResponse
     {
         return response()->json(['succes' => true, 'user' => $request->user()]);
     }
 
+    // Change password
     public function changePassword(Request $request): JsonResponse
     {
         $request->validate([
@@ -108,6 +114,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password successfully changed.']);
     }
 
+    // Change email
     public function changeEmail(Request $request): JsonResponse
     {
         $request->validate([
@@ -130,6 +137,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'Email successfully changed.']);
     }
 
+    // ForgotPassword, send an email with a token to reset password
     public function forgotPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -154,6 +162,7 @@ class AuthController extends Controller
 
         $recoveryToken = RecoveryToken::createForUser($user->user_id);
 
+        // Using blade view in folder ressources/views/emails => recovery.blade.php
         Mail::send('emails.recovery', ['token' => $recoveryToken->recovery_token_value], function ($message) use ($user) {
             $message->to($user->user_email);
             $message->subject('Password reset request');
@@ -165,6 +174,7 @@ class AuthController extends Controller
         ]);
     }
 
+    // Return if the current token is valid or not (expired, used, invalid)
     public function verifyToken(Request $request): JsonResponse
     {
         $token = RecoveryToken::where('recovery_token_value', $request->token)->first();
@@ -188,6 +198,7 @@ class AuthController extends Controller
         ]);
     }
 
+    //change the password after a forgotten password
     public function resetPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -229,5 +240,28 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Password successfully reset.'
         ]);
+    }
+
+    // Delete account
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_email' => 'required|email|max:100|unique:user,user_email',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->user_password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Current password is incorrect.'],
+            ]);
+        }
+
+        $user->update([
+            'user_email' => $request->new_email
+        ]);
+
+        return response()->json(['message' => 'Email successfully changed.']);
     }
 }
