@@ -62,8 +62,8 @@ export class AuthService {
 
   //3 step forgotten password
   //send email to user with the token in the url
-  forgotPassword(email: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/forgot-password', {email});
+  forgotPassword(user_email: string){
+    return this.http.post('http://localhost:8000/api/v1/auth/forgot-password', {user_email});
   }
 
   //can check if the token is valid (before showing view to reset)

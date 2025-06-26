@@ -1,17 +1,20 @@
 import { Component } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth-service/auth-service';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-forgot-password',
+  selector: 'app-reset-password',
   imports: [ReactiveFormsModule],
-  templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component.css'
+  templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.css'
 })
-export class ForgotPasswordComponent {
-  forgotPasswordForm!: any;
+export class ResetPasswordComponent {
+  resetPasswordForm!: any;
+  token!: string;
+  isValidToken: boolean = false;
 
-  constructor(private fb: FormBuilder, public authService: AuthService){}
+  constructor(private fb: FormBuilder, public authService: AuthService, private route: ActivatedRoute, private router: Router){}
 
   ngAfterViewInit(): void {
     this.generateStars(30);
@@ -19,29 +22,71 @@ export class ForgotPasswordComponent {
   }
 
   ngOnInit(): void {
-    this.initForgotPasswordForm();
+    this.initResetPasswordForm();
+    this.verifyToken();
   }
 
-  //init the form with validators
-  initForgotPasswordForm() {
-    this.forgotPasswordForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]]
+  verifyToken(){
+    this.route.queryParamMap.subscribe(params => {
+      const token = params.get('token');
+      if (token) {
+        this.authService.verifyResetToken(token.toString()).subscribe({
+          next: () => {
+            this.token = token;
+            this.isValidToken = true;
+          },
+          error: (error) => {
+            //redirection to home
+            this.navigateTo('/');
+          }
+        }
+        );
+      }
     });
   }
 
-  //user submit the password recovery form
-  onForgotPasswordSubmit(){
-    if (this.forgotPasswordForm.valid) {
-    const { email } = this.forgotPasswordForm.value;
+  //init the form with validators
+  initResetPasswordForm() {
+    this.resetPasswordForm = this.fb.group({
+      newPassword: ['', [Validators.required, this.strongPasswordValidator]],
+      newPasswordBis: ['', [Validators.required, this.strongPasswordValidator]]
+    }, { validators: [this.newPasswordMatchValidator] });
+  }
 
-      this.authService.forgotPassword(email).subscribe({
+  //same for new password
+  private newPasswordMatchValidator(group: any) {
+    const newPass = group.get('newPassword')?.value;
+    const newPassBis = group.get('newPasswordBis')?.value;
+    return newPass === newPassBis ? null : { newPasswordMismatch: true };
+  }
+
+  // Strong password validator
+  private strongPasswordValidator(control: any) {
+    const value = control.value;
+    if (!value) return null;
+
+    const hasMinLength = value.length >= 12;
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    const hasSpecialChar = /[^A-Za-z0-9]/.test(value);
+
+    const isValid = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar;
+
+    return isValid ? null : { weakPassword: true };
+  }
+
+  onPasswordResetSubmit(){
+    if (this.resetPasswordForm.valid) {
+      const { newPassword } = this.resetPasswordForm.value;
+
+      this.authService.changePassword(newPassword, this.token).subscribe({
         next: () => {
-          //succesfully sended email
-          //some feedback in the view
+          //succesfully changed password, logout
+          this.authService.logout().subscribe();
         },
         error: () => {
           //error, incorrect old password or missmatch
-          alert('Something went wrong...');
+          alert('Invalid password');
         }
       })
     }
@@ -123,5 +168,9 @@ export class ForgotPasswordComponent {
     `;
     
     document.head.appendChild(style);
+  }
+
+  navigateTo(url: string) {
+    this.router.navigateByUrl(url)
   }
 }
