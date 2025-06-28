@@ -15,6 +15,20 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    // Check if login is available
+    public function checkLoginAvailability(Request $request) {
+        $available = !User::where('login', $request->login)->exists();
+        
+        return response()->json(['available' => $available]);
+    }
+
+    // Check if email is available
+    public function checkEmailAvailability(Request $request) {
+        $available = !User::where('email', $request->email)->exists();
+        
+        return response()->json(['available' => $available]);
+    }
+
     // Register
     public function register(Request $request): JsonResponse
     {

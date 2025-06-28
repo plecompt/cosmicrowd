@@ -2,16 +2,17 @@
 
 <div class="container">
 
-  <form (ngSubmit)="onLoginSubmit()" [formGroup]="registerForm">
+  <form (ngSubmit)="onRegisterSubmit()" [formGroup]="registerForm">
     <h1>Register</h1>
 
-    <input type="text" placeholder="Login" required formControlName="login">    
-    <input type="email" placeholder="Email" required formControlName="email">
-    <input type="password" placeholder="Password" required formControlName="password">
-    <input type="password" placeholder="Password Confirmation" required formControlName="passwordBis">
+    <app-form-errors [errors]="formErrors"></app-form-errors>
+
+    <input type="text" placeholder="Login" formControlName="login">    
+    <input type="email" placeholder="Email" formControlName="email">
+    <input type="password" placeholder="Password" formControlName="password">
+    <input type="password" placeholder="Password Confirmation" formControlName="passwordBis">
 
     <button type="submit">Register</button>
-    <a (click)="navigateTo('login')" class="actions">Already an explorer ? Log In !</a>
   </form>
 
 </div>

@@ -24,7 +24,10 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('auth/verify-token', [AuthController::class, 'verifyToken']);
     Route::post('auth/reset-password', [AuthController::class, 'resetPassword']);
-    
+    Route::post('auth/check-login', [AuthController::class, 'checkLoginAvailability']);
+    Route::post('auth/check-email', [AuthController::class, 'checkEmailAvailability']);
+
+
     // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
     Route::get('galaxies/{id}', [GalaxyController::class, 'show']); //une galaxie avec ses stats

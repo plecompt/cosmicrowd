@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-import { AuthService } from '../../services/auth-service/auth-service';
+import { AuthService } from '../../services/auth/auth.service';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';

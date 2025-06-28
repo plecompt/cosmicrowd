@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../services/auth-service/auth-service';
+import { AuthService } from '../../services/auth/auth.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 
 @Component({

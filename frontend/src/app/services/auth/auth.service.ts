@@ -32,8 +32,8 @@ export class AuthService {
   }
 
   //register
-  register(login: string, password: string, email: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/register', {login, password, email});
+  register(user_login: string, user_password: string, user_email: string){
+    return this.http.post('http://localhost:8000/api/v1/auth/register', {user_login, user_password, user_email});
   }
 
   //login
@@ -55,7 +55,7 @@ export class AuthService {
     );
   }
 
-  //return connected user.
+  //return connected user
   me(){
     return this.http.get('http://localhost:8000/api/v1/auth/me');
   }

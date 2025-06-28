@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth-service/auth-service';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
