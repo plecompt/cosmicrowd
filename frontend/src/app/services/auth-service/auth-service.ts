@@ -72,8 +72,8 @@ export class AuthService {
   }
 
   //update the password
-  setNewPassword(password: string, token: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/reset-password', {password, token});
+  setNewPassword(new_password: string, token: string){
+    return this.http.post('http://localhost:8000/api/v1/auth/reset-password', {new_password, token});
   }
 
   //password modify

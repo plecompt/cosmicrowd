@@ -1,20 +1,22 @@
 import { Component } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth-service/auth-service';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-reset-password',
-  imports: [ReactiveFormsModule],
-  templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.css'
+  selector: 'app-register',
+  imports: [],
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.css'
 })
-export class ResetPasswordComponent {
-  resetPasswordForm!: any;
-  token!: string;
-  isValidToken: boolean = false;
+export class Register {
+  loginForm!: FormGroup;
 
-  constructor(private fb: FormBuilder, public authService: AuthService, private route: ActivatedRoute, private router: Router){}
+  constructor(private router: Router, public authService: AuthService, private fb: FormBuilder) { 
+  }
+
+  ngOnDestroy(): void {
+  }
 
   ngAfterViewInit(): void {
     this.generateStars(30);
@@ -22,77 +24,35 @@ export class ResetPasswordComponent {
   }
 
   ngOnInit(): void {
-    this.initResetPasswordForm();
-    this.verifyToken();
+    this.initLoginForm();
   }
 
-  verifyToken(){
-    this.route.queryParamMap.subscribe(params => {
-      const token = params.get('token');
-      if (token) {
-        this.authService.verifyResetToken(token.toString()).subscribe({
-          next: () => {
-            this.token = token;
-            this.isValidToken = true;
-          },
-          error: (error) => {
-            //redirection to home
-            this.navigateTo('/');
-          }
-        }
-        );
-      }
+
+  initLoginForm(){
+    this.loginForm = this.fb.group({
+      email: [''],
+      password: ['']
     });
   }
 
-  //init the form with validators
-  initResetPasswordForm() {
-    this.resetPasswordForm = this.fb.group({
-      newPassword: ['', [Validators.required, this.strongPasswordValidator]],
-      newPasswordBis: ['', [Validators.required, this.strongPasswordValidator]]
-    }, { validators: [this.newPasswordMatchValidator] });
-  }
+  onLoginSubmit(){
+    //Here we need to check form, wont do it here, because i'll have to redo it
+    //let's just check inputs are not empty
+    if (this.loginForm.value.email && this.loginForm.value.email.length > 0 && this.loginForm.value.password && this.loginForm.value.password.length > 0){
 
-  //same for new password
-  private newPasswordMatchValidator(group: any) {
-    const newPass = group.get('newPassword')?.value;
-    const newPassBis = group.get('newPasswordBis')?.value;
-    return newPass === newPassBis ? null : { newPasswordMismatch: true };
-  }
-
-  // Strong password validator
-  private strongPasswordValidator(control: any) {
-    const value = control.value;
-    if (!value) return null;
-
-    const hasMinLength = value.length >= 12;
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSpecialChar = /[^A-Za-z0-9]/.test(value);
-
-    const isValid = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar;
-
-    return isValid ? null : { weakPassword: true };
-  }
-
-  onPasswordResetSubmit(){
-    if (this.resetPasswordForm.valid) {
-      const { newPassword } = this.resetPasswordForm.value;
-
-      this.authService.setNewPassword(newPassword, this.token).subscribe({
+      this.authService.login(this.loginForm.value.email , this.loginForm.value.password).subscribe({
         next: () => {
-          //succesfully changed password, logout
-          this.authService.logout().subscribe();
+          this.router.navigateByUrl('/home');
         },
         error: () => {
-          //error, incorrect old password or missmatch
-          alert('Invalid password');
+          alert("Invalid email/password");
         }
       })
     }
   }
 
-    generateStars(numberOfStars: number = 15, containerSelector: string = '.stars-container'): void {
+
+  generateStars(numberOfStars: number = 15, containerSelector: string = '.stars-container'): void {
     const container: HTMLElement | null = document.querySelector(containerSelector);
     
     if (container) {

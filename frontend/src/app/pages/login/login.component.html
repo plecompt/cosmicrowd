@@ -1,15 +1,16 @@
 <div class="container">
 
-    <form (ngSubmit)="onLoginSubmit()" [formGroup]="loginForm">
-            <h1>CosmiCrowd</h1>
+<!-- Dans votre template -->
+<app-background-stars [numberOfStars]="150"></app-background-stars>
 
-            <input type="email" placeholder="Email" required formControlName="email">
-            <input type="password" placeholder="Password" required formControlName="password">
+  <form (ngSubmit)="onLoginSubmit()" [formGroup]="loginForm">
+    <h1>CosmiCrowd</h1>
 
-            <button type="submit">Sign In</button>
-            <a (click)="navigateTo('forgot-password')">Forgot password?</a>
-    </form>
+    <input type="email" placeholder="Email" required formControlName="email">
+    <input type="password" placeholder="Password" required formControlName="password">
 
-    <div class="stars-container"></div>
+    <button type="submit">Sign In</button>
+    <a (click)="navigateTo('forgot-password')">Forgot password?</a>
+  </form>
+
 </div>
-
