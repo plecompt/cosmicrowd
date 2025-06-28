@@ -1,1 +1,17 @@
-<p>register works!</p>
+<app-background-stars [numberOfStars]="30"></app-background-stars>
+
+<div class="container">
+
+  <form (ngSubmit)="onLoginSubmit()" [formGroup]="registerForm">
+    <h1>Register</h1>
+
+    <input type="text" placeholder="Login" required formControlName="login">    
+    <input type="email" placeholder="Email" required formControlName="email">
+    <input type="password" placeholder="Password" required formControlName="password">
+    <input type="password" placeholder="Password Confirmation" required formControlName="passwordBis">
+
+    <button type="submit">Register</button>
+    <a (click)="navigateTo('login')" class="actions">Already an explorer ? Log In !</a>
+  </form>
+
+</div>

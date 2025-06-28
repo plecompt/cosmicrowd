@@ -1,99 +1,108 @@
-// background-stars.component.ts
-import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-background-stars',
   standalone: true,
-  template: `
-    <div class="stars-container-base" [class]="containerClass" #starsContainer>
-      <!-- Les étoiles seront générées dynamiquement ici -->
-    </div>
-  `,
-  styles: [`
-    .stars-container-base {
-      position: fixed; /* Position fixe pour couvrir tout l'écran */
-      top: 0;
-      left: 0;
-      width: 100vw; /* Largeur de la viewport */
-      height: 100vh; /* Hauteur de la viewport */
-      background: transparent;
-      overflow: hidden;
-      pointer-events: none;
-      z-index: -1; /* Derrière le contenu */
-    }
-
-    .star {
-      position: absolute;
-      border-radius: 50%;
-      animation: twinkle infinite ease-in-out;
-    }
-
-    @keyframes twinkle {
-      0%, 100% {
-        opacity: 0.2;
-        transform: scale(0.8);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.2);
-      }
-    }
-
-    .star:nth-child(3n) {
-      background-color: #ffffff;
-    }
-
-    .star:nth-child(4n) {
-      background-color: #ffeeaa;
-    }
-
-    .star:nth-child(5n) {
-      background-color: #aaeeff;
-    }
-
-    .star:nth-child(7n) {
-      background-color: #ffccdd;
-    }
-  `]
+  templateUrl: './background-stars.component.html',
+  styleUrls: ['./background-stars.component.css']
 })
-export class BackgroundStarsComponent implements OnInit {
-  @Input() numberOfStars: number = 100;
-  @Input() containerClass: string = '';
+export class BackgroundStarsComponent implements OnInit, OnDestroy {
+  @Input() numberOfStars: number = 15;
+  @Input() containerClass: string = 'stars-container';
   @ViewChild('starsContainer', { static: true }) starsContainer!: ElementRef;
 
+  private readonly colors: string[] = ['#ffffff', '#b3d9ff', '#ffffcc', '#ffccdd', '#ccffcc'];
+
   ngOnInit(): void {
+    this.createTwinkleAnimation();
     setTimeout(() => {
       this.generateStars();
     }, 100);
   }
 
-  generateStars(): void {
-    const container = this.starsContainer.nativeElement;
+  ngOnDestroy(): void {
+    this.clearStars();
+  }
+
+  private generateStars(): void {
+    const container: HTMLElement = this.starsContainer.nativeElement;
     
-    const existingStars = container.querySelectorAll('.star');
-    existingStars.forEach((star: any) => star.remove());
-    
-    for (let i = 0; i < this.numberOfStars; i++) {
-      const star = document.createElement('div');
+    if (!container) return;
+
+    this.clearStars();
+
+    // Dimensions du conteneur
+    const containerRect: DOMRect = container.getBoundingClientRect();
+    const containerWidth: number = containerRect.width || container.clientWidth;
+    const containerHeight: number = containerRect.height || container.clientHeight;
+
+    for (let i: number = 0; i < this.numberOfStars; i++) {
+      const star: HTMLDivElement = document.createElement('div');
       star.className = 'star';
       
-      const left = Math.random() * 100; // % du container qui fait maintenant 100vw
-      const top = Math.random() * 100;  // % du container qui fait maintenant 100vh
-      const size = Math.random() * 2.5 + 0.5;
-      const duration = Math.random() * 3 + 2;
-      const delay = Math.random() * 4;
-      
+      // Propriétés typées
+      const size: number = Math.random() * 3 + 1;
+      const x: number = Math.random() * Math.max(0, containerWidth - size);
+      const y: number = Math.random() * Math.max(0, containerHeight - size);
+      const delay: number = Math.random() * 3;
+      const duration: number = Math.random() * 2 + 2;
+      const color: string = this.colors[Math.floor(Math.random() * this.colors.length)];
+
       star.style.cssText = `
-        left: ${left}%;
-        top: ${top}%;
+        left: ${x}px;
+        top: ${y}px;
         width: ${size}px;
         height: ${size}px;
-        animation-duration: ${duration}s;
+        background: ${color};
+        box-shadow: 0 0 ${size + 2}px ${color};
         animation-delay: ${delay}s;
-        background-color: white;
+        animation-duration: ${duration}s;
+        position: absolute;
+        animation: twinkle ${duration}s infinite ease-in-out ${delay}s;
       `;
       
       container.appendChild(star);
     }
+  }
+
+  private clearStars(): void {
+    const container: HTMLElement = this.starsContainer.nativeElement;
+    if (container) {
+      container.innerHTML = '';
+    }
+  }
+
+  private createTwinkleAnimation(): void {
+    const styleId = 'twinkle-animation';
+    
+    // If animation already exist
+    if (document.getElementById(styleId)) {
+      return;
+    }
+    
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      @keyframes twinkle {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        25% {
+          opacity: 0.2;
+          transform: scale(0.8);
+        }
+        50% {
+          opacity: 0.05;
+          transform: scale(0.6);
+        }
+        75% {
+          opacity: 0.3;
+          transform: scale(0.9);
+        }
+      }
+    `;
+    
+    document.head.appendChild(style);
   }
 }
