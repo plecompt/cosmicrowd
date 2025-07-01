@@ -57,7 +57,6 @@ export class RegisterComponent {
     this.formErrors = this.formValidator.validateForm(this.registerForm);
     
     if (!this.formValidator.canSubmit(this.registerForm)) {
-
       return;
     }
 

@@ -261,7 +261,6 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required|string',
-            'new_email' => 'required|email|max:100|unique:user,user_email',
         ]);
 
         $user = $request->user();
@@ -272,10 +271,23 @@ class AuthController extends Controller
             ]);
         }
 
-        $user->update([
-            'user_email' => $request->new_email
-        ]);
+        // Deleting all the likes
+        $user->solarSystemLikes()->delete();
+        $user->planetLikes()->delete();
+        $user->moonLikes()->delete();
 
-        return response()->json(['message' => 'Email successfully changed.']);
+        // Deleting tokens
+        if (method_exists($user, 'tokens')) {
+            $user->tokens()->delete();
+        }
+
+        // Deleting user and claimed user_solar_system_ownership with onCascade
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Account successfully deleted.'
+        ]);
     }
+
+
 }

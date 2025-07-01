@@ -74,6 +74,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function 
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::post('auth/change-password', [AuthController::class, 'changePassword']);
     Route::post('auth/change-email', [AuthController::class, 'changeEmail']);
+    Route::post('auth/delete-account', [AuthController::class, 'deleteAccount']);
     
     // Galaxies (modification) Pas de modification des galaxies, seul l'admin peut les modifier/creer/supprimer
     //Route::post('galaxies', [GalaxyController::class, 'store']);

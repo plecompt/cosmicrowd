@@ -8,7 +8,7 @@ import { catchError, debounceTime, map, Observable, of } from 'rxjs';
 })
 export class CustomValidatorsService {
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Strong password validator
   static strongPassword(): ValidatorFn {
@@ -125,6 +125,18 @@ export class CustomValidatorsService {
       return null;
     };
   }
+
+  // Exact match validator
+  static exactMatch(expectedValue: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null;
+
+      const isExactMatch = value === expectedValue;
+      return !isExactMatch ? { exactMatch: { expected: expectedValue, actual: value } } : null;
+    };
+  }
+
 
   // // Check if login is available
   // public checkLoginAvailability(): AsyncValidatorFn {

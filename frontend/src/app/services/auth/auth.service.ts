@@ -36,6 +36,12 @@ export class AuthService {
     return this.http.post('http://localhost:8000/api/v1/auth/register', {user_login, user_password, user_email});
   }
 
+  //delete
+  deleteAccount(current_password: string){
+    return this.http.post('http://localhost:8000/api/v1/auth/delete-account', {current_password});
+  }
+
+
   //login
   login(user_email: string, user_password: string): any{
     return this.http.post('http://localhost:8000/api/v1/auth/login', {user_email, user_password}).pipe(
