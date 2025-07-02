@@ -1,3 +1,21 @@
 <app-background-stars [numberOfStars]="30"></app-background-stars>
 
-<p>contact works!</p>
+    <div class="forgot-password-container flex-column">
+        <form [formGroup]="contactForm" (ngSubmit)="onContactFormSubmit()" >
+            <h2>Contact</h2>
+
+            <p>
+                Please fill this form to contact us
+            </p>
+
+            <input type="email" formControlName="email" placeholder="your.email@mail.com">
+    
+            <input type="login" formControlName="login" placeholder="Login">
+
+            <input type="subject" formControlName="subject" placeholder="Subject">
+
+            <textarea formControlName="message" placeholder="Your message"> </textarea>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>

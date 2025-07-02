@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class AuthController extends Controller
+class AuthController
 {
     // Check if login is available
     public function checkLoginAvailability(Request $request) {
@@ -27,6 +27,59 @@ class AuthController extends Controller
         $available = !User::where('email', $request->email)->exists();
         
         return response()->json(['available' => $available]);
+    }
+
+    // Contact, send us an email from user_email
+    public function contact(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'user_email' => 'required|email|max:100',
+                'user_message' => 'required|string|min:10|max:1000',
+                'user_name' => 'nullable|string|max:100',
+                'subject' => 'nullable|string|max:200'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 400);
+            }
+
+            $contactData = [
+                'user_email' => $request->user_email,
+                'user_name' => $request->user_name ?? 'Anonymous user',
+                'user_message' => $request->user_message,
+                'subject' => $request->subject ?? 'Contact from Cosmicrowd',
+                'sent_at' => now(),
+                'user_ip' => $request->ip(),
+            ];
+
+            // Sending mail to contact@cosmicrowd.com <- from .env
+            Mail::send('emails.contact', $contactData, function ($message) use ($contactData) {
+                $message->to('contact@cosmicrowd.com') // FROM .ENV
+                    ->replyTo($contactData['user_email'], $contactData['user_name'])
+                    ->subject('[CosmiCrowd Contact] ' . $contactData['subject']);
+            });
+
+            // Confirmation to user
+            Mail::send('emails.contact-confirmation', $contactData, function ($message) use ($contactData) {
+                $message->to($contactData['user_email'], $contactData['user_name'])
+                    ->subject('Message Received - CosmiCrowd');
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mail succesfully send'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error while sending your email, please try again.'
+            ], 500);
+        }
     }
 
     // Register
@@ -288,6 +341,4 @@ class AuthController extends Controller
             'message' => 'Account successfully deleted.'
         ]);
     }
-
-
 }

@@ -26,7 +26,7 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/reset-password', [AuthController::class, 'resetPassword']);
     Route::post('auth/check-login', [AuthController::class, 'checkLoginAvailability']);
     Route::post('auth/check-email', [AuthController::class, 'checkEmailAvailability']);
-
+    Route::post('auth/contact', [AuthController::class, 'contact']);
 
     // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
@@ -64,7 +64,6 @@ Route::prefix('v1')->group(function () {
 
     // User
     Route::get('/user/{userId}', [UserController::class, 'view']);
-    Route::delete('/user/{userId}', [UserController::class, 'delete']);
 });
 
 // Routes protégées (authentification requise)
@@ -106,5 +105,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function 
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [UserSystemOwnershipController::class, 'unclaim']);
 
     // User
+    Route::post('/user/{userId}', [UserController::class, 'add']);
     Route::delete('/user/{userId}', [UserController::class, 'delete']);
 });

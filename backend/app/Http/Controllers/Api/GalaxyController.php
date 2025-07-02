@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Galaxy;
 use Illuminate\Http\Request;
 
-class GalaxyController extends Controller
+class GalaxyController
 {
     // Return the list of all galaxy with their solarSystems, their planets and moons
     public function index()

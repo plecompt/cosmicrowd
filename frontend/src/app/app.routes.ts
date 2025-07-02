@@ -10,6 +10,7 @@ import { SystemViewComponent } from './pages/system-view/system-view.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { DeleteAccountComponent } from './pages/delete-account/delete-account.component';
+import { ContactComponent } from './pages/contact/contact.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent, title: 'CosmiCrowd'},
@@ -20,6 +21,7 @@ export const routes: Routes = [
     { path: 'delete-account', component: DeleteAccountComponent, title: 'CosmiCrowd - Delete Account' },
     { path: 'change-password', component: ChangePasswordComponent, title: 'CosmiCrowd - Change Password' },
     { path: 'change-email', component: ChangeEmailComponent, title: 'CosmiCrowd - Change Email' },
+    { path: 'contact', component: ContactComponent, title: 'CosmiCrowd - Contact' },
     { path: 'reset-password', component: ResetPasswordComponent, title: 'CosmiCrowd - Reset Password' },
     { path: 'profile', component: ProfileComponent, title: 'CosmiCrowd - Profile' },
     { path: 'systems', component: SystemsComponent, title: 'CosmiCrowd - Systems' },

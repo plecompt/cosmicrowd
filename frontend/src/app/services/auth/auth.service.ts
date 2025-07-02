@@ -41,7 +41,6 @@ export class AuthService {
     return this.http.post('http://localhost:8000/api/v1/auth/delete-account', {current_password});
   }
 
-
   //login
   login(user_email: string, user_password: string): any{
     return this.http.post('http://localhost:8000/api/v1/auth/login', {user_email, user_password}).pipe(
@@ -59,6 +58,11 @@ export class AuthService {
       }),
       shareReplay(1)
     );
+  }
+
+  //user send an email
+  contact(user_email: string, user_message: string, user_name: string = "", subject: string = ""){
+    return this.http.post('http://localhost:8000/api/v1/auth/contact', {user_email, user_message, user_name, subject});
   }
 
   //return connected user
