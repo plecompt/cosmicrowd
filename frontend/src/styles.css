@@ -45,3 +45,7 @@ body, html {
   overflow: hidden;
   background: #000010;
 }
+
+.error {
+  color: red;
+}

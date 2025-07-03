@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { AuthService } from '../../services/auth/auth.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormValidatorService, ValidationError } from '../../services/form-validators/form-validator-service';
+import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { Router } from '@angular/router';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 
@@ -14,7 +14,6 @@ import { CustomValidatorsService } from '../../services/custom-validators/custom
 })
 export class DeleteAccountComponent {
   deleteAccountForm!: FormGroup;
-  formErrors: ValidationError[] = [];
 
   constructor(
     private router: Router, 
@@ -41,7 +40,7 @@ export class DeleteAccountComponent {
   }
 
   onAccountDeletionSubmit() {
-    this.formErrors = this.formValidator.validateForm(this.deleteAccountForm);
+    // this.formErrors = this.formValidator.validateForm(this.deleteAccountForm);
     
     if (!this.formValidator.canSubmit(this.deleteAccountForm)) {
       return;

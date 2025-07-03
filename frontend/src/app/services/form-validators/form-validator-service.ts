@@ -1,11 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormGroup, AbstractControl } from '@angular/forms';
-
-export interface ValidationError {
-  field: string;
-  message: string;
-  type: string;
-}
+import { FormGroup } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -25,47 +19,23 @@ export class FormValidatorService {
     invalidStarSystemName: 'Star system name must be 2-50 characters with valid characters',
   };
 
-  validateForm(form: FormGroup): ValidationError[] {
-    const errors: ValidationError[] = [];
-    
-    Object.keys(form.controls).forEach(key => {
-      const control = form.get(key);
-      if (control && control.invalid && (control.dirty || control.touched)) {
-        const controlErrors = this.getControlErrors(key, control);
-        errors.push(...controlErrors);
-      }
-    });
-
-    // Form-level errors
-    if (form.errors) {
-      Object.keys(form.errors).forEach(errorKey => {
-        errors.push({
-          field: 'form',
-          message: this.errorMessages[errorKey] || 'Form validation error',
-          type: errorKey
-        });
-      });
-    }
-
-    return errors;
+  // Check if a specific field has validation errors and has been touched
+  hasError(form: FormGroup, fieldName: string, submitted: boolean = false): boolean {
+    const control = form.get(fieldName);
+    return !!(control && control.invalid && submitted);
   }
 
-  private getControlErrors(fieldName: string, control: AbstractControl): ValidationError[] {
-    const errors: ValidationError[] = [];
+  // Get the first error message for a specific field
+  getErrorMessage(form: FormGroup, fieldName: string): string {
+    const control = form.get(fieldName);
     
-    if (control.errors) {
-      Object.keys(control.errors).forEach(errorKey => {
-        errors.push({
-          field: fieldName,
-          message: this.errorMessages[errorKey] || `${fieldName} is invalid`,
-          type: errorKey
-        });
-      });
-    }
+    if (!control || !control.errors) return '';
     
-    return errors;
+    const firstErrorKey = Object.keys(control.errors)[0];
+    return this.errorMessages[firstErrorKey] || `${fieldName} is invalid`;
   }
 
+  // Check if the form can be submitted (all fields valid)
   canSubmit(form: FormGroup): boolean {
     return form.valid;
   }

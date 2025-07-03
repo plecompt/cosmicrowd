@@ -1,24 +1,29 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
-import { FormValidatorService, ValidationError } from '../../services/form-validators/form-validator-service';
-import { FormErrorsComponent } from '../../components/form-error/form-error.component';
+import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-register',
-  imports: [BackgroundStarsComponent, ReactiveFormsModule, FormErrorsComponent],
+  imports: [BackgroundStarsComponent, ReactiveFormsModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit{
   registerForm!: FormGroup;
-  formErrors: ValidationError[] = [];
+  submitted: boolean = false;
 
-  constructor(private router: Router, public authService: AuthService, private fb: FormBuilder, private formValidator: FormValidatorService, private customValidators: CustomValidatorsService) {}
+  constructor(
+    private router: Router, 
+    public authService: AuthService, 
+    private fb: FormBuilder, 
+    public formValidator: FormValidatorService, 
+    private customValidators: CustomValidatorsService
+  ) {}
 
   ngOnInit(): void {
     this.initRegisterForm();
@@ -52,11 +57,10 @@ export class RegisterComponent {
     });
   }
 
-  onRegisterSubmit() {
-
-    this.formErrors = this.formValidator.validateForm(this.registerForm);
-    
+  onRegisterSubmit() { 
+    // Check if form is valid
     if (!this.formValidator.canSubmit(this.registerForm)) {
+      this.submitted = true;
       return;
     }
 
@@ -69,11 +73,7 @@ export class RegisterComponent {
         this.router.navigateByUrl('/home');
       },
       error: () => {
-        this.formErrors = [{
-          field: 'form',
-          message: 'Registration failed. Please try again.',
-          type: 'server'
-        }];
+        alert('Registration failed. Please try again.');
       }
     });
   }

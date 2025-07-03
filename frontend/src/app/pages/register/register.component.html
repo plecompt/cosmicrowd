@@ -5,12 +5,25 @@
   <form (ngSubmit)="onRegisterSubmit()" [formGroup]="registerForm">
     <h1>Register</h1>
 
-    <app-form-errors [errors]="formErrors"></app-form-errors>
+    <input type="text" placeholder="Login" formControlName="login">
+    @if (formValidator.hasError(registerForm, 'login', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'login') }}</div>
+    }
 
-    <input type="text" placeholder="Login" formControlName="login">    
     <input type="email" placeholder="Email" formControlName="email">
+    @if (formValidator.hasError(registerForm, 'email', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'email') }}</div>
+    }
+
     <input type="password" placeholder="Password" formControlName="password">
+    @if (formValidator.hasError(registerForm, 'password', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'password') }}</div>
+    }
+
     <input type="password" placeholder="Password Confirmation" formControlName="passwordBis">
+    @if (formValidator.hasError(registerForm, 'passwordBis', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'passwordBis') }}</div>
+    }
 
     <button type="submit">Register</button>
   </form>
