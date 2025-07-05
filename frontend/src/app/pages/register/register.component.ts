@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth/auth.service';
   selector: 'app-register',
   imports: [BackgroundStarsComponent, ReactiveFormsModule],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrls: ['./register.component.css', '../../shared/styles/form.template.css']
 })
 export class RegisterComponent implements OnInit{
   registerForm!: FormGroup;

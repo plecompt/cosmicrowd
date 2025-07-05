@@ -1,31 +1,29 @@
 <app-background-stars [numberOfStars]="30"></app-background-stars>
 
 @if (authService.isLoggedIn()){
-    <div class="account-deletion-container flex-column">
-        <form [formGroup]="deleteAccountForm" (ngSubmit)="onAccountDeletionSubmit()">
+    <form [formGroup]="deleteAccountForm" (ngSubmit)="onAccountDeletionSubmit()">
 
-            <h1>Account deletion</h1>
+        <h1>Account deletion</h1>
 
-            <p>
-                <strong>This action is IRREVERSIBLE and PERMANENT.</strong><br>
-                <br>
-                Your claimed solar systems will become <strong>available for other explorers</strong> to claim.
-                Your cosmic creations will remain in the galaxy, but ownership will be lost.
-            </p>
-
+        <p>
+            <strong>This action is IRREVERSIBLE and PERMANENT.</strong><br>
             <br>
-            <input type="text" formControlName="confirmationText" placeholder='Type "DELETE" to confirm'>
-            <input type="password" formControlName="currentPassword" placeholder="Current password">
+            Your claimed solar systems will become <strong>available for other explorers</strong> to claim.
+            Your cosmic creations will remain in the galaxy, but ownership will be lost.
+        </p>
 
-            @if (deleteAccountForm.hasError('invalidConfirmation') && deleteAccountForm.touched) {
-                <small class="error">Please type "DELETE" to confirm</small>
-            }
+        <br>
+        <input type="text" formControlName="confirmationText" placeholder='Type "DELETE" to confirm'>
+        <input type="password" formControlName="currentPassword" placeholder="Current password">
 
-            @if (deleteAccountForm.hasError('invalidPassword') && deleteAccountForm.touched) {
-                <small class="error">Invalid password</small>
-            }
+        @if (deleteAccountForm.hasError('invalidConfirmation') && deleteAccountForm.touched) {
+            <small class="error">Please type "DELETE" to confirm</small>
+        }
 
-            <button type="submit" [disabled]="!deleteAccountForm.valid" class="delete-btn">DELETE MY ACCOUNT FOREVER</button>
-        </form>
-    </div>
+        @if (deleteAccountForm.hasError('invalidPassword') && deleteAccountForm.touched) {
+            <small class="error">Invalid password</small>
+        }
+
+        <button type="submit" [disabled]="!deleteAccountForm.valid" class="delete-btn">DELETE MY ACCOUNT FOREVER</button>
+    </form>
 }

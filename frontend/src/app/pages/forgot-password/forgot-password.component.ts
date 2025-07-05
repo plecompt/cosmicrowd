@@ -7,7 +7,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
   selector: 'app-forgot-password',
   imports: [ReactiveFormsModule, BackgroundStarsComponent],
   templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component.css'
+  styleUrls: ['./forgot-password.component.css', '../../shared/styles/form.template.css']
 })
 export class ForgotPasswordComponent {
   forgotPasswordForm!: any;

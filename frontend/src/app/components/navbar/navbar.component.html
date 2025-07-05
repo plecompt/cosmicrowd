@@ -2,19 +2,28 @@
   
     <div class="left-part">
       <h1 class="logo" (click)="navigateTo('home')">CosmiCrowd</h1>
-      <div class="search-container">
+      <div class="search-container" (pointerdown)="this.isMenuOpen = false">
         <input type="text" placeholder="Search solar systems..." class="search-input">
         <button class="search-btn" (click)="onSearch()">🔍</button>
       </div>
     </div>
 
     <div class="right-part">
-      @if(this.authService.isLoggedIn()){
-        <button class="create-btn" (click)="navigateTo('/systems')">Systems</button>
-        <button class="profile-btn" (click)="navigateTo('/profile')">Profile</button>
-        <button class="login-btn" (click)="this.authService.logout().subscribe()">Disconnect</button>
-      } @else {
-        <button class="login-btn" (click)="navigateTo('/login')">Login / Sign In</button>
+      <button class="menu-btn" (click)="toggleMenu()">☰</button>
+      
+      @if (isMenuOpen){
+        <div class="dropdown">
+          <button class="create-btn" (click)="navigateTo('/')">Home</button>
+          <button class="create-btn" (click)="navigateTo('/contact')">Contact</button>
+        @if(this.authService.isLoggedIn()){
+          <button class="create-btn" (click)="navigateTo('/systems')">Systems</button>
+          <button class="profile-btn" (click)="navigateTo('/profile')">Profile</button>
+          <button class="login-btn" (click)="logout()">Disconnect</button>
+        } @else {
+          <button class="login-btn" (click)="navigateTo('/login')">Login / Sign In</button>
+        }
+        </div>
       }
     </div>
+
 </nav>

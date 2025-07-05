@@ -1,19 +1,24 @@
-<app-background-stars [numberOfStars]="30"></app-background-stars>
+@if (!authService.isLoggedIn()){
+  <app-background-stars [numberOfStars]="30"></app-background-stars>
 
-<div class="container">
+  <div class="container">
 
-  <form (ngSubmit)="onLoginSubmit()" [formGroup]="loginForm" class="flex-column">
-    <h1>Login</h1>
+    <form (ngSubmit)="onLoginSubmit()" [formGroup]="loginForm" class="flex-column">
+      <h1>Login</h1>
 
-    <input type="email" placeholder="Email" required formControlName="email">
-    <input type="password" placeholder="Password" required formControlName="password">
+      <input type="email" placeholder="Email" required formControlName="email">
+      <input type="password" placeholder="Password" required formControlName="password">
 
-    <button type="submit">Sign In</button>
+      <button type="submit">Sign In</button>
 
-    <div class="forgot-register-actions flex-column">
-      <a (click)="navigateTo('register')">No account ? Join the Galaxy !</a>
-      <a (click)="navigateTo('forgot-password')">Forgot password ?</a>
-    </div>
-  </form>
+      <div class="forgot-register-actions flex-column">
+        <a (click)="navigateTo('register')">No account ? Join the Galaxy !</a>
+        <a (click)="navigateTo('forgot-password')">Forgot password ?</a>
+      </div>
+    </form>
 
-</div>
+  </div>
+
+} @else {
+  {{this.navigateTo('/home')}}
+}

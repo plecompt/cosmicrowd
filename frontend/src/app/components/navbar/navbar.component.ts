@@ -10,12 +10,15 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './navbar.component.css'
 })
 export class NavigationBarComponent {
+  isMenuOpen = false;
   searchQuery: string = '';
   searchResults: any[] = [];
 
   constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService){}
 
   onSearch(): void {
+    this.isMenuOpen = false; //closing dropdown menu
+
     if (this.searchQuery.trim()) {
       this.galaxiesService.searchStars(this.searchQuery).subscribe({
         next: (response) => {
@@ -34,6 +37,16 @@ export class NavigationBarComponent {
   }
 
    navigateTo(url: string){
+    this.isMenuOpen = false; //closing dropdown menu
     this.router.navigateByUrl(url)
+   }
+
+   logout(){
+    this.isMenuOpen = false; //closing dropdown menu
+    this.authService.logout().subscribe();
+   }
+
+   toggleMenu(){
+    this.isMenuOpen = !this.isMenuOpen;
    }
 }

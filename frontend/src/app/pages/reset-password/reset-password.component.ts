@@ -8,7 +8,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
   selector: 'app-reset-password',
   imports: [ReactiveFormsModule, BackgroundStarsComponent],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.css'
+  styleUrls: ['./reset-password.component.css', '../../shared/styles/form.template.css']
 })
 export class ResetPasswordComponent {
   resetPasswordForm!: any;

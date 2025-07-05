@@ -1,16 +1,15 @@
 @if (this.authService.isLoggedIn()){
 <app-background-stars [numberOfStars]="30"></app-background-stars>
 
-<div class="change-email-container">
-    <h2>Change your email address</h2>
-    <p>
-        To update the email address associated with your account, please complete the form below.
-        You will need to confirm your current password for security reasons.
-        After submitting the request, you will be automatically logged out, and you’ll need to log in again using your
-        new email address.
-    </p>
+    <form [formGroup]="changeEmailForm" (ngSubmit)="onEmailChangeSubmit()" class="flex-column">
+        <h2>Change your email address</h2>
+        <p>
+            To update the email address associated with your account, please complete the form below.
+            You will need to confirm your current password for security reasons.
+            After submitting the request, you will be automatically logged out, and you’ll need to log in again using your
+            new email address.
+        </p>
 
-    <form [formGroup]="changeEmailForm" (ngSubmit)="onEmailChangeSubmit()" >
         <input type="password" formControlName="currentPassword" placeholder="Current password">
         <input type="password" formControlName="currentPasswordBis" placeholder="Repeat current password">
 
@@ -27,5 +26,5 @@
 
         <button type="submit">Submit</button>
     </form>
-</div>
+
 }

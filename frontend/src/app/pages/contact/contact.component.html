@@ -1,21 +1,20 @@
 <app-background-stars [numberOfStars]="30"></app-background-stars>
 
-    <div class="forgot-password-container flex-column">
-        <form [formGroup]="contactForm" (ngSubmit)="onContactFormSubmit()" >
-            <h2>Contact</h2>
+<form [formGroup]="contactForm" (ngSubmit)="onContactFormSubmit()" class="flex-column">
+    <h2>Contact</h2>
 
-            <p>
-                Please fill this form to contact us
-            </p>
+    <p>
+        Please fill this form to contact us
+    </p>
 
-            <input type="email" formControlName="email" placeholder="your.email@mail.com">
-    
-            <input type="login" formControlName="login" placeholder="Login">
+    <input type="email" formControlName="email" placeholder="your.email@mail.com">
 
-            <input type="subject" formControlName="subject" placeholder="Subject">
+    <input type="login" formControlName="login" placeholder="Login">
 
-            <textarea formControlName="message" placeholder="Your message"> </textarea>
+    <input type="subject" formControlName="subject" placeholder="Subject">
 
-            <button type="submit">Submit</button>
-        </form>
-    </div>
+    <textarea formControlName="message" placeholder="Your message"> </textarea>
+
+    <button type="submit">Submit</button>
+
+</form>

@@ -10,7 +10,7 @@ import { CustomValidatorsService } from '../../services/custom-validators/custom
   selector: 'app-delete-account',
   imports: [BackgroundStarsComponent, ReactiveFormsModule],
   templateUrl: './delete-account.component.html',
-  styleUrl: './delete-account.component.css'
+  styleUrls: ['./delete-account.component.css', '../../shared/styles/form.template.css']
 })
 export class DeleteAccountComponent {
   deleteAccountForm!: FormGroup;

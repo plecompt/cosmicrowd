@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth/auth.service';
   selector: 'app-contact',
   imports: [BackgroundStarsComponent, ReactiveFormsModule],
   templateUrl: './contact.component.html',
-  styleUrl: './contact.component.css'
+  styleUrls: ['./contact.component.css', '../../shared/styles/form.template.css']
 })
 export class ContactComponent {
   contactForm!: any;

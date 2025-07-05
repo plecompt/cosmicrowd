@@ -11,7 +11,7 @@
         <p>You requested to reset your password. Click the button below to continue:</p>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ env('FRONTEND_URL') }}/reset-password?token={{ $token }}"
+            <a href="{{ config('app.frontend_url') }}/reset-password?token={{ $token }}"
                style="background-color: #61dafb; color: #121212; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold;">
                 Reset Password
             </a>

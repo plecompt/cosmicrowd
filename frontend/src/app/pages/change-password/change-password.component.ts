@@ -7,7 +7,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
   selector: 'app-change-password',
   imports: [ReactiveFormsModule, BackgroundStarsComponent],
   templateUrl: './change-password.component.html',
-  styleUrl: './change-password.component.css'
+  styleUrls: ['./change-password.component.css', '../../shared/styles/form.template.css']
 })
 export class ChangePasswordComponent {
   changePasswordForm!: any;

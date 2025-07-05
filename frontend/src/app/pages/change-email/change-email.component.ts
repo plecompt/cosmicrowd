@@ -7,7 +7,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
   selector: 'app-change-email',
   imports: [ReactiveFormsModule, BackgroundStarsComponent],
   templateUrl: './change-email.component.html',
-  styleUrl: './change-email.component.css'
+  styleUrls: ['./change-email.component.css', '../../shared/styles/form.template.css']
 })
 export class ChangeEmailComponent implements OnInit, AfterViewInit {
   changeEmailForm!: any;

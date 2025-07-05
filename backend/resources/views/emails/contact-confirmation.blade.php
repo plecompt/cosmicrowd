@@ -21,7 +21,7 @@
         <p>We'll respond to: <strong>{{ $user_email }}</strong></p>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ config('app.frontend_url', 'http://localhost:4200') }}"
+            <a href="{{ config('app.frontend_url') }}"
                style="background-color: #61dafb; color: #121212; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold;">
                 Visit CosmiCrowd
             </a>

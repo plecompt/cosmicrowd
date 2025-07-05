@@ -8,7 +8,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
   selector: 'app-login',
   imports: [ReactiveFormsModule, BackgroundStarsComponent],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css', '../../shared/styles/form.template.css']
 })
 export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   loginForm!: FormGroup;
