@@ -1,0 +1,76 @@
+1- Developper la partie front end d'une application web - web mobile
+- Installer et configurer son environement de travail en fonction du projet web / web mobile
+- Maquetter des interfaces utilisateurs web ou web mobile
+- Réaliser des interfaces utilisateurs statiques web ou web mobile
+- Developper la partie dynamique des interfaces utilisateurs web ou web mobile
+
+2- Developper la partie back end d'une application web - web mobile
+- Mettre en place une base de données relationnelle
+- Developper des composants d'accès aux données SQL et NOsql
+- Developper des composants metier cotés serveur
+- Documenter le deploiement d'une application web ou web mobile
+
+Structure de présentation 20mn basée sur le référentiel :
+1. Introduction (2mn)
+
+    Présentation du projet CosmiCrowd
+    Contexte et objectifs
+    Technologies choisies
+
+2. ACTIVITÉ 1 - Développement Front-End (8mn)
+
+Slide : Environnement de travail (1mn)
+
+    Installation Angular (dernière version)
+    Configuration des outils de développement
+    Intégration avec Laravel
+
+Slide : Maquettage (2mn)
+
+    Wireframes de l'interface galaxie
+    Mockups des pages principales
+    UX/UI design choices
+
+Slide : Interfaces statiques (2mn)
+
+    Structure HTML/CSS
+    Composants Angular
+    Responsive design
+
+Slide : Partie dynamique (3mn)
+
+    Animation de la galaxie (Canvas/WebGL)
+    Interactions utilisateur
+    Gestion des états avec Angular
+
+3. ACTIVITÉ 2 - Développement Back-End (8mn)
+
+Slide : Base de données (2mn)
+
+    Modèle relationnel (après votre partie UML)
+    Migrations Laravel
+    Relations entre entités
+
+Slide : Accès aux données (2mn)
+
+    Eloquent ORM
+    Requêtes SQL optimisées
+    API REST
+
+Slide : Composants métier (2mn)
+
+    Controllers Laravel
+    Services et logique métier
+    Validation des données
+
+Slide : Documentation & Déploiement (2mn)
+
+    Documentation API
+    Processus de déploiement
+    Tests automatisés
+
+4. Bilan & Perspectives (2mn)
+
+    Compétences validées
+    Difficultés rencontrées
+    Évolutions possibles

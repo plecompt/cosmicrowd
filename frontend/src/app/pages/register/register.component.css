@@ -12,6 +12,7 @@ form {
     width: 100%;
     max-width: 360px;
     text-align: center;
+    gap: 10px;
 
     h1 { 
         margin-bottom: 2rem; 
@@ -48,5 +49,4 @@ form {
     .actions {
         display: block;
     }
-
 }

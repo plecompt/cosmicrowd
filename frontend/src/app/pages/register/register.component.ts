@@ -58,7 +58,7 @@ export class RegisterComponent implements OnInit{
   }
 
   onRegisterSubmit() { 
-    // Check if form is valid
+    // Check if form is valid and set submitted to true, so we enable real-time feedback on input
     if (!this.formValidator.canSubmit(this.registerForm)) {
       this.submitted = true;
       return;

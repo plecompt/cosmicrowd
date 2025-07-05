@@ -22,21 +22,33 @@ export class FormValidatorService {
   // Check if a specific field has validation errors and has been touched
   hasError(form: FormGroup, fieldName: string, submitted: boolean = false): boolean {
     const control = form.get(fieldName);
+        console.log(`Fieldname: ${fieldName}, submitted: ${submitted}, control: ${control}`);
+        console.log(control);
     return !!(control && control.invalid && submitted);
+  }
+
+  // Check if a field is valid
+  isFieldValid(form: FormGroup, fieldName: string): boolean {
+    const control = form.get(fieldName);
+    return !!(control && control.valid && control.value && control.value.length > 0);
   }
 
   // Get the first error message for a specific field
   getErrorMessage(form: FormGroup, fieldName: string): string {
     const control = form.get(fieldName);
     
+    console.log(`Field: ${fieldName}`);
+
     if (!control || !control.errors) return '';
-    
+
     const firstErrorKey = Object.keys(control.errors)[0];
     return this.errorMessages[firstErrorKey] || `${fieldName} is invalid`;
   }
 
   // Check if the form can be submitted (all fields valid)
   canSubmit(form: FormGroup): boolean {
+
+    console.log(form);
     return form.valid;
   }
 }

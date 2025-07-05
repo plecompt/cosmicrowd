@@ -31,7 +31,7 @@ export class BackgroundStarsComponent implements OnInit, OnDestroy {
 
     this.clearStars();
 
-    // Dimensions du conteneur
+    // Container dimension
     const containerRect: DOMRect = container.getBoundingClientRect();
     const containerWidth: number = containerRect.width || container.clientWidth;
     const containerHeight: number = containerRect.height || container.clientHeight;
@@ -40,7 +40,7 @@ export class BackgroundStarsComponent implements OnInit, OnDestroy {
       const star: HTMLDivElement = document.createElement('div');
       star.className = 'star';
       
-      // Propriétés typées
+      // Properties
       const size: number = Math.random() * 3 + 1;
       const x: number = Math.random() * Math.max(0, containerWidth - size);
       const y: number = Math.random() * Math.max(0, containerHeight - size);
