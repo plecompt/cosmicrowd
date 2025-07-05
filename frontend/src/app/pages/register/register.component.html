@@ -2,15 +2,30 @@
 
 <div class="container">
 
-  <form (ngSubmit)="onRegisterSubmit()" [formGroup]="registerForm">
+  <form (ngSubmit)="onRegisterSubmit()" [formGroup]="registerForm" class="flex-column">
     <h1>Register</h1>
 
-    <app-form-errors [errors]="formErrors"></app-form-errors>
+    <input type="text" placeholder="Login" formControlName="login" [class.valid]="formValidator.isFieldValid(registerForm, 'login')" [class.invalid]="formValidator.hasError(registerForm, 'login', submitted)">
+    @if (formValidator.hasError(registerForm, 'login', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'login') }}</div>
+    }
 
-    <input type="text" placeholder="Login" formControlName="login">    
     <input type="email" placeholder="Email" formControlName="email">
+    @if (formValidator.hasError(registerForm, 'email', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'email') }}</div>
+    }
+
     <input type="password" placeholder="Password" formControlName="password">
+    <!-- //Je rentre pas dans le if -->
+    @if (formValidator.hasError(registerForm, 'password', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'password') }}</div>
+    }
+    
     <input type="password" placeholder="Password Confirmation" formControlName="passwordBis">
+    <!-- //Je rentre pas dans le if -->
+    @if (formValidator.hasError(registerForm, 'passwordBis', submitted)) {
+      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'passwordBis') }}</div>
+    }
 
     <button type="submit">Register</button>
   </form>
