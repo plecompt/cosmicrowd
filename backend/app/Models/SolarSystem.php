@@ -61,9 +61,9 @@ class SolarSystem extends Model
         return $this->hasMany(Planet::class, 'solar_system_id', 'solar_system_id');
     }
 
-    public function likers()
+    public function likes()
     {
-        return $this->hasMany(LikerSolarSystem::class, 'solar_system_id', 'solar_system_id');
+        return $this->hasMany(LikeSolarSystem::class, 'solar_system_id', 'solar_system_id');
     }
 
     // ========== MÉTHODES UTILES ==========
@@ -82,14 +82,14 @@ class SolarSystem extends Model
     {
         return [
             'solar_system_likes' => $this->getLikesCount(),
-            'planet_likes' => LikerPlanet::whereHas('planet', function ($q) {
+            'planet_likes' => LikePlanet::whereHas('planet', function ($q) {
                 $q->where('solar_system_id', $this->solar_system_id);
             })->count(),
-            'moon_likes' => LikerMoon::whereHas('moon.planet', function ($q) {
+            'moon_likes' => LikeMoon::whereHas('moon.planet', function ($q) {
                 $q->where('solar_system_id', $this->solar_system_id);
             })->count(),
             'total_system_likes' => $this->getTotalSystemLikes(),
-            'recent_likers' => $this->getRecentLikers(5)
+            'recent_likes' => $this->getRecentLikes(5)
         ];
     }
 
@@ -97,28 +97,28 @@ class SolarSystem extends Model
     {
         $solarSystemLikes = $this->getLikesCount();
         
-        $planetLikes = LikerPlanet::whereHas('planet', function ($q) {
+        $planetLikes = LikePlanet::whereHas('planet', function ($q) {
             $q->where('solar_system_id', $this->solar_system_id);
         })->count();
         
-        $moonLikes = LikerMoon::whereHas('moon.planet', function ($q) {
+        $moonLikes = LikeMoon::whereHas('moon.planet', function ($q) {
             $q->where('solar_system_id', $this->solar_system_id);
         })->count();
 
         return $solarSystemLikes + $planetLikes + $moonLikes;
     }
 
-    public function getRecentLikers($limit = 5)
+    public function getRecentLikes($limit = 5)
     {
         return $this->likes()
                    ->with('user')
-                   ->orderBy('liker_solar_system_date', 'desc')
+                   ->orderBy('like_solar_system_date', 'desc')
                    ->limit($limit)
                    ->get()
                    ->map(function ($like) {
                        return [
                            'user' => $like->user,
-                           'date' => $like->liker_solar_system_date
+                           'date' => $like->like_solar_system_date
                        ];
                    });
     }

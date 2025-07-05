@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LikerMoon extends Model
+class LikeMoon extends Model
 {
     use HasFactory;
 
-    protected $table = 'liker_moon';
+    protected $table = 'like_moon';
     public $timestamps = false;
     public $incrementing = false; // Pas d'ID auto-incrémenté
     protected $primaryKey = ['moon_id', 'user_id']; // Clé composite
@@ -17,11 +17,11 @@ class LikerMoon extends Model
     protected $fillable = [
         'moon_id',
         'user_id',
-        'liker_moon_date'
+        'like_moon_date'
     ];
 
     protected $casts = [
-        'liker_moon_date' => 'datetime',
+        'like_moon_date' => 'datetime',
     ];
 
     // Override pour clé composite
@@ -99,7 +99,7 @@ class LikerMoon extends Model
             self::create([
                 'moon_id' => $moonId,
                 'user_id' => $userId,
-                'liker_moon_date' => now()
+                'like_moon_date' => now()
             ]);
             return true; // Like
         }
@@ -114,7 +114,7 @@ class LikerMoon extends Model
     {
         return self::where('user_id', $userId)
                   ->with(['moon.planet.star'])
-                  ->orderBy('liker_moon_date', 'desc')
+                  ->orderBy('like_moon_date', 'desc')
                   ->get();
     }
 
@@ -131,7 +131,7 @@ class LikerMoon extends Model
     public static function getRecentLikes($limit = 20)
     {
         return self::with(['user', 'moon.planet.star'])
-                  ->orderBy('liker_moon_date', 'desc')
+                  ->orderBy('like_moon_date', 'desc')
                   ->limit($limit)
                   ->get();
     }
@@ -158,13 +158,13 @@ class LikerMoon extends Model
         return [
             'total_likes' => self::where('user_id', $userId)->count(),
             'by_moon_type' => self::where('user_id', $userId)
-                                 ->join('moon', 'liker_moon.moon_id', '=', 'moon.moon_id')
+                                 ->join('moon', 'like_moon.moon_id', '=', 'moon.moon_id')
                                  ->select('moon.moon_type', \DB::raw('COUNT(*) as count'))
                                  ->groupBy('moon.moon_type')
                                  ->pluck('count', 'moon.moon_type')
                                  ->toArray(),
             'by_system' => self::where('user_id', $userId)
-                              ->join('moon', 'liker_moon.moon_id', '=', 'moon.moon_id')
+                              ->join('moon', 'like_moon.moon_id', '=', 'moon.moon_id')
                               ->join('planet', 'moon.planet_id', '=', 'planet.planet_id')
                               ->join('star', 'planet.star_id', '=', 'star.star_id')
                               ->select('star.star_name', \DB::raw('COUNT(*) as count'))
@@ -175,7 +175,7 @@ class LikerMoon extends Model
                               ->toArray(),
             'recent_likes' => self::where('user_id', $userId)
                                  ->with(['moon.planet.star'])
-                                 ->orderBy('liker_moon_date', 'desc')
+                                 ->orderBy('like_moon_date', 'desc')
                                  ->limit(5)
                                  ->get()
         ];

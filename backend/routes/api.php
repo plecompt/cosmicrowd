@@ -9,9 +9,9 @@ use App\Http\Controllers\Api\PlanetController;
 use App\Http\Controllers\Api\MoonController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\SearchController;
-use App\Http\Controllers\Api\LikerMoonController;
-use App\Http\Controllers\Api\LikerPlanetController;
-use App\Http\Controllers\Api\LikerSolarSystemController;
+use App\Http\Controllers\Api\LikeMoonController;
+use App\Http\Controllers\Api\LikePlanetController;
+use App\Http\Controllers\Api\LikeSolarSystemController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserSolarSystemOwnershipController;
 use App\Http\Controllers\Api\UserSystemOwnershipController;
@@ -95,7 +95,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function 
     Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'update']);
     Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'destroy']);
     
-    // Liker Routes (toutes privées)
+    // Like Routes (toutes privées)
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/to-like', [LikeController::class, 'toggleSolarSystem']); //to like ou unlike un systeme solaire
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/to-like', [LikeController::class, 'togglePlanet']); //to like ou unlike une planete
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon']); //to like ou unlike une lune

@@ -83,15 +83,15 @@ class Planet extends Model
     // Relation directe avec la table de likes
     public function likes()
     {
-        return $this->hasMany(LikerPlanet::class, 'planet_id', 'planet_id');
+        return $this->hasMany(LikePlanet::class, 'planet_id', 'planet_id');
     }
 
     // Utilisateurs qui ont liké cette planète
     public function likedBy()
     {
-        return $this->belongsToMany(User::class, 'liker_planet', 'planet_id', 'user_id')
-                    ->withPivot('liker_planet_date')
-                    ->orderByPivot('liker_planet_date', 'desc');
+        return $this->belongsToMany(User::class, 'like_planet', 'planet_id', 'user_id')
+                    ->withPivot('like_planet_date')
+                    ->orderByPivot('like_planet_date', 'desc');
     }
 
     // ========== MÉTHODES UTILES ==========

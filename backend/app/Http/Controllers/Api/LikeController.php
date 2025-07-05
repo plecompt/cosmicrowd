@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\LikerMoon;
-use App\Models\LikerPlanet;
-use App\Models\LikerSolarSystem;
+use App\Models\LikeMoon;
+use App\Models\LikePlanet;
+use App\Models\LikeSolarSystem;
 use App\Models\Moon;
 use App\Models\Planet;
 use App\Models\SolarSystem;
@@ -26,7 +26,7 @@ class LikeController extends Controller
             
             $userId = Auth::id();
             
-            $existingLike = LikerSolarSystem::where('solar_system_id', $solarSystemId)
+            $existingLike = LikeSolarSystem::where('solar_system_id', $solarSystemId)
                 ->where('user_id', $userId)
                 ->first();
                 
@@ -34,7 +34,7 @@ class LikeController extends Controller
                 $existingLike->delete();
                 return response()->json(['message' => 'Like deleted', 'liked' => false]);
             } else {
-                LikerSolarSystem::create([
+                LikeSolarSystem::create([
                     'solar_system_id' => $solarSystemId,
                     'user_id' => $userId
                 ]);
@@ -56,7 +56,7 @@ class LikeController extends Controller
             
             $userId = Auth::id();
             
-            $existingLike = LikerPlanet::where('planet_id', $planetId)
+            $existingLike = LikePlanet::where('planet_id', $planetId)
                 ->where('user_id', $userId)
                 ->first();
                 
@@ -64,7 +64,7 @@ class LikeController extends Controller
                 $existingLike->delete();
                 return response()->json(['message' => 'Like added', 'liked' => false]);
             } else {
-                LikerPlanet::create([
+                LikePlanet::create([
                     'planet_id' => $planetId,
                     'user_id' => $userId
                 ]);
@@ -87,7 +87,7 @@ class LikeController extends Controller
             
             $userId = Auth::id();
             
-            $existingLike = LikerMoon::where('moon_id', $moonId)
+            $existingLike = LikeMoon::where('moon_id', $moonId)
                 ->where('user_id', $userId)
                 ->first();
                 
@@ -95,7 +95,7 @@ class LikeController extends Controller
                 $existingLike->delete();
                 return response()->json(['message' => 'Like added', 'liked' => false]);
             } else {
-                LikerMoon::create([
+                LikeMoon::create([
                     'moon_id' => $moonId,
                     'user_id' => $userId
                 ]);
@@ -113,7 +113,7 @@ class LikeController extends Controller
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)
                 ->findOrFail($solarSystemId);
 
-            $likesCount = LikerSolarSystem::where('solar_system_id', $solarSystemId)->count();
+            $likesCount = LikeSolarSystem::where('solar_system_id', $solarSystemId)->count();
 
             return response()->json([
                 'likes_count' => $likesCount
@@ -132,7 +132,7 @@ class LikeController extends Controller
                     ->where('solar_system_id', $solarSystemId);
             })->findOrFail($planetId);
 
-            $likesCount = LikerPlanet::where('planet_id', $planetId)->count();
+            $likesCount = LikePlanet::where('planet_id', $planetId)->count();
 
             return response()->json([
                 'likes_count' => $likesCount
@@ -152,7 +152,7 @@ class LikeController extends Controller
             })->where('planet_id', $planetId)
             ->findOrFail($moonId);
 
-            $likesCount = LikerMoon::where('moon_id', $moonId)->count();
+            $likesCount = LikeMoon::where('moon_id', $moonId)->count();
 
             return response()->json([
                 'likes_count' => $likesCount
@@ -169,14 +169,14 @@ class LikeController extends Controller
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)
                 ->findOrFail($solarSystemId);
 
-            $likes = LikerSolarSystem::with(['user:user_id,user_login'])
+            $likes = LikeSolarSystem::with(['user:user_id,user_login'])
                 ->where('solar_system_id', $solarSystemId)
-                ->select('user_id', 'liker_solar_system_date')
+                ->select('user_id', 'like_solar_system_date')
                 ->get()
                 ->map(function($like) {
                     return [
                         'user_name' => $like->user->user_login,
-                        'liked_at' => $like->liker_solar_system_date
+                        'liked_at' => $like->like_solar_system_date
                     ];
                 });
 
@@ -197,14 +197,14 @@ class LikeController extends Controller
                     ->where('solar_system_id', $solarSystemId);
             })->findOrFail($planetId);
 
-            $likes = LikerPlanet::with(['user:user_id,user_login'])
+            $likes = LikePlanet::with(['user:user_id,user_login'])
                 ->where('planet_id', $planetId)
-                ->select('user_id', 'liker_planet_date')
+                ->select('user_id', 'like_planet_date')
                 ->get()
                 ->map(function($like) {
                     return [
                         'user_name' => $like->user->user_login,
-                        'liked_at' => $like->liker_planet_date
+                        'liked_at' => $like->like_planet_date
                     ];
                 });
 
@@ -226,14 +226,14 @@ class LikeController extends Controller
             })->where('planet_id', $planetId)
             ->findOrFail($moonId);
 
-            $likes = LikerMoon::with(['user:user_id,user_login'])
+            $likes = LikeMoon::with(['user:user_id,user_login'])
                 ->where('moon_id', $moonId)
-                ->select('user_id', 'liker_moon_date')
+                ->select('user_id', 'like_moon_date')
                 ->get()
                 ->map(function($like) {
                     return [
                         'user_name' => $like->user->user_login,
-                        'liked_at' => $like->liker_moon_date
+                        'liked_at' => $like->like_moon_date
                     ];
                 });
 

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LikerSolarSystem extends Model
+class LikeSolarSystem extends Model
 {
     use HasFactory;
 
-    protected $table = 'liker_solar_system';
+    protected $table = 'like_solar_system';
     public $timestamps = false;
     public $incrementing = false; // Pas d'ID auto-incrémenté
     protected $primaryKey = ['solar_system_id', 'user_id']; // Clé composite
@@ -17,11 +17,11 @@ class LikerSolarSystem extends Model
     protected $fillable = [
         'solar_system_id',
         'user_id',
-        'liker_solar_system_date'
+        'like_solar_system_date'
     ];
 
     protected $casts = [
-        'liker_solar_system_date' => 'datetime',
+        'like_solar_system_date' => 'datetime',
     ];
 
     // Override pour clé composite
@@ -89,7 +89,7 @@ class LikerSolarSystem extends Model
             self::create([
                 'solar_system_id' => $solarSystemId,
                 'user_id' => $userId,
-                'liker_solar_system_date' => now()
+                'like_solar_system_date' => now()
             ]);
             return true; // Like
         }
@@ -104,7 +104,7 @@ class LikerSolarSystem extends Model
     {
         return self::where('user_id', $userId)
                   ->with(['solarSystem.planets.moons'])
-                  ->orderBy('liker_solar_system_date', 'desc')
+                  ->orderBy('like_solar_system_date', 'desc')
                   ->get();
     }
 
@@ -121,7 +121,7 @@ class LikerSolarSystem extends Model
     public static function getRecentLikes($limit = 20)
     {
         return self::with(['user', 'solarSystem'])
-                  ->orderBy('liker_solar_system_date', 'desc')
+                  ->orderBy('like_solar_system_date', 'desc')
                   ->limit($limit)
                   ->get();
     }

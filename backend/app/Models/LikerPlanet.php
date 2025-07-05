@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LikerPlanet extends Model
+class LikePlanet extends Model
 {
     use HasFactory;
 
-    protected $table = 'liker_planet';
+    protected $table = 'like_planet';
     public $timestamps = false;
     public $incrementing = false; // Pas d'ID auto-incrémenté
     protected $primaryKey = ['planet_id', 'user_id']; // Clé composite
@@ -17,11 +17,11 @@ class LikerPlanet extends Model
     protected $fillable = [
         'planet_id',
         'user_id',
-        'liker_planet_date'
+        'like_planet_date'
     ];
 
     protected $casts = [
-        'liker_planet_date' => 'datetime',
+        'like_planet_date' => 'datetime',
     ];
 
     // Override pour clé composite
@@ -94,7 +94,7 @@ class LikerPlanet extends Model
             self::create([
                 'planet_id' => $planetId,
                 'user_id' => $userId,
-                'liker_planet_date' => now()
+                'like_planet_date' => now()
             ]);
             return true; // Like
         }
@@ -109,7 +109,7 @@ class LikerPlanet extends Model
     {
         return self::where('user_id', $userId)
                   ->with(['planet.star', 'planet.moons'])
-                  ->orderBy('liker_planet_date', 'desc')
+                  ->orderBy('like_planet_date', 'desc')
                   ->get();
     }
 
@@ -126,7 +126,7 @@ class LikerPlanet extends Model
     public static function getRecentLikes($limit = 20)
     {
         return self::with(['user', 'planet.star'])
-                  ->orderBy('liker_planet_date', 'desc')
+                  ->orderBy('like_planet_date', 'desc')
                   ->limit($limit)
                   ->get();
     }
@@ -153,14 +153,14 @@ class LikerPlanet extends Model
         return [
             'total_likes' => self::where('user_id', $userId)->count(),
             'by_planet_type' => self::where('user_id', $userId)
-                                   ->join('planet', 'liker_planet.planet_id', '=', 'planet.planet_id')
+                                   ->join('planet', 'like_planet.planet_id', '=', 'planet.planet_id')
                                    ->select('planet.planet_type', \DB::raw('COUNT(*) as count'))
                                    ->groupBy('planet.planet_type')
                                    ->pluck('count', 'planet.planet_type')
                                    ->toArray(),
             'recent_likes' => self::where('user_id', $userId)
                                  ->with(['planet.star'])
-                                 ->orderBy('liker_planet_date', 'desc')
+                                 ->orderBy('like_planet_date', 'desc')
                                  ->limit(5)
                                  ->get()
         ];

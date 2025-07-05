@@ -61,17 +61,17 @@ class User extends Authenticatable
     
     public function solarSystemLikes()
     {
-        return $this->hasMany(LikerSolarSystem::class, 'user_id', 'user_id');
+        return $this->hasMany(LikeSolarSystem::class, 'user_id', 'user_id');
     }
 
     public function planetLikes()
     {
-        return $this->hasMany(LikerPlanet::class, 'user_id', 'user_id');
+        return $this->hasMany(LikePlanet::class, 'user_id', 'user_id');
     }
 
     public function moonLikes()
     {
-        return $this->hasMany(LikerMoon::class, 'user_id', 'user_id');
+        return $this->hasMany(LikeMoon::class, 'user_id', 'user_id');
     }
 
     // ========== MÉTHODES UTILES ==========
@@ -93,17 +93,17 @@ class User extends Authenticatable
 
     public function toggleSolarSystemLike($solarSystemId)
     {
-        return LikerSolarSystem::toggleLike($solarSystemId, $this->user_id);
+        return LikeSolarSystem::toggleLike($solarSystemId, $this->user_id);
     }
 
     public function togglePlanetLike($planetId)
     {
-        return LikerPlanet::toggleLike($planetId, $this->user_id);
+        return LikePlanet::toggleLike($planetId, $this->user_id);
     }
 
     public function toggleMoonLike($moonId)
     {
-        return LikerMoon::toggleLike($moonId, $this->user_id);
+        return LikeMoon::toggleLike($moonId, $this->user_id);
     }
 
     public function getLikeStats(): array
@@ -129,7 +129,7 @@ class User extends Authenticatable
             ->map(fn($like) => [
                 'type' => 'solar_system',
                 'item' => $like->solarSystem,
-                'date' => $like->liker_solar_system_date,
+                'date' => $like->like_solar_system_date,
                 'name' => $like->solarSystem->solar_system_name
             ]);
 
@@ -139,7 +139,7 @@ class User extends Authenticatable
             ->map(fn($like) => [
                 'type' => 'planet',
                 'item' => $like->planet,
-                'date' => $like->liker_planet_date,
+                'date' => $like->like_planet_date,
                 'name' => $like->planet->planet_name,
                 'system' => $like->planet->solarSystem->solar_system_name
             ]);
@@ -150,7 +150,7 @@ class User extends Authenticatable
             ->map(fn($like) => [
                 'type' => 'moon',
                 'item' => $like->moon,
-                'date' => $like->liker_moon_date,
+                'date' => $like->like_moon_date,
                 'name' => $like->moon->moon_name,
                 'planet' => $like->moon->planet->planet_name,
                 'system' => $like->moon->planet->solarSystem->solar_system_name

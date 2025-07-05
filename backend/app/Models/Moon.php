@@ -82,14 +82,14 @@ class Moon extends Model
     // Relations de likes
     public function likes()
     {
-        return $this->hasMany(LikerMoon::class, 'moon_id', 'moon_id');
+        return $this->hasMany(LikeMoon::class, 'moon_id', 'moon_id');
     }
 
     public function likedBy()
     {
-        return $this->belongsToMany(User::class, 'liker_moon', 'moon_id', 'user_id')
-                    ->withPivot('liker_moon_date')
-                    ->orderByPivot('liker_moon_date', 'desc');
+        return $this->belongsToMany(User::class, 'like_moon', 'moon_id', 'user_id')
+                    ->withPivot('like_moon_date')
+                    ->orderByPivot('like_moon_date', 'desc');
     }
 
     // Méthodes utiles
@@ -125,17 +125,17 @@ class Moon extends Model
 
     // ========== MÉTHODES UTILES ==========
 
-    public function getRecentLikers($limit = 5)
+    public function getRecentLikes($limit = 5)
     {
         return $this->likes()
                    ->with('user')
-                   ->orderBy('liker_moon_date', 'desc')
+                   ->orderBy('like_moon_date', 'desc')
                    ->limit($limit)
                    ->get()
                    ->map(function ($like) {
                        return [
                            'user' => $like->user,
-                           'date' => $like->liker_moon_date
+                           'date' => $like->like_moon_date
                        ];
                    });
     }
