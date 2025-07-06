@@ -11,8 +11,8 @@ class MoonSeeder extends Seeder
     {
         DB::table('moon')->insert([
             [
-                'moon_name' => 'Lune',
-                'moon_desc' => 'Le seul satellite naturel de la Terre.',
+                'moon_name' => 'Moon',
+                'moon_desc' => 'Earth only satellite',
                 'moon_type' => 'rocky',
                 'moon_gravity' => 1.62,
                 'moon_surface_temp' => 20,

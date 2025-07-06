@@ -10,75 +10,66 @@ use App\Utils\StellarRanges;
 
 class GalaxySeeder extends Seeder
 {
-    // ✅ TOUS LES TYPES avec probabilités réalistes
+    // Realistic star type probabilities
     private const STAR_TYPES = [
-        // 🔴 NAINES (75% de toutes les étoiles)
-        'red_dwarf' => 47,      // Les + communes
-        'brown_dwarf' => 15,    // Assez communes
-        'yellow_dwarf' => 5,    // Comme le Soleil (rares !)
-        'white_dwarf' => 8,     // Restes d'étoiles mortes
+        // Red dwarfs (75% of all stars)
+        'red_dwarf' => 47,      // Most common
+        'brown_dwarf' => 15,    // Quite common
+        'yellow_dwarf' => 5,    // Like our Sun (rare!)
+        'white_dwarf' => 8,     // Stellar remnants
         
-        // 🔥 GÉANTES (10% - Étoiles évoluées)
-        'red_giant' => 6,       // Étoiles vieillissantes
-        'blue_giant' => 4,      // Chaudes et massives
+        // Giants (10% - Evolved stars)
+        'red_giant' => 6,       // Aging stars
+        'blue_giant' => 4,      // Hot and massive
         
-        // 💥 SUPERGÉANTES (6% - Très rares)
-        'red_supergiant' => 3,  // Bételgeuse, Antarès
+        // Supergiants (6% - Very rare)
+        'red_supergiant' => 3,  // Betelgeuse, Antares
         'blue_supergiant' => 3, // Rigel, Deneb
         
-        // 🌟 EXTRÊMES (6% - Ultra rares)
-        'hypergiant' => 2,      // Les + grandes étoiles
-        'neutron_star' =>1,    // Résidus supernovae
-        'pulsar' => 1,          // Étoiles à neutrons rotatives
-        'variable' => 2,        // Luminosité variable
+        // Extreme objects (6% - Ultra rare)
+        'hypergiant' => 2,      // Largest stars
+        'neutron_star' => 1,    // Supernova remnants
+        'pulsar' => 1,          // Rotating neutron stars
+        'variable' => 2,        // Variable brightness
         
-        // 🌠 SYSTÈMES (2.3% - Très spéciaux)
-        'binary' => 1.3,        // Systèmes doubles
-        'ternary' => 1,       // Systèmes triples
+        // Multiple systems (2.3% - Special)
+        'binary' => 1.3,        // Binary systems
+        'ternary' => 1,         // Triple systems
         
-        // ⚫ BLACK HOLES (0.6% - Extrêmement rares)
-        'black_hole' => 0.7,    // Trous noirs
+        // Black holes (0.6% - Extremely rare)
+        'black_hole' => 0.7,    // Black holes
     ];
 
-    // Config galaxie simple
-
+    // Galaxy configuration
     private const CONFIG = [
-        'NUM_SYSTEMS' => 2000, // per ARMS!
+        'NUM_SYSTEMS' => 2000, // per arm
         'NUM_ARMS' => 4,
         'GALAXY_THICKNESS' => 5,
         'CORE_X_DIST' => 33,
         'CORE_Y_DIST' => 33,
-        'GALAXY_RADIUS' => 1000,//200 * galaxy_thickness ?
+        'GALAXY_RADIUS' => 1000,
         'ARM_X_DIST' => 100,
         'ARM_Y_DIST' => 50,
-        'ARM_X_MEAN' => 50, //where the arm is centered
-        'ARM_Y_MEAN' => 25, //where the arm is centered
-        'SPIRAL_FORCE' => 2.0, //how strong the arms must be
+        'ARM_X_MEAN' => 50, // arm center
+        'ARM_Y_MEAN' => 25, // arm center
+        'SPIRAL_FORCE' => 2.0, // spiral strength
     ];
 
     public function run()
-    {
-        echo "Génération galaxie CosmiCrowd...\n";
-        
-        // 1. Créer la galaxie
+    {      
+        // Create galaxy
         $galaxy = $this->createGalaxy();
-        echo "Galaxie créée : {$galaxy->galaxy_name}\n";
-        
-        // 2. Générer les systèmes solaires
+        // Generate solar systems
         $this->generateSolarSystems($galaxy->galaxy_id);
-        echo "" . self::CONFIG['NUM_SYSTEMS'] * self::CONFIG['NUM_ARMS'] . " systèmes générés !\n";
-        
-        // 3. Statistiques
-        $this->showStatistics();
     }
 
     private function createGalaxy(): Galaxy
     {
         return Galaxy::create([
             'galaxy_name' => 'CosmiCrowd Galaxy',
-            'galaxy_desc' => 'Galaxie spirale collaborative générée pour CosmiCrowd',
+            'galaxy_desc' => 'Collaborative spiral galaxy generated for CosmiCrowd',
             'galaxy_size' => self::CONFIG['GALAXY_RADIUS'],
-            'galaxy_age' => rand(8, 14) // Milliards d'années
+            'galaxy_age' => rand(8, 14) // Billions of years
         ]);
     }
 
@@ -86,7 +77,8 @@ class GalaxySeeder extends Seeder
      * Generate random number following Gaussian/Normal distribution
      * Uses Box-Muller transformation
      */
-    private function gaussianRandom(float $center = 0.0, float $deviation = 1.0): float {
+    private function gaussianRandom(float $center = 0.0, float $deviation = 1.0): float 
+    {
         $u = mt_rand() / mt_getrandmax();
         $v = mt_rand() / mt_getrandmax();
         
@@ -95,17 +87,21 @@ class GalaxySeeder extends Seeder
         return $z * $deviation + $center;
     }
 
+    private function generateSolarSystems(int $galaxyId)
+    {
+        for($i = 0; $i < self::CONFIG['NUM_ARMS']; $i++){
+            for($j = 0; $j < self::CONFIG['NUM_SYSTEMS']; $j++){
+                $position = $this->spiral(
+                    $this->gaussianRandom(self::CONFIG['ARM_X_MEAN'], self::CONFIG['ARM_X_DIST']), 
+                    $this->gaussianRandom(self::CONFIG['ARM_Y_MEAN'], self::CONFIG['ARM_Y_DIST']), 
+                    $this->gaussianRandom(0, self::CONFIG['GALAXY_THICKNESS']), 
+                    $i * 2 * M_PI / self::CONFIG['NUM_ARMS']
+                );
 
-    private function generateSolarSystems(int $galaxyId){
-
-        for($i=0; $i < self::CONFIG['NUM_ARMS']; $i++){
-            for($j=0; $j < self::CONFIG['NUM_SYSTEMS']; $j++){
-                $position = $this->spiral($this->gaussianRandom(self::CONFIG['ARM_X_MEAN'], self::CONFIG['ARM_X_DIST']), $this->gaussianRandom(self::CONFIG['ARM_Y_MEAN'], self::CONFIG['ARM_Y_DIST']), $this->gaussianRandom(0, self::CONFIG['GALAXY_THICKNESS']), $i * 2 * M_PI / self::CONFIG['NUM_ARMS']);
-
-                // Type d'étoile avec probabilité
+                // Star type with probability
                 $starType = $this->getRandomStarType();
                 
-                // Propriétés selon le type
+                // Properties based on type
                 $properties = StellarRanges::generateRandomStar($starType);
 
                 SolarSystem::create([
@@ -126,7 +122,8 @@ class GalaxySeeder extends Seeder
         }
     }
 
-    private function spiral(float $x, float $y, float $z, float $offset){
+    private function spiral(float $x, float $y, float $z, float $offset)
+    {
         $r = sqrt($x**2 + $y**2);
         $theta = $offset;
         $theta += $x > 0 ? atan($y/$x) : atan($y/$x) + M_PI;
@@ -137,7 +134,7 @@ class GalaxySeeder extends Seeder
 
     private function getRandomStarType(): string
     {
-        $random = rand(1, 1000) / 10; // Précision 0.1%
+        $random = rand(1, 100);
         $cumulative = 0;
         
         foreach (self::STAR_TYPES as $type => $probability) {
@@ -155,7 +152,7 @@ class GalaxySeeder extends Seeder
         $prefixes = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Zeta', 'Omicron', 'Theta', 'Sigma', 'Tau', 'Phi'];
         $suffixes = ['Centauri', 'Draconis', 'Orionis', 'Cygni', 'Lyrae', 'Vega', 'Sirius', 'Rigel', 'Deneb'];
         
-        // ⚫ Noms spéciaux pour certains types
+        // Special names for certain types
         $specialNames = match($type) {
             'black_hole' => ['Sagittarius A*', 'Cygnus X-1', 'V404 Cygni', 'GRO J1655-40'],
             'pulsar' => ['PSR J', 'B1919+21', 'Vela', 'Crab Pulsar'],
@@ -165,55 +162,33 @@ class GalaxySeeder extends Seeder
         };
         
         if ($specialNames && rand(1, 3) === 1) {
-            return $specialNames[array_rand($specialNames)] . ' ' . rand(1000, 9999);
+            return $specialNames[array_rand($specialNames)] . ' ' . rand(1, 9999);
         }
         
         return $prefixes[array_rand($prefixes)] . ' ' . 
                $suffixes[array_rand($suffixes)] . ' ' . 
-               rand(100, 9999);
+               rand(1, 9999);
     }
 
     private function generateDescription(string $type): string
     {
         return match($type) {
-            'red_dwarf' => 'Naine rouge, étoile froide et de longue durée de vie',
-            'brown_dwarf' => 'Naine brune, "étoile ratée" qui ne peut fusionner l\'hydrogène',
-            'yellow_dwarf' => 'Naine jaune similaire à notre Soleil',
-            'white_dwarf' => 'Naine blanche, résidu dense d\'une étoile morte',
-            'red_giant' => 'Géante rouge en fin de vie, atmosphère étendue',
-            'blue_giant' => 'Géante bleue chaude et massive',
-            'red_supergiant' => 'Supergéante rouge, parmi les plus grandes étoiles',
-            'blue_supergiant' => 'Supergéante bleue extrêmement chaude et lumineuse',
-            'hypergiant' => 'Hypergéante, étoile de taille extraordinaire',
-            'neutron_star' => 'Étoile à neutrons ultra-dense, résidu de supernova',
-            'pulsar' => 'Pulsar, étoile à neutrons émettant des faisceaux radio',
-            'variable' => 'Étoile variable à luminosité changeante',
-            'binary' => 'Système binaire de deux étoiles en orbite',
-            'ternary' => 'Système ternaire de trois étoiles liées',
-            'black_hole' => 'Trou noir, région où rien ne peut s\'échapper',
-            default => 'Système stellaire généré automatiquement'
+            'red_dwarf' => 'Red dwarf star, cool and long-lived',
+            'brown_dwarf' => 'Brown dwarf, "failed star" that cannot fuse hydrogen',
+            'yellow_dwarf' => 'Yellow dwarf similar to our Sun',
+            'white_dwarf' => 'White dwarf, dense remnant of a dead star',
+            'red_giant' => 'Red giant in its final stages, extended atmosphere',
+            'blue_giant' => 'Hot and massive blue giant',
+            'red_supergiant' => 'Red supergiant, among the largest stars',
+            'blue_supergiant' => 'Blue supergiant, extremely hot and luminous',
+            'hypergiant' => 'Hypergiant, star of extraordinary size',
+            'neutron_star' => 'Ultra-dense neutron star, supernova remnant',
+            'pulsar' => 'Pulsar, neutron star emitting radio beams',
+            'variable' => 'Variable star with changing luminosity',
+            'binary' => 'Binary system of two orbiting stars',
+            'ternary' => 'Ternary system of three bound stars',
+            'black_hole' => 'Black hole, region where nothing can escape',
+            default => 'Automatically generated stellar system'
         };
-    }
-
-    private function showStatistics(): void
-    {
-        echo "\n📊 STATISTIQUES DE LA GALAXIE :\n";
-        
-        $stats = [];
-        foreach (self::STAR_TYPES as $type => $probability) {
-            $count = SolarSystem::where('solar_system_type', $type)->count();
-            if ($count > 0) {
-                $stats[$type] = $count;
-            }
-        }
-        
-        arsort($stats);
-        
-        foreach ($stats as $type => $count) {
-            $percentage = round(($count / self::CONFIG['NUM_SYSTEMS']) * 100, 1);
-            echo "  🌟 {$type}: {$count} ({$percentage}%)\n";
-        }
-        
-        echo "\nGalaxie CosmiCrowd générée avec succès !\n";
     }
 }

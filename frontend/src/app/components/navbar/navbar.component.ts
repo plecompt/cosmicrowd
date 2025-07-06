@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
+import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { FormsModule } from '@angular/forms';
+import { ModalService } from '../../services/modal/modal.service';
 
 @Component({
   selector: 'app-navbar',
@@ -15,7 +16,7 @@ export class NavigationBarComponent {
   searchQuery: string = '';
   searchResults: any[] = [];
 
-  constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService){}
+  constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService, private modalService: ModalService){}
 
   onSearch(): void {
     this.isMenuOpen = false; //closing dropdown menu
@@ -24,11 +25,10 @@ export class NavigationBarComponent {
       this.galaxiesService.searchStars(this.searchQuery).subscribe({
         next: (response) => {
           this.searchResults = response.results || [];
-          //here show something beautifull
-          alert(JSON.stringify(this.searchResults));
+          this.showModal(this.searchResults);
         },
         error: (error) => {
-          console.error('Erreur lors de la recherche:', error);
+          alert(`error in the backend: ${error}`);
         }
       });
     }
@@ -52,4 +52,62 @@ export class NavigationBarComponent {
    toggleMenu(){
     this.isMenuOpen = !this.isMenuOpen;
    }
+
+  private showModal(searchResult: any): void {
+    let formattedMessage = '';
+
+    // Moons
+    if (searchResult.moons && searchResult.moons.length > 0) {
+      formattedMessage += 'Moons:\n';
+      for (const moon of searchResult.moons) {
+        formattedMessage += `  - ${moon.moon_name}: ${moon.moon_desc}\n`;
+      }
+      formattedMessage += '\n';
+    }
+
+    // Planets
+    if (searchResult.planets && searchResult.planets.length > 0) {
+      formattedMessage += 'Planets:\n';
+      for (const planet of searchResult.planets) {
+        formattedMessage += `  - ${planet.planet_name}: ${planet.planet_desc}\n`;
+      }
+      formattedMessage += '\n';
+    }
+
+    // Solar Systems
+    if (searchResult.solar_systems && searchResult.solar_systems.length > 0) {
+      formattedMessage += 'Solar Systems:\n';
+      for (const system of searchResult.solar_systems) {
+        formattedMessage += `  - ${system.solar_system_name}: ${system.solar_system_desc}\n`;
+      }
+      formattedMessage += '\n';
+    }
+
+    // Users
+    if (searchResult.users && searchResult.users.length > 0) {
+      formattedMessage += 'Users:\n';
+      for (const user of searchResult.users) {
+        formattedMessage += `  - ${user.user_login}\n`;
+      }
+      formattedMessage += '\n';
+    }
+
+    // Fallback if empty
+    if (formattedMessage.trim() === '') {
+      formattedMessage = 'No results found.';
+    }
+
+    this.modalService.show({
+      title: 'Search Results',
+      content: formattedMessage,
+      showCancel: true,
+      onConfirm: () => {
+        console.log('modal confirmed');
+      },
+      onCancel: () => {
+        console.log('modal cancelled');
+      }
+    });
+  }
+
 }

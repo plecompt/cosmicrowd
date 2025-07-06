@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RateLimitMiddleware
 {
-    //Limit the number of request to 60 by minute
+    // Limit the number of request to 60 by minute
     public function handle(Request $request, Closure $next, $maxAttempts = 60, $decayMinutes = 1): Response
     {
         $key = $this->resolveRequestSignature($request);

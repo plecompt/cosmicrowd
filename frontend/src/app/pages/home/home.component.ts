@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalaxyAnimationComponent } from '../../components/galaxy-animation/galaxy-animation.component';
-import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
+import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { SolarSystemAnimation } from '../../interfaces/solar-system/solar-system.interface';
 import { GalaxyStats } from '../../interfaces/galaxy/galaxy.interface'
 
@@ -75,5 +75,4 @@ export class HomeComponent implements OnInit {
       }
     });
   }
-
 }

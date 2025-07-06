@@ -11,8 +11,8 @@ class PlanetSeeder extends Seeder
     {
         DB::table('planet')->insert([
             [
-                'planet_name' => 'Mercure',
-                'planet_desc' => 'La plus petite planète du système solaire.',
+                'planet_name' => 'Mercury',
+                'planet_desc' => 'The smallest planet of our solar system',
                 'planet_type' => 'terrestrial',
                 'planet_gravity' => 3.7,
                 'planet_surface_temp' => 167.0,
@@ -35,8 +35,8 @@ class PlanetSeeder extends Seeder
                 'user_id' => 1,
             ],
             [
-                'planet_name' => 'Vénus',
-                'planet_desc' => 'La planète la plus chaude du système solaire, avec une rotation rétrograde.',
+                'planet_name' => 'Venus',
+                'planet_desc' => 'The hottest planet of our solar system',
                 'planet_type' => 'terrestrial',
                 'planet_gravity' => 8.87,
                 'planet_surface_temp' => 462.0,

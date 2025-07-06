@@ -34,64 +34,36 @@ class StarSeeder extends Seeder
             'gravity' => [50, 200], 'temp' => [20000, 50000], 'luminosity' => [10000, 1000000],
             'mass' => [10, 50], 'radius' => [7, 15]
         ],
-        'red_supergiant' => [
-            'gravity' => [0.1, 1], 'temp' => [3200, 4500], 'luminosity' => [1000, 500000],
-            'mass' => [10, 40], 'radius' => [200, 1500]
-        ],
-        'blue_supergiant' => [
-            'gravity' => [10, 100], 'temp' => [20000, 50000], 'luminosity' => [10000, 1000000],
-            'mass' => [20, 90], 'radius' => [15, 25]
-        ],
-        'hypergiant' => [
-            'gravity' => [0.01, 0.1], 'temp' => [3000, 35000], 'luminosity' => [100000, 5000000],
-            'mass' => [100, 300], 'radius' => [1000, 2000]
-        ],
         'neutron_star' => [
             'gravity' => [1e11, 1e12], 'temp' => [600000, 1000000], 'luminosity' => [0.001, 0.1],
             'mass' => [1.17, 2.16], 'radius' => [0.00001, 0.00002]
         ],
-        'pulsar' => [
-            'gravity' => [1e11, 1e12], 'temp' => [1000000, 3000000], 'luminosity' => [0.001, 0.1],
-            'mass' => [1.17, 2.16], 'radius' => [0.00001, 0.00002]
-        ],
-        'variable' => [
-            'gravity' => [1, 1000], 'temp' => [3000, 30000], 'luminosity' => [0.1, 10000],
-            'mass' => [0.5, 20], 'radius' => [1, 200]
-        ],
-        'binary' => [
-            'gravity' => [10, 500], 'temp' => [3000, 40000], 'luminosity' => [0.1, 1000],
-            'mass' => [0.5, 10], 'radius' => [0.5, 20]
-        ],
-        'ternary' => [
-            'gravity' => [10, 500], 'temp' => [3000, 40000], 'luminosity' => [0.1, 1000],
-            'mass' => [0.5, 15], 'radius' => [0.5, 25]
+        'black_hole' => [
+            'gravity' => [1e15, 1e16], 'temp' => [0, 100], 'luminosity' => [0, 0],
+            'mass' => [3, 100], 'radius' => [0.00001, 0.001]
         ]
     ];
 
     private $starNames = [
         'Proxima', 'Kepler', 'Gliese', 'Vega', 'Altair', 'Rigel', 'Betelgeuse', 'Sirius',
         'Canopus', 'Arcturus', 'Capella', 'Aldebaran', 'Spica', 'Antares', 'Fomalhaut',
-        'Deneb', 'Regulus', 'Adhara', 'Castor', 'Procyon', 'Achernar', 'Bellatrix',
-        'Elnath', 'Miaplacidus', 'Alnilam', 'Alnair', 'Alioth', 'Dubhe', 'Mirfak'
+        'Deneb', 'Regulus', 'Adhara', 'Castor', 'Procyon', 'Achernar', 'Bellatrix'
     ];
 
-     /**
-     * 🎯 Comportement par défaut : 1 à 3 étoiles par utilisateur
-     */
     public function run()
     {
         $users = User::all();
         $galaxy = Galaxy::first();
         
         if (!$galaxy) {
-            $this->command->error("❌ Aucune galaxie trouvée ! Exécutez d'abord GalaxySeeder.");
+            $this->command->error("No galaxy found! Run GalaxySeeder first.");
             return;
         }
 
         $starsCreated = 0;
 
         foreach ($users as $user) {
-            $numberOfStars = rand(1, 3); // 1 à 3 étoiles par utilisateur
+            $numberOfStars = rand(1, 3); // 1 to 3 stars per user
             
             for ($i = 0; $i < $numberOfStars; $i++) {
                 $this->createSingleStar($user->user_id, $galaxy);
@@ -99,27 +71,22 @@ class StarSeeder extends Seeder
             }
         }
 
-        $this->command->info("✅ {$starsCreated} étoiles créées avec le comportement par défaut !");
+        $this->command->info("{$starsCreated} stars created successfully!");
     }
 
-    /**
-     * 🚀 Méthode pour générer x étoiles (utilisée par la commande personnalisée)
-     */
     public function generateStars(int $count, ?int $userId = null): int
     {
         $users = User::all();
         $galaxy = Galaxy::first();
         
         if (!$galaxy) {
-            throw new \Exception("❌ Aucune galaxie trouvée !");
+            throw new \Exception("No galaxy found!");
         }
 
         $starsCreated = 0;
 
         for ($i = 0; $i < $count; $i++) {
-            // Si userId fourni : utiliser cet utilisateur, sinon utilisateur aléatoire
             $assignedUserId = $userId ?? $users->random()->user_id;
-            
             $this->createSingleStar($assignedUserId, $galaxy);
             $starsCreated++;
         }
@@ -133,144 +100,39 @@ class StarSeeder extends Seeder
         $typeData = $this->starTypeData[$starType];
         $starName = $this->starNames[array_rand($this->starNames)] . '-' . uniqid();
         
-        // 🌌 COORDONNÉES GALAXIE SPIRALE RÉALISTE
-        $coordinates = $this->generateGalaxyCoordinates($galaxy);
+        // Random position in galaxy
+        $coordinates = $this->generateGalaxyPosition($galaxy);
         
         Star::create([
             'star_name' => $starName,
-            'star_desc' => "Étoile de type {$starType}",
+            'star_desc' => "Star of type {$starType}",
             'star_type' => $starType,
             'star_gravity' => $this->randomFloat($typeData['gravity'][0], $typeData['gravity'][1]),
             'star_surface_temp' => $this->randomFloat($typeData['temp'][0], $typeData['temp'][1]),
             'star_luminosity' => $this->randomFloat($typeData['luminosity'][0], $typeData['luminosity'][1]),
             'star_mass' => $this->randomFloat($typeData['mass'][0], $typeData['mass'][1]),
             'star_diameter' => $this->randomFloat($typeData['radius'][0], $typeData['radius'][1]) * 2 * 6371,
-            
-            // ✅ COORDONNÉES GALAXIE RÉALISTE
             'star_initial_x' => $coordinates['x'],
             'star_initial_y' => $coordinates['y'],
             'star_initial_z' => $coordinates['z'],
-            
             'user_id' => $userId,
             'galaxy_id' => $galaxy->galaxy_id,
         ]);
     }
 
-    /**
-     * 🌌 Génère des coordonnées de galaxie spirale réaliste
-     */
-    private function generateGalaxyCoordinates(Galaxy $galaxy): array
+    private function generateGalaxyPosition(Galaxy $galaxy): array
     {
-        $galaxyRadius = $galaxy->galaxy_size / 10; // Échelle adaptée à Three.js
+        $radius = $galaxy->galaxy_size / 10; // Scale for Three.js
         
-        // 🎯 CHOIX DU TYPE DE RÉGION
-        $regionType = $this->chooseGalaxyRegion();
-        
-        switch ($regionType) {
-            case 'core':
-                return $this->generateCoreCoordinates($galaxyRadius);
-            case 'spiral_arm':
-                return $this->generateSpiralArmCoordinates($galaxyRadius);
-            case 'disk':
-                return $this->generateDiskCoordinates($galaxyRadius);
-            case 'halo':
-                return $this->generateHaloCoordinates($galaxyRadius);
-            default:
-                return $this->generateDiskCoordinates($galaxyRadius);
-        }
-    }
-
-    /**
-     * 🎲 Choisit la région de la galaxie (répartition réaliste)
-     */
-    private function chooseGalaxyRegion(): string
-    {
-        $rand = rand(1, 100);
-        
-        if ($rand <= 15) return 'core';        // 15% centre galactique
-        if ($rand <= 65) return 'spiral_arm';  // 50% bras spiraux  
-        if ($rand <= 90) return 'disk';        // 25% disque
-        return 'halo';                         // 10% halo
-    }
-
-    /**
-     * 🔥 CENTRE GALACTIQUE (dense, étoiles massives)
-     */
-    private function generateCoreCoordinates(float $galaxyRadius): array
-    {
-        $coreRadius = $galaxyRadius * 0.05; // 5% du rayon total
-        
-        $distance = $this->randomFloat(0, $coreRadius);
+        // Simple spiral galaxy distribution
+        $distance = sqrt($this->randomFloat(0, 1)) * $radius;
         $angle = $this->randomFloat(0, 2 * M_PI);
-        $height = $this->randomFloat(-50, 50); // Zone plate
-        
-        return [
-            'x' => round($distance * cos($angle)),
-            'y' => round($height),
-            'z' => round($distance * sin($angle))
-        ];
-    }
-
-    /**
-     * 🌀 BRAS SPIRAUX (structure caractéristique)
-     */
-    private function generateSpiralArmCoordinates(float $galaxyRadius): array
-    {
-        $numberOfArms = 4; // Galaxie à 4 bras
-        $armIndex = rand(0, $numberOfArms - 1);
-        
-        // Distance du centre (plus d'étoiles au milieu des bras)
-        $distance = $this->randomFloat($galaxyRadius * 0.2, $galaxyRadius * 0.8);
-        
-        // Angle de base du bras + courbure spirale
-        $baseAngle = ($armIndex * 2 * M_PI) / $numberOfArms;
-        $spiralTightness = 2; // Serrage de la spirale
-        $spiralAngle = $baseAngle + ($distance / $galaxyRadius) * $spiralTightness;
-        
-        // Variation aléatoire pour épaisseur du bras
-        $armWidth = $galaxyRadius * 0.1;
-        $offsetAngle = $this->randomFloat(-$armWidth/$distance, $armWidth/$distance);
-        $finalAngle = $spiralAngle + $offsetAngle;
-        
-        // Hauteur (disque mince)
         $height = $this->randomFloat(-100, 100);
         
         return [
-            'x' => round($distance * cos($finalAngle)),
-            'y' => round($height),
-            'z' => round($distance * sin($finalAngle))
-        ];
-    }
-
-    /**
-     * 💫 DISQUE GALACTIQUE (répartition uniforme)
-     */
-    private function generateDiskCoordinates(float $galaxyRadius): array
-    {
-        $distance = sqrt($this->randomFloat(0, 1)) * $galaxyRadius * 0.9;
-        $angle = $this->randomFloat(0, 2 * M_PI);
-        $height = $this->randomFloat(-150, 150); // Plus épais que les bras
-        
-        return [
             'x' => round($distance * cos($angle)),
             'y' => round($height),
             'z' => round($distance * sin($angle))
-        ];
-    }
-
-    /**
-     * ⭐ HALO GALACTIQUE (étoiles anciennes)
-     */
-    private function generateHaloCoordinates(float $galaxyRadius): array
-    {
-        $distance = $this->randomFloat($galaxyRadius * 0.8, $galaxyRadius * 2);
-        $angle = $this->randomFloat(0, 2 * M_PI);
-        $elevation = $this->randomFloat(-M_PI/2, M_PI/2);
-        
-        return [
-            'x' => round($distance * cos($elevation) * cos($angle)),
-            'y' => round($distance * sin($elevation)),
-            'z' => round($distance * cos($elevation) * sin($angle))
         ];
     }
     

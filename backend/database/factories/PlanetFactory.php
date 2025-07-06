@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class PlanetFactory extends Factory
 {
     protected static $planetTypes = [
-        'Tellurique', 'Gazeuse', 'Glacée', 'Océanique', 'Désertique', 'Volcanique'
+        'terrestrial', 'gas', 'ice', 'super_earth', 'sub_neptune', 'dwarf', 'lava', 'carbon', 'ocean'
     ];
 
     protected static $planetNames = [

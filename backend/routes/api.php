@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserSolarSystemOwnershipController;
 use App\Http\Controllers\Api\UserSystemOwnershipController;
 
+use App\Http\Middleware\IsAdmin;
+
 // Routes publiques (pas d'authentification requise)
 Route::prefix('v1')->group(function () {
     // Authentification
@@ -105,6 +107,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function 
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [UserSystemOwnershipController::class, 'unclaim']);
 
     // User
-    Route::post('/user/{userId}', [UserController::class, 'add']);
+    Route::post('/user/{userId}', [UserController::class, 'add'])->middleware(IsAdmin::class);
     Route::delete('/user/{userId}', [UserController::class, 'delete']);
 });

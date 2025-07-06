@@ -11,9 +11,7 @@ use App\Models\Moon;
 
 class CheckOwnershipMiddleware
 {
-    /**
-     * Handle an incoming request.
-     */
+    // Handle an incoming request.
     public function handle(Request $request, Closure $next, $resource): Response
     {
         $user = $request->user();
@@ -21,7 +19,7 @@ class CheckOwnershipMiddleware
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Authentification requise'
+                'message' => 'Authentication required'
             ], 401);
         }
         
@@ -30,7 +28,7 @@ class CheckOwnershipMiddleware
         if (!$resourceId) {
             return response()->json([
                 'success' => false,
-                'message' => 'ID de ressource manquant'
+                'message' => 'Resource ID missing'
             ], 400);
         }
         
@@ -39,16 +37,14 @@ class CheckOwnershipMiddleware
         if (!$isOwner) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vous n\'êtes pas autorisé à modifier cette ressource'
+                'message' => 'You are not authorized to modify this resource'
             ], 403);
         }
         
         return $next($request);
     }
     
-    /**
-     * Check if user owns the resource.
-     */
+    // Check if user owns the resource.
     private function checkOwnership($userId, $resource, $resourceId): bool
     {
         switch ($resource) {
