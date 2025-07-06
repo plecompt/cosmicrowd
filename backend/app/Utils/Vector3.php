@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+// Need a Vector3 for position in 3d space
 class Vector3
 {
     public float $x;

@@ -54,7 +54,7 @@ class UserController
                 'user_login' => 'required|string|max:50|unique:user,user_login',
                 'user_email' => 'required|email|max:100|unique:user,user_email',
                 'user_password' => ['required', new StrongPassword],
-                'user_role' => 'required|string|in:member,admin', // 🌟 Seule différence !
+                'user_role' => 'required|string|in:member,admin',
                 'user_active' => 'boolean'
             ]);
 

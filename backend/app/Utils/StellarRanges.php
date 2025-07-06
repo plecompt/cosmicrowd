@@ -4,6 +4,7 @@ namespace App\Utils;
 
 class StellarRanges
 {
+    // For each star type, give ranges
     public static function getStarRanges(string $type): array
     {
         return match($type) {
@@ -121,6 +122,7 @@ class StellarRanges
         };
     }
     
+    // Generate a random star
     public static function generateRandomStar(string $type): array
     {
         $ranges = self::getStarRanges($type);
@@ -147,6 +149,7 @@ class StellarRanges
         ];
     }
 
+    //Diamater
     private static function calculateDiameter(float $mass, string $type): float
     {
         $baseDiameter = match($type) {
@@ -168,7 +171,7 @@ class StellarRanges
             default => 1.0
         };
         
-        //magic numbers everywhere
+        //magic numbers everywhere *-*
         $massEffect = match($type) {
             'white_dwarf' => 1.0,
             'neutron_star', 'pulsar' => 1.0,
@@ -180,6 +183,7 @@ class StellarRanges
         return $baseDiameter * $massEffect;
     }
     
+    //Gravity
     private static function calculateGravity(float $mass, float $diameter, string $type): float
     {
         $radius = $diameter / 2;
@@ -223,6 +227,7 @@ class StellarRanges
         return max($min, min($max, $current));
     }
 
+    // Get a random float between min and max
     private static function randomFloat(float $min, float $max): float
     {
         return $min + mt_rand() / mt_getrandmax() * ($max - $min);

@@ -30,7 +30,7 @@ return new class extends Migration
             $table->foreignId('galaxy_id')->references('galaxy_id')->on('galaxy');
         });
 
-        // Ajout des contraintes CHECK pour MariaDB
+        // Adding check constrains
         DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_gravity CHECK (solar_system_gravity >= 0)');
         DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_surface_temp CHECK (solar_system_surface_temp >= 0)');
         DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_diameter CHECK (solar_system_diameter >= 0)');

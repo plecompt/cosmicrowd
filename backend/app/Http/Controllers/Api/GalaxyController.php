@@ -44,7 +44,7 @@ class GalaxyController
         $solarSystems = $galaxy->solarSystems()
             ->withCount('likes')
             ->orderBy('likes_count', 'desc')
-            ->take(10) // A voir plus tard combien, peut etre une variable d'environnement ?
+            ->take(10) // See later => may be an .env variable
             ->get();
             
         return response()->json($solarSystems);
@@ -57,7 +57,7 @@ class GalaxyController
         
         $solarSystems = $galaxy->solarSystems()
             ->orderBy('created_at', 'desc')
-            ->take(10) // A voir plus tard combien, peut etre une variable d'environnement ?
+            ->take(10) // See later => may be an .env variable
             ->get();
             
         return response()->json($solarSystems);

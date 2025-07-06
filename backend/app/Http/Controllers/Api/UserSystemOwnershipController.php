@@ -13,11 +13,11 @@ class UserSystemOwnershipController
     public function isClaimable($galaxyId, $solarSystemId)
     {
         try {
-            // Vérifie que le système solaire existe dans la bonne galaxie
+            // Check if solar system exists in the correct galaxy
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)
                 ->findOrFail($solarSystemId);
             
-            // Vérifie si le système est déjà claimé
+            // Check if system is already claimed
             $existingClaim = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)->first();
             if ($existingClaim) {
                 return response()->json([
@@ -26,7 +26,7 @@ class UserSystemOwnershipController
                 ]);
             }
             
-            // Compte le nombre de systèmes claimés par l'utilisateur A REVOIR POUR RECUPERER LUSER
+            // Count user's claimed systems
             $userClaimsCount = UserSolarSystemOwnership::where('user_id', Auth::id())->count();
             if ($userClaimsCount >= 3) {
                 return response()->json([
@@ -40,33 +40,30 @@ class UserSystemOwnershipController
                 'reason' => 'Solar System is available'
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erreur lors de la vérification du claim'], 500);
+            return response()->json(['error' => 'Error while checking claim status'], 500);
         }
     }
 
-    /**
-     * Tente de claimer un système solaire
-     */
     public function claim($galaxyId, $solarSystemId)
     {
         try {
-            // Vérifie que le système solaire existe dans la bonne galaxie
+            // Check if solar system exists in the correct galaxy
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)
                 ->findOrFail($solarSystemId);
             
-            // Vérifie si le système est déjà claimé
+            // Check if system is already claimed
             $existingClaim = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)->first();
             if ($existingClaim) {
                 return response()->json(['error' => 'This solar system is already claimed'], 400);
             }
             
-            // Vérifie le nombre de systèmes claimés par l'utilisateur
+            // Check user's claimed systems count
             $userClaimsCount = UserSolarSystemOwnership::where('user_id', Auth::id())->count();
             if ($userClaimsCount >= 3) {
                 return response()->json(['error' => 'You can\'t have more than 3 claimed solar systems at the same time'], 400);
             }
             
-            // Crée le claim
+            // Create claim
             UserSolarSystemOwnership::create([
                 'solar_system_id' => $solarSystemId,
                 'user_id' => Auth::id(),
@@ -80,17 +77,14 @@ class UserSystemOwnershipController
         }
     }
 
-    /**
-     * Tente de un-claimer un système solaire
-     */
     public function unclaim($galaxyId, $solarSystemId)
     {
         try {
-            // Vérifie que le système solaire existe dans la bonne galaxie
+            // Check if solar system exists in the correct galaxy
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)
                 ->findOrFail($solarSystemId);
             
-            // Vérifie si le système est claimé par l'utilisateur
+            // Check if system is claimed by user
             $existingClaim = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -99,7 +93,7 @@ class UserSystemOwnershipController
                 return response()->json(['error' => 'You don\'t have own this solar system'], 400);
             }
             
-            // Supprime le claim
+            // Delete claim
             $existingClaim->delete();
             
             return response()->json(['message' => 'Solar system un-claimed successfully']);
@@ -107,4 +101,4 @@ class UserSystemOwnershipController
             return response()->json(['error' => 'Error while un-claiming the solar system'], 500);
         }
     }
-} 
+}

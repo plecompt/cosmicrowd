@@ -8,9 +8,10 @@ use App\Models\Moon;
 use App\Models\User;
 use Illuminate\Http\Request;
 
+// May want to refacto this. Don't like all this if...
 class SearchController
 {
-    // Recherche globale
+    // Search in everything
     public function globalSearch(Request $request)
     {
         $query = $request->get('q', '');
@@ -19,33 +20,32 @@ class SearchController
         if (empty($query)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Veuillez entrer un terme de recherche'
+                'message' => 'Empty query'
             ], 400);
         }
 
-        // Rechercher dans les étoiles
+        // Looking in SolarSystems
         $solarSystems = SolarSystem::where('solar_system_name', 'LIKE', '%' . $query . '%')
                     ->limit($limit)
                     ->get();
 
-        // Rechercher dans les planètes
+        // Looking in Planets
         $planets = Planet::where('planet_name', 'LIKE', '%' . $query . '%')
                         ->limit($limit)
                         ->get();
 
-        // Rechercher dans les lunes
+        // Looking in Moons
         $moons = Moon::where('moon_name', 'LIKE', '%' . $query . '%')
                     ->limit($limit)
                     ->get();
 
-        // Rechercher dans les lunes
+        // Looking in users
         $users = User::where('user_login', 'LIKE', '%' . $query . '%')
                     ->limit($limit)
                     ->get();
 
         return response()->json([
             'success' => true,
-            'query' => $query,
             'results' => [
                 'solar_systems' => $solarSystems,
                 'planets' => $planets,
@@ -56,73 +56,75 @@ class SearchController
         ]);
     }
 
-    // Recherche spécifique aux étoiles
-    public function searchStars(Request $request)
+    // Search for Solar Systems
+    public function searchSolarSystems(Request $request)
     {
         $query = $request->get('q', '');
         $typeFilter = $request->get('type');
         $gravityMin = $request->get('gravity_min');
         $gravityMax = $request->get('gravity_max');
-        $tempMin = $request->get('temp_min');
-        $tempMax = $request->get('temp_max');
+        $luminosityMin = $request->get('luminosity_min');
+        $luminosityMax = $request->get('luminosity_max');
         $limit = $request->get('limit', 15);
 
-        $starsQuery = Star::with(['user', 'planets', 'likes']);
+        $solarSystemsQuery = SolarSystem::with(['user', 'planets', 'likes']);
 
-        // Recherche par nom
+        // Search by name
         if (!empty($query)) {
-            $starsQuery->where('star_name', 'LIKE', '%' . $query . '%');
+            $solarSystemsQuery->where('solar_system_name', 'LIKE', '%' . $query . '%');
         }
 
-        // Filtres
+        // Filters
         if ($typeFilter) {
-            $starsQuery->where('star_type', $typeFilter);
+            $solarSystemsQuery->where('solar_system_type', $typeFilter);
         }
 
         if ($gravityMin) {
-            $starsQuery->where('star_gravity', '>=', $gravityMin);
+            $solarSystemsQuery->where('solar_system_gravity', '>=', $gravityMin);
         }
 
         if ($gravityMax) {
-            $starsQuery->where('star_gravity', '<=', $gravityMax);
+            $solarSystemsQuery->where('solar_system_gravity', '<=', $gravityMax);
         }
 
-        if ($tempMin) {
-            $starsQuery->where('star_surface_temp', '>=', $tempMin);
+        if ($luminosityMin) {
+            $solarSystemsQuery->where('solar_system_luminosity', '>=', $luminosityMin);
         }
 
-        if ($tempMax) {
-            $starsQuery->where('star_surface_temp', '<=', $tempMax);
+        if ($luminosityMax) {
+            $solarSystemsQuery->where('solar_system_luminosity', '<=', $luminosityMax);
         }
 
-        $stars = $starsQuery->orderBy('star_id', 'desc')
-                          ->paginate($limit);
+        $solarSystems = $solarSystemsQuery->orderBy('solar_system_id', 'desc')
+                                        ->paginate($limit);
 
         return response()->json([
             'success' => true,
-            'stars' => $stars
+            'solar_systems' => $solarSystems
         ]);
     }
 
-    // Recherche spécifique aux planètes
+    // Search for Planets  
     public function searchPlanets(Request $request)
     {
         $query = $request->get('q', '');
         $typeFilter = $request->get('type');
         $gravityMin = $request->get('gravity_min');
         $gravityMax = $request->get('gravity_max');
-        $distanceMin = $request->get('distance_min');
-        $distanceMax = $request->get('distance_max');
+        $diameterMin = $request->get('diameter_min');
+        $diameterMax = $request->get('diameter_max');
+        $massMin = $request->get('mass_min');
+        $massMax = $request->get('mass_max');
         $limit = $request->get('limit', 15);
 
-        $planetsQuery = Planet::with(['star.user', 'moons', 'likes']);
+        $planetsQuery = Planet::with(['user', 'solarSystem', 'moons', 'likes']);
 
-        // Recherche par nom
+        // Search by name
         if (!empty($query)) {
             $planetsQuery->where('planet_name', 'LIKE', '%' . $query . '%');
         }
 
-        // Filtres
+        // Filters
         if ($typeFilter) {
             $planetsQuery->where('planet_type', $typeFilter);
         }
@@ -135,16 +137,24 @@ class SearchController
             $planetsQuery->where('planet_gravity', '<=', $gravityMax);
         }
 
-        if ($distanceMin) {
-            $planetsQuery->where('planet_average_distance', '>=', $distanceMin);
+        if ($diameterMin) {
+            $planetsQuery->where('planet_diameter', '>=', $diameterMin);
         }
 
-        if ($distanceMax) {
-            $planetsQuery->where('planet_average_distance', '<=', $distanceMax);
+        if ($diameterMax) {
+            $planetsQuery->where('planet_diameter', '<=', $diameterMax);
+        }
+
+        if ($massMin) {
+            $planetsQuery->where('planet_mass', '>=', $massMin);
+        }
+
+        if ($massMax) {
+            $planetsQuery->where('planet_mass', '<=', $massMax);
         }
 
         $planets = $planetsQuery->orderBy('planet_id', 'desc')
-                              ->paginate($limit);
+                            ->paginate($limit);
 
         return response()->json([
             'success' => true,
@@ -152,71 +162,86 @@ class SearchController
         ]);
     }
 
-    // Recherche par utilisateur
-    public function searchByUser($userId)
+    // Search for Moons
+    public function searchMoons(Request $request)
     {
-        $user = User::find($userId);
+        $query = $request->get('q', '');
+        $typeFilter = $request->get('type');
+        $gravityMin = $request->get('gravity_min');
+        $gravityMax = $request->get('gravity_max');
+        $diameterMin = $request->get('diameter_min');
+        $diameterMax = $request->get('diameter_max');
+        $massMin = $request->get('mass_min');
+        $massMax = $request->get('mass_max');
+        $limit = $request->get('limit', 15);
 
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Utilisateur non trouvé'
-            ], 404);
+        $moonsQuery = Moon::with(['user', 'planet', 'likes']);
+
+        // Search by name
+        if (!empty($query)) {
+            $moonsQuery->where('moon_name', 'LIKE', '%' . $query . '%');
         }
 
-        $stars = Star::with(['planets.moons', 'likes'])
-                    ->where('user_id', $userId)
-                    ->orderBy('star_id', 'desc')
-                    ->get();
+        // Filters
+        if ($typeFilter) {
+            $moonsQuery->where('moon_type', $typeFilter);
+        }
+
+        if ($gravityMin) {
+            $moonsQuery->where('moon_gravity', '>=', $gravityMin);
+        }
+
+        if ($gravityMax) {
+            $moonsQuery->where('moon_gravity', '<=', $gravityMax);
+        }
+
+        if ($diameterMin) {
+            $moonsQuery->where('moon_diameter', '>=', $diameterMin);
+        }
+
+        if ($diameterMax) {
+            $moonsQuery->where('moon_diameter', '<=', $diameterMax);
+        }
+
+        if ($massMin) {
+            $moonsQuery->where('moon_mass', '>=', $massMin);
+        }
+
+        if ($massMax) {
+            $moonsQuery->where('moon_mass', '<=', $massMax);
+        }
+
+        $moons = $moonsQuery->orderBy('moon_id', 'desc')
+                        ->paginate($limit);
 
         return response()->json([
             'success' => true,
-            'user' => $user,
-            'stars' => $stars,
-            'total_stars' => $stars->count(),
-            'total_planets' => $stars->sum(function($star) { return $star->planets->count(); }),
-            'total_moons' => $stars->sum(function($star) { 
-                return $star->planets->sum(function($planet) { 
-                    return $planet->moons->count(); 
-                }); 
-            })
+            'moons' => $moons
         ]);
     }
 
-    // Suggestions de recherche
-    public function searchSuggestions(Request $request)
+    // Search for Users
+    public function searchUsers(Request $request)
     {
         $query = $request->get('q', '');
-        $limit = $request->get('limit', 5);
+        $limit = $request->get('limit', 15);
 
-        if (strlen($query) < 2) {
-            return response()->json([
-                'success' => true,
-                'suggestions' => []
-            ]);
+        $usersQuery = User::with(['solarSystems', 'planets', 'moons']);
+
+        // Search by name or email
+        if (!empty($query)) {
+            $usersQuery->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', '%' . $query . '%')
+                ->orWhere('email', 'LIKE', '%' . $query . '%');
+            });
         }
 
-        $starSuggestions = Star::where('star_name', 'LIKE', $query . '%')
-                              ->limit($limit)
-                              ->pluck('star_name');
-
-        $planetSuggestions = Planet::where('planet_name', 'LIKE', $query . '%')
-                                  ->limit($limit)
-                                  ->pluck('planet_name');
-
-        $userSuggestions = User::where('user_pseudo', 'LIKE', $query . '%')
-                              ->limit($limit)
-                              ->pluck('user_pseudo');
-
-        $suggestions = collect()
-            ->merge($starSuggestions->map(function($name) { return ['type' => 'star', 'name' => $name]; }))
-            ->merge($planetSuggestions->map(function($name) { return ['type' => 'planet', 'name' => $name]; }))
-            ->merge($userSuggestions->map(function($name) { return ['type' => 'user', 'name' => $name]; }))
-            ->take($limit * 3);
+        $users = $usersQuery->orderBy('id', 'desc')
+                        ->paginate($limit);
 
         return response()->json([
             'success' => true,
-            'suggestions' => $suggestions
+            'users' => $users
         ]);
     }
 }

@@ -15,11 +15,11 @@ class StrongPassword implements Rule
      */
     public function passes($attribute, $value)
     {
-        return strlen($value) >= 12 &&
-               preg_match('/[A-Z]/', $value) && // Au moins une majuscule
-               preg_match('/[a-z]/', $value) && // Au moins une minuscule
-               preg_match('/[0-9]/', $value) && // Au moins un chiffre
-               preg_match('/[^A-Za-z0-9]/', $value); // Au moins un caractère spécial
+        return strlen($value) >= 12 && // Min 12 length
+               preg_match('/[A-Z]/', $value) && // At least one UpperCase char
+               preg_match('/[a-z]/', $value) && // At least one lowerCase char
+               preg_match('/[0-9]/', $value) && // At least one number
+               preg_match('/[^A-Za-z0-9]/', $value); // At least one special char
     }
 
     /**

@@ -35,7 +35,7 @@ class RecoveryToken extends Model
         return $this->belongsTo(User::class, 'recovery_token_user_id');
     }
 
-    // Méthodes utiles
+    // Create recoveryToken for given userId
     public static function createForUser($userId, $expiresInMinutes = 60)
     {
         return self::create([

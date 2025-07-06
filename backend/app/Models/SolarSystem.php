@@ -29,16 +29,10 @@ class SolarSystem extends Model
     ];
 
     protected $casts = [
-        'solar_system_gravity' => 'float',
-        'solar_system_surface_temp' => 'float',
-        'solar_system_diameter' => 'integer',
-        'solar_system_mass' => 'integer',
-        'solar_system_luminosity' => 'integer',
-        'solar_system_initial_x' => 'integer',
-        'solar_system_initial_y' => 'integer',
-        'solar_system_initial_z' => 'integer'
+        'solar_system_mass' => 'integer'
     ];
 
+    // Relations
     public function galaxy()
     {
         return $this->belongsTo(Galaxy::class, 'galaxy_id', 'galaxy_id');
@@ -49,10 +43,10 @@ class SolarSystem extends Model
         return $this->hasOneThrough(
             User::class,
             UserSolarSystemOwnership::class,
-            'solar_system_id', // Foreign key sur ownership table
-            'user_id', // Foreign key sur users table
-            'solar_system_id', // Local key sur solar_systems table
-            'user_id' // Local key sur ownership table
+            'solar_system_id',
+            'user_id',
+            'solar_system_id',
+            'user_id'
         );
     }
 
@@ -65,94 +59,4 @@ class SolarSystem extends Model
     {
         return $this->hasMany(LikeSolarSystem::class, 'solar_system_id', 'solar_system_id');
     }
-
-    // ========== MÉTHODES UTILES ==========
-
-    public function getLikesCount()
-    {
-        return $this->likes()->count();
-    }
-
-    public function isLikedBy($userId)
-    {
-        return $this->likes()->where('user_id', $userId)->exists();
-    }
-
-    public function getSystemLikesStats()
-    {
-        return [
-            'solar_system_likes' => $this->getLikesCount(),
-            'planet_likes' => LikePlanet::whereHas('planet', function ($q) {
-                $q->where('solar_system_id', $this->solar_system_id);
-            })->count(),
-            'moon_likes' => LikeMoon::whereHas('moon.planet', function ($q) {
-                $q->where('solar_system_id', $this->solar_system_id);
-            })->count(),
-            'total_system_likes' => $this->getTotalSystemLikes(),
-            'recent_likes' => $this->getRecentLikes(5)
-        ];
-    }
-
-    public function getTotalSystemLikes()
-    {
-        $solarSystemLikes = $this->getLikesCount();
-        
-        $planetLikes = LikePlanet::whereHas('planet', function ($q) {
-            $q->where('solar_system_id', $this->solar_system_id);
-        })->count();
-        
-        $moonLikes = LikeMoon::whereHas('moon.planet', function ($q) {
-            $q->where('solar_system_id', $this->solar_system_id);
-        })->count();
-
-        return $solarSystemLikes + $planetLikes + $moonLikes;
-    }
-
-    public function getRecentLikes($limit = 5)
-    {
-        return $this->likes()
-                   ->with('user')
-                   ->orderBy('like_solar_system_date', 'desc')
-                   ->limit($limit)
-                   ->get()
-                   ->map(function ($like) {
-                       return [
-                           'user' => $like->user,
-                           'date' => $like->like_solar_system_date
-                       ];
-                   });
-    }
-
-    public function getMostLikedPlanets($limit = 3)
-    {
-        return Planet::where('solar_system_id', $this->solar_system_id)
-                    ->withCount('likes')
-                    ->orderBy('likes_count', 'desc')
-                    ->limit($limit)
-                    ->get();
-    }
-
-    // Obtenir toutes les lunes du système
-    public function moons()
-    {
-        return Moon::whereHas('planet', function($query) {
-            $query->where('solar_system_id', $this->solar_system_id);
-        });
-    }
-
-    // Scope pour les systèmes les plus populaires
-    public static function scopePopular($query, $limit = 10)
-    {
-        return $query->withCount('likes')
-                    ->orderBy('likes_count', 'desc')
-                    ->limit($limit);
-    }
-
-    public static function scopeWithLikesStats($query)
-    {
-        return $query->withCount(['likes', 'planets' => function ($q) {
-            $q->withCount('likes');
-        }]);
-    }
-
 }

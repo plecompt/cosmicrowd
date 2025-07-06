@@ -38,7 +38,7 @@ return new class extends Migration
             $table->foreignId('user_id')->references('user_id')->on('user');
         });
 
-        // Ajout des contraintes CHECK pour MariaDB
+        // Adding check constrains
         DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_gravity CHECK (planet_gravity >= 0)');
         DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_surface_temp CHECK (planet_surface_temp >= 0)');
         DB::statement('ALTER TABLE planet ADD CONSTRAINT check_planet_orbital_longitude CHECK (planet_orbital_longitude >= 0 AND planet_orbital_longitude <= 360)');

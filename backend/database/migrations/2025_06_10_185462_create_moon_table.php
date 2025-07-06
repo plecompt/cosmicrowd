@@ -38,7 +38,7 @@ return new class extends Migration
             $table->foreignId('user_id')->references('user_id')->on('user');
         });
 
-        // Ajout des contraintes CHECK pour MariaDB
+        // Adding check constrains
         DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_gravity CHECK (moon_gravity >= 0)');
         DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_surface_temp CHECK (moon_surface_temp >= 0)');
         DB::statement('ALTER TABLE moon ADD CONSTRAINT check_moon_orbital_longitude CHECK (moon_orbital_longitude >= 0 AND moon_orbital_longitude <= 360)');

@@ -11,8 +11,8 @@ class LikeMoon extends Model
 
     protected $table = 'like_moon';
     public $timestamps = false;
-    public $incrementing = false; // Pas d'ID auto-incrémenté
-    protected $primaryKey = ['moon_id', 'user_id']; // Clé composite
+    public $incrementing = false;
+    protected $primaryKey = ['moon_id', 'user_id'];
 
     protected $fillable = [
         'moon_id',

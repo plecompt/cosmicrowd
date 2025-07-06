@@ -24,6 +24,8 @@ export class NavigationBarComponent {
       this.galaxiesService.searchStars(this.searchQuery).subscribe({
         next: (response) => {
           this.searchResults = response.results || [];
+          //here show something beautifull
+          alert(JSON.stringify(this.searchResults));
         },
         error: (error) => {
           console.error('Erreur lors de la recherche:', error);
