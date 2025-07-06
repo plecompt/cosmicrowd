@@ -13,10 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class LikeController extends Controller
+class LikeController
 {
-
-
     // Add or Delete a like for given SolarSystemId
     public function toggleSolarSystem($galaxyId, $solarSystemId): JsonResponse
     {

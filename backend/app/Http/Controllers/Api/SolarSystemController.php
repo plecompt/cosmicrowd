@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class SolarSystemController extends Controller
+class SolarSystemController
 {
     // Get all solarSystem for given galaxyId with full information
     public function index($galaxyId): JsonResponse

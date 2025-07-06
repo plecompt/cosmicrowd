@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { GalaxiesService } from '../../services/galaxies-service/galaxies.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })

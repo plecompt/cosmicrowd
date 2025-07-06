@@ -7,7 +7,7 @@ use App\Models\UserSolarSystemOwnership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class UserSystemOwnershipController extends Controller
+class UserSystemOwnershipController
 {
     // Check if given SolarSystemId is claimable for user
     public function isClaimable($galaxyId, $solarSystemId)

@@ -28,7 +28,7 @@ export class AuthService {
   public clearSession(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user_id');
-    this.router.navigateByUrl(``);
+    this.router.navigateByUrl('/home');
   }
 
   //register
@@ -52,7 +52,6 @@ export class AuthService {
   //logout
   logout(): Observable<any> {
      return this.http.post<any>('http://localhost:8000/api/v1/auth/logout', {}).pipe(
-      tap(),
       finalize(() => {
         this.clearSession();
       }),

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 
-class PlanetController extends Controller
+class PlanetController
 {
     // Return the list of planets for given SolarSystemId
     public function index($galaxyId, $solarSystemId)

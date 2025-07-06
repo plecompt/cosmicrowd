@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 
-class MoonController extends Controller
+class MoonController
 {
     // Return the list of moons for given planetId
     public function index($galaxyId, $solarSystemId, $planetId)

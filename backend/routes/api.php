@@ -57,7 +57,7 @@ Route::prefix('v1')->group(function () {
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes-stats', [LikeController::class, 'getMoonLikesStats']); //stats des likes (infos plus completes) pour cette lune
     
     // Search
-    Route::get('search', [SearchController::class, 'search']); //retourne une liste de systemes solaires, planetes, lunes, galaxies, etc.
+    Route::get('search', [SearchController::class, 'globalSearch']); //retourne une liste de systemes solaires, planetes, lunes, galaxies, etc.
     
     // User Solar System Ownership (lecture seule)
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [UserSystemOwnershipController::class, 'isClaimable']);

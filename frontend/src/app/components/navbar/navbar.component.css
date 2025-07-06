@@ -15,13 +15,10 @@
     gap: 2rem;
 
     .logo {
-      color: #fff;
+      color: #adadad;
       font-size: 1.5rem;
       margin: 0;
-      background-color: gray;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      background-color: transparent;
       cursor: pointer;
     }
 

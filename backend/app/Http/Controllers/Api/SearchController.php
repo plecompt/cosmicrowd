@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Star;
+use App\Models\SolarSystem;
 use App\Models\Planet;
 use App\Models\Moon;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class SearchController extends Controller
+class SearchController
 {
     // Recherche globale
     public function globalSearch(Request $request)
@@ -24,25 +24,22 @@ class SearchController extends Controller
         }
 
         // Rechercher dans les étoiles
-        $stars = Star::with(['user', 'planets'])
-                    ->where('star_name', 'LIKE', '%' . $query . '%')
+        $solarSystems = SolarSystem::where('solar_system_name', 'LIKE', '%' . $query . '%')
                     ->limit($limit)
                     ->get();
 
         // Rechercher dans les planètes
-        $planets = Planet::with(['star.user', 'moons'])
-                        ->where('planet_name', 'LIKE', '%' . $query . '%')
+        $planets = Planet::where('planet_name', 'LIKE', '%' . $query . '%')
                         ->limit($limit)
                         ->get();
 
         // Rechercher dans les lunes
-        $moons = Moon::with(['planet.star.user'])
-                    ->where('moon_name', 'LIKE', '%' . $query . '%')
+        $moons = Moon::where('moon_name', 'LIKE', '%' . $query . '%')
                     ->limit($limit)
                     ->get();
 
-        // Rechercher dans les utilisateurs
-        $users = User::where('user_pseudo', 'LIKE', '%' . $query . '%')
+        // Rechercher dans les lunes
+        $users = User::where('user_login', 'LIKE', '%' . $query . '%')
                     ->limit($limit)
                     ->get();
 
@@ -50,12 +47,12 @@ class SearchController extends Controller
             'success' => true,
             'query' => $query,
             'results' => [
-                'stars' => $stars,
+                'solar_systems' => $solarSystems,
                 'planets' => $planets,
                 'moons' => $moons,
                 'users' => $users
             ],
-            'total_results' => $stars->count() + $planets->count() + $moons->count() + $users->count()
+            'total_results' => $solarSystems->count() + $planets->count() + $moons->count() + $users->count()
         ]);
     }
 
