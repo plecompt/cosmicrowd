@@ -35,12 +35,18 @@ export class RegisterComponent implements OnInit{
         Validators.required,
         CustomValidatorsService.username(),
         CustomValidatorsService.noSpaces(),
-        // this.customValidators.checkLoginAvailability()
+      ], 
+      //Async Validators
+      [
+        this.customValidators.checkLoginAvailability()
       ]],
       email: ['', [
         Validators.required,
         CustomValidatorsService.strictEmail(),
-        // this.customValidators.checkEmailAvailability()
+      ],
+      //Async Validators
+      [
+        this.customValidators.checkEmailAvailability()
       ]],
       password: ['', [
         Validators.required,

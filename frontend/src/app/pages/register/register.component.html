@@ -16,15 +16,16 @@
     }
 
     <input type="password" placeholder="Password" formControlName="password">
-    <!-- //Je rentre pas dans le if -->
     @if (formValidator.hasError(registerForm, 'password', submitted)) {
       <div class="error">{{ formValidator.getErrorMessage(registerForm, 'password') }}</div>
     }
     
     <input type="password" placeholder="Password Confirmation" formControlName="passwordBis">
-    <!-- //Je rentre pas dans le if -->
     @if (formValidator.hasError(registerForm, 'passwordBis', submitted)) {
       <div class="error">{{ formValidator.getErrorMessage(registerForm, 'passwordBis') }}</div>
+    }
+    @if (registerForm.errors?.['passwordMatch'] && submitted) {
+      <div class="error">Passwords do not match</div>
     }
 
     <button type="submit">Register</button>

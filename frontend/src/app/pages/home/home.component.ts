@@ -60,7 +60,6 @@ export class HomeComponent implements OnInit {
 
   onSolarSystemClick(solarSystem: SolarSystemAnimation): void {
     this.selectedSolarSystem = solarSystem;
-    console.log('Solar System clicked:', solarSystem);
   }
 
   loadMostLikedSolarSytems(): void {

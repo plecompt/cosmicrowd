@@ -30,7 +30,7 @@ export class DeleteAccountComponent {
     this.deleteAccountForm = this.fb.group({
       confirmationText: ['', [
         Validators.required,
-        CustomValidatorsService.exactMatch('DELETE')
+        CustomValidatorsService.passwordsMatch('DELETE')
       ]],
       currentPassword: ['', [
         Validators.required,

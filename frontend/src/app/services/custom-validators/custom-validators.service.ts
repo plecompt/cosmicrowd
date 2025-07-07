@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, FormGroup, AsyncValidatorFn } from '@angular/forms';
 import { catchError, debounceTime, map, Observable, of } from 'rxjs';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -41,18 +42,18 @@ export class CustomValidatorsService {
   }
 
   // Match passwords validator
-  static passwordsMatch(passwordField: string = 'password', confirmPasswordField: string = 'passwordBis'): ValidatorFn {
-    return (group: AbstractControl): ValidationErrors | null => {
-      if (!(group instanceof FormGroup)) return null;
+static passwordsMatch(passwordField: string = 'password', confirmPasswordField: string = 'passwordBis'): ValidatorFn {
+  return (group: AbstractControl): ValidationErrors | null => {
+    if (!(group instanceof FormGroup)) return null;
 
-      const password = group.get(passwordField);
-      const confirmPassword = group.get(confirmPasswordField);
+    const password = group.get(passwordField);
+    const confirmPassword = group.get(confirmPasswordField);
 
-      if (!password || !confirmPassword) return null;
+    if (!password || !confirmPassword) return null;
 
-      return password.value === confirmPassword.value ? null : { passwordsMismatch: true };
-    };
-  }
+    return password.value === confirmPassword.value ? null : { passwordMatch: { expected: password.value, actual: confirmPassword.value } };
+  };
+}
 
   // Username validator
   static username(): ValidatorFn {
@@ -126,47 +127,42 @@ export class CustomValidatorsService {
     };
   }
 
-  // Exact match validator
-  static exactMatch(expectedValue: string): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value;
-      if (!value) return null;
+  // Check if login is available
+  checkLoginAvailability(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      // Return null if no value to validate
+      if (!control.value) return of(null);
 
-      const isExactMatch = value === expectedValue;
-      return !isExactMatch ? { exactMatch: { expected: expectedValue, actual: value } } : null;
+        console.log('hereLOgin');
+      // Call API to check login availability
+      return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/auth/check-login', { login: control.value })
+        .pipe(
+          // Debounce to avoid too many API calls
+          debounceTime(200),
+          // Return error if login is taken, null if available
+          map(response => response.available ? null : { loginTaken: true }),
+          // Return null on API error
+          catchError(() => of(null))
+        );
     };
   }
 
+  // Check if email is available
+  checkEmailAvailability(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      // Return null if no value to validate
+      if (!control.value) return of(null);
 
-  // // Check if login is available
-  // public checkLoginAvailability(): AsyncValidatorFn {
-  //   return (control: AbstractControl): Observable<ValidationErrors | null> => {
-  //     if (!control.value) {
-  //       return of(null);
-  //     }
-
-  //     return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/auth/check-login', { login: control.value })
-  //       .pipe(
-  //         debounceTime(500),
-  //         map(response => response.available ? null : { loginTaken: true }),
-  //         catchError(() => of(null))
-  //       );
-  //   };
-  // }
-
-  // // Check if email is available
-  // public checkEmailAvailability(): AsyncValidatorFn {
-  //   return (control: AbstractControl): Observable<ValidationErrors | null> => {
-  //     if (!control.value) {
-  //       return of(null);
-  //     }
-
-  //     return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/auth/check-email', { email: control.value })
-  //       .pipe(
-  //         debounceTime(500),
-  //         map(response => response.available ? null : { emailTaken: true }),
-  //         catchError(() => of(null))
-  //       );
-  //   };
-  // }
+      // Call API to check email availability
+      return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/auth/check-email', { email: control.value })
+        .pipe(
+          // Debounce to avoid too many API calls
+          debounceTime(200),
+          // Return error if email is taken, null if available
+          map(response => response.available ? null : { emailTaken: true }),
+          // Return null on API error
+          catchError(() => of(null))
+        );
+    };
+  }
 }

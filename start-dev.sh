@@ -16,41 +16,41 @@ echo -e "${PURPLE}#  Starting CosmiCrowd...${NC}"
 check_dependencies() {
     local error=0
     
-    echo -e "${CYAN}🔍 Checking dependencies...${NC}"
+    echo -e "${CYAN}Checking dependencies...${NC}"
     
     if [ ! -d "frontend" ]; then
-        echo -e "${RED}❌ Frontend directory not found!${NC}"
+        echo -e "${RED}Frontend directory not found!${NC}"
         error=1
     fi
     
     if [ ! -d "backend" ]; then
-        echo -e "${RED}❌ Backend directory not found!${NC}"
+        echo -e "${RED}Backend directory not found!${NC}"
         error=1
     fi
     
     if ! command -v ng &> /dev/null; then
         echo -e "${RED}❌ Angular CLI not installed!${NC}"
-        echo -e "${YELLOW}💡 Run: npm install -g @angular/cli${NC}"
+        echo -e "${YELLOW}Run: npm install -g @angular/cli${NC}"
         error=1
     fi
     
     if ! command -v php &> /dev/null; then
-        echo -e "${RED}❌ PHP not installed!${NC}"
+        echo -e "${RED}PHP not installed!${NC}"
         error=1
     fi
     
     if ! command -v maildev &> /dev/null; then
-        echo -e "${YELLOW}⚠️  MailDev not installed, skipping...${NC}"
-        echo -e "${YELLOW}💡 Run: npm install -g maildev${NC}"
+        echo -e "${YELLOW}MailDev not installed, skipping...${NC}"
+        echo -e "${YELLOW}Run: npm install -g maildev${NC}"
         SKIP_MAILDEV=true
     fi
     
     if [ $error -eq 1 ]; then
-        echo -e "${RED}🚫 Please fix the errors above before continuing.${NC}"
+        echo -e "${RED}Please fix the errors above before continuing.${NC}"
         exit 1
     fi
     
-    echo -e "${GREEN}✅ All dependencies checked!${NC}"
+    echo -e "${GREEN}All dependencies checked!${NC}"
 }
 
 # Kill them all
@@ -68,7 +68,7 @@ cleanup() {
     if [ -n "$MAIL_PID" ]; then
         kill $MAIL_PID 2>/dev/null
     fi
-    echo -e "${RED}💀 All processes terminated${NC}"
+    echo -e "${RED}All processes terminated${NC}"
     exit 0
 }
 
@@ -87,19 +87,19 @@ if [ "$SKIP_MAILDEV" != true ]; then
     MAIL_PID=$!
     
     if ps -p $MAIL_PID > /dev/null; then
-        echo -e "${GREEN}✅ MailDev started successfully${NC}"
+        echo -e "${GREEN}MailDev started successfully${NC}"
     else
-        echo -e "${RED}❌ Failed to start MailDev${NC}"
+        echo -e "${RED}Failed to start MailDev${NC}"
     fi
 else
-    echo -e "${YELLOW}⏭️  Skipping MailDev...${NC}"
+    echo -e "${YELLOW}⏭Skipping MailDev...${NC}"
 fi
 
 # Waiting
 sleep 2
 
 # Starting frontend
-echo -e "${BLUE}🎨 Starting Angular frontend...${NC}"
+echo -e "${BLUE}Starting Angular frontend...${NC}"
 cd frontend/
 ng serve &
 FRONT_PID=$!
@@ -108,13 +108,13 @@ cd ..
 # Check if frontend started
 sleep 3
 if ps -p $FRONT_PID > /dev/null; then
-    echo -e "${GREEN}✅ Frontend started successfully${NC}"
+    echo -e "${GREEN}Frontend started successfully${NC}"
 else
     cleanup "${RED}Error while starting Angular${NC}"
 fi
 
 # Starting backend
-echo -e "${BLUE}⚙️  Starting Laravel backend...${NC}"
+echo -e "${BLUE}Starting Laravel backend...${NC}"
 cd backend/
 php artisan serve --quiet &
 BACK_PID=$!
@@ -123,7 +123,7 @@ cd ..
 # Check if backend started
 sleep 2
 if ps -p $BACK_PID > /dev/null; then
-    echo -e "${GREEN}✅ Backend started successfully${NC}"
+    echo -e "${GREEN}Backend started successfully${NC}"
 else
     cleanup "${RED}Error while starting Laravel${NC}"
 fi
@@ -132,14 +132,14 @@ fi
 echo ""
 echo -e "${GREEN}# CosmiCrowd is alive!${NC}"
 echo -e "${WHITE}┌────────────────────────────────────┐${NC}"
-echo -e "${WHITE}│${NC} ${CYAN}🎨 Frontend: ${WHITE}http://localhost:4200${NC}  ${WHITE}│${NC}"
-echo -e "${WHITE}│${NC} ${CYAN}⚙️  Backend:  ${WHITE}http://localhost:8000${NC}  ${WHITE}│${NC}"
+echo -e "${WHITE}│${NC} ${CYAN} Frontend: ${WHITE}http://localhost:4200${NC}   ${WHITE}│${NC}"
+echo -e "${WHITE}│${NC} ${CYAN} Backend:  ${WHITE}http://localhost:8000${NC}   ${WHITE}│${NC}"
 if [ "$SKIP_MAILDEV" != true ]; then
-    echo -e "${WHITE}│${NC} ${CYAN}📧 MailDev:  ${WHITE}http://localhost:1080${NC}  ${WHITE}│${NC}"
+    echo -e "${WHITE}│${NC} ${CYAN} MailDev:  ${WHITE}http://localhost:1080${NC}   ${WHITE}│${NC}"
 fi
 echo -e "${WHITE}└────────────────────────────────────┘${NC}"
 echo ""
-echo -e "${YELLOW}💡 Press Ctrl+C to kill everything${NC}"
+echo -e "${YELLOW}Press Ctrl+C to kill everything${NC}"
 
 # Staying alive
 wait
