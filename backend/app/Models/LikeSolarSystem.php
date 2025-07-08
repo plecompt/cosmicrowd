@@ -5,59 +5,52 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LikeSolarSystem extends Model
+class SolarSystem extends Model
 {
     use HasFactory;
 
-    protected $table = 'like_solar_system';
+    protected $table = 'solar_system';
+    protected $primaryKey = 'solar_system_id';
     public $timestamps = false;
-    public $incrementing = false;
-    protected $primaryKey = ['solar_system_id', 'user_id'];
 
     protected $fillable = [
-        'solar_system_id',
+        'galaxy_id',
         'user_id',
-        'like_solar_system_date'
+        'solar_system_name',
+        'solar_system_desc',
+        'solar_system_type',
+        'solar_system_gravity',
+        'solar_system_surface_temp',
+        'solar_system_diameter',
+        'solar_system_mass',
+        'solar_system_luminosity',
+        'solar_system_initial_x',
+        'solar_system_initial_y',
+        'solar_system_initial_z'
     ];
 
     protected $casts = [
-        'like_solar_system_date' => 'datetime',
+        'solar_system_mass' => 'integer'
     ];
 
-    protected function setKeysForSaveQuery($query)
+    // Relations
+    public function galaxy()
     {
-        $keys = $this->getKeyName();
-        if (!is_array($keys)) {
-            return parent::setKeysForSaveQuery($query);
-        }
-
-        foreach ($keys as $keyName) {
-            $query->where($keyName, '=', $this->getKeyForSaveQuery($keyName));
-        }
-
-        return $query;
+        return $this->belongsTo(Galaxy::class, 'galaxy_id', 'galaxy_id');
     }
 
-    protected function getKeyForSaveQuery($keyName = null)
-    {
-        if (is_null($keyName)) {
-            $keyName = $this->getKeyName();
-        }
-
-        if (isset($this->original[$keyName])) {
-            return $this->original[$keyName];
-        }
-
-        return $this->getAttribute($keyName);
-    }
-
-    public function user()
+    public function owner()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function solarSystem()
+    public function planets()
     {
-        return $this->belongsTo(SolarSystem::class, 'solar_system_id', 'solar_system_id');
+        return $this->hasMany(Planet::class, 'solar_system_id', 'solar_system_id');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(LikeSolarSystem::class, 'solar_system_id', 'solar_system_id');
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Moon;
 use App\Models\Planet;
-use App\Models\UserSystemOwnership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;

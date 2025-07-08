@@ -50,7 +50,7 @@ class User extends Authenticatable
     // Relations
     public function ownedSolarSystems()
     {
-        return $this->belongsToMany(SolarSystem::class, 'user_solar_system_ownership', 'user_id', 'solar_system_id');
+        return $this->hasMany(SolarSystem::class, 'user_id', 'user_id');
     }
 
     public function solarSystemLikes()

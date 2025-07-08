@@ -28,6 +28,7 @@ return new class extends Migration
             $table->integer('solar_system_initial_y');
             $table->integer('solar_system_initial_z');
             $table->foreignId('galaxy_id')->references('galaxy_id')->on('galaxy');
+            $table->foreignId('user_id')->nullable()->references('user_id')->on('user')->onDelete('set null');
         });
 
         // Adding check constrains

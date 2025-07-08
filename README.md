@@ -169,7 +169,6 @@ By default, there is two users:
 - Like_Planet: User appreciation system for Planet
 - Like_Moon: User appreciation system for Moon
 - Recovery_Token: Allow users to reset their password when lost
-- User_Solar_System_Ownership: Ownership of solar_systems to users
 
 ## Contribution ##
 

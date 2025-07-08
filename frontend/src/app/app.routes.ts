@@ -11,6 +11,7 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
 import { RegisterComponent } from './pages/register/register.component';
 import { DeleteAccountComponent } from './pages/delete-account/delete-account.component';
 import { ContactComponent } from './pages/contact/contact.component';
+import { StylizedSystemComponent } from './pages/poc/poc';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent, title: 'CosmiCrowd'},
@@ -26,5 +27,6 @@ export const routes: Routes = [
     { path: 'profile', component: ProfileComponent, title: 'CosmiCrowd - Profile' },
     { path: 'systems', component: SystemsComponent, title: 'CosmiCrowd - Systems' },
     { path: 'system-view', component: SystemViewComponent, title: 'CosmiCrowd - System' },
+    { path: 'poc', component: StylizedSystemComponent, title: 'CosmiCrowd - System' },
     { path: '**', redirectTo: '' }
 ];

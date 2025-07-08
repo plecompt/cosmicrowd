@@ -17,7 +17,7 @@ class AuthController
 {
     // Check if login is available
     public function checkLoginAvailability(Request $request) {
-        $available = !User::where('login', $request->login)->exists();
+        $available = !User::where('user_login', $request->login)->exists();
         
         return response()->json(['available' => $available]);
     }
@@ -329,12 +329,15 @@ class AuthController
         $user->planetLikes()->delete();
         $user->moonLikes()->delete();
 
+        // Release claimed solar systems
+        SolarSystem::where('user_id', $user->user_id)->update(['user_id' => null]);
+
         // Deleting tokens
         if (method_exists($user, 'tokens')) {
             $user->tokens()->delete();
         }
 
-        // Deleting user and claimed user_solar_system_ownership with onCascade
+        // Deleting user
         $user->delete();
 
         return response()->json([
