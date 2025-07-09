@@ -7,18 +7,24 @@
       <h1>Login</h1>
 
       <input type="email" placeholder="Email" required formControlName="email">
+      @if (formValidator.isInvalid(loginForm, 'email')) {
+        <div class="error-message">{{ formValidator.getErrorMessage(loginForm, 'email') }}</div>
+      }
+
       <input type="password" placeholder="Password" required formControlName="password">
+
+      @if (loginError) {
+        <div class="error-message">{{ loginError }}</div>
+      }
 
       <button type="submit">Sign In</button>
 
       <div class="forgot-register-actions flex-column">
-        <a (click)="navigateTo('register')">No account ? Join the Galaxy !</a>
-        <a (click)="navigateTo('forgot-password')">Forgot password ?</a>
+        <a (click)="this.authService.navigateTo('register')">No account ? Join the Galaxy !</a>
+        <a (click)="this.authService.navigateTo('forgot-password')">Forgot password ?</a>
       </div>
     </form>
 
   </div>
 
-} @else {
-  {{this.navigateTo('/home')}}
 }

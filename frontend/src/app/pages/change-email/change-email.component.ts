@@ -2,6 +2,9 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth/auth.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
+import { NotificationService } from '../../services/notifications/notification.service';
+import { FormValidatorService } from '../../services/form-validators/form-validator-service';
+import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 
 @Component({
   selector: 'app-change-email',
@@ -11,53 +14,48 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 })
 export class ChangeEmailComponent implements OnInit, AfterViewInit {
   changeEmailForm!: any;
+  changeEmailErrorMessage: string = "";
 
-  constructor(private fb: FormBuilder, public authService: AuthService){}
+  constructor(private fb: FormBuilder, public authService: AuthService, private notificationService: NotificationService, public formValidator: FormValidatorService, private customValidators: CustomValidatorsService){}
 
   ngAfterViewInit(): void {
   }
 
   ngOnInit(): void {
+    // If user is not logged in
+    if (!this.authService.isLoggedIn()) {
+        this.authService.navigateTo('/home');
+        return;
+    }
     this.initEmailForm();
   }
 
   //init the form with validators
   initEmailForm() {
     this.changeEmailForm = this.fb.group({
-      currentPassword: ['', Validators.required],
-      currentPasswordBis: ['', Validators.required],
-      newEmail: ['', [Validators.required, Validators.email]],
-      newEmailBis: ['', [Validators.required, Validators.email]]
-    }, { validators: [this.passwordsMatchValidator, this.emailsMatchValidator] });
+      password: ['', Validators.required],
+      passwordBis: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()]],
+      emailBis: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()]]
+    }, { validators: [CustomValidatorsService.passwordsMatch(), CustomValidatorsService.emailsMatch()] });
   }
 
-  //custom math validators
-  private passwordsMatchValidator(group: any) {
-    const pass = group.get('currentPassword')?.value;
-    const passBis = group.get('currentPasswordBis')?.value;
-    return pass === passBis ? null : { passwordsMismatch: true };
-  }
-  //same for mails
-  private emailsMatchValidator(group: any) {
-    const email = group.get('newEmail')?.value;
-    const emailBis = group.get('newEmailBis')?.value;
-    return email === emailBis ? null : { emailsMismatch: true };
-  }
 
   onEmailChangeSubmit(){
     if (this.changeEmailForm.valid) {
-      const { currentPassword, newEmail } = this.changeEmailForm.value;
+      const { email, password } = this.changeEmailForm.value;
 
-      this.authService.changeEmail(currentPassword, newEmail).subscribe({
+      this.authService.changeEmail(password, email).subscribe({
         next: () => {
-          //succesfully changed email, logout
+          this.notificationService.showSuccess('Email successfully modified !');
           this.authService.logout().subscribe();
         },
         error: () => {
-          //error, incorrect password or email
-          alert('Invalid email or password');
+          this.changeEmailErrorMessage = "Invalid password, or email is allready taken";
         }
       })
+    } else {
+      this.changeEmailForm.markAllAsTouched();
     }
   }
 }

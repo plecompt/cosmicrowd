@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth/auth.service';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
+import { NotificationService } from '../../services/notifications/notification.service';
+import { FormValidatorService } from '../../services/form-validators/form-validator-service';
+import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -10,19 +13,26 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css', '../../shared/styles/form.template.css']
 })
-export class ResetPasswordComponent {
-  resetPasswordForm!: any;
+export class ResetPasswordComponent implements OnInit {
+  resetPasswordForm!: FormGroup;
   token!: string;
   isValidToken: boolean = false;
+  errorMessage: string = "";
 
-  constructor(private fb: FormBuilder, public authService: AuthService, private route: ActivatedRoute, private router: Router){}
+  constructor(private fb: FormBuilder, public authService: AuthService, private route: ActivatedRoute, private notificationService: NotificationService, public formValidator: FormValidatorService, private customValidators: CustomValidatorsService){}
 
-  ngAfterViewInit(): void {
-  }
 
   ngOnInit(): void {
     this.initResetPasswordForm();
     this.verifyToken();
+  }
+
+    //init the form with validators
+  initResetPasswordForm() {
+    this.resetPasswordForm = this.fb.group({
+      newPassword: ['', [Validators.required, CustomValidatorsService.strongPassword(), CustomValidatorsService.noSpaces()]],
+      newPasswordBis: ['', [Validators.required, CustomValidatorsService.strongPassword(), CustomValidatorsService.noSpaces()]]
+    }, {validators: [CustomValidatorsService.passwordsMatch('newPassword', 'newPasswordBis')] });
   }
 
   verifyToken(){
@@ -34,44 +44,13 @@ export class ResetPasswordComponent {
             this.token = token;
             this.isValidToken = true;
           },
-          error: (error) => {
-            //redirection to home
-            this.navigateTo('/');
+          error:() => {
+            this.notificationService.showError('This link is not valid or expired');
           }
         }
         );
       }
     });
-  }
-
-  //init the form with validators
-  initResetPasswordForm() {
-    this.resetPasswordForm = this.fb.group({
-      newPassword: ['', [Validators.required, this.strongPasswordValidator]],
-      newPasswordBis: ['', [Validators.required, this.strongPasswordValidator]]
-    }, { validators: [this.newPasswordMatchValidator] });
-  }
-
-  //same for new password
-  private newPasswordMatchValidator(group: any) {
-    const newPass = group.get('newPassword')?.value;
-    const newPassBis = group.get('newPasswordBis')?.value;
-    return newPass === newPassBis ? null : { newPasswordMismatch: true };
-  }
-
-  // Strong password validator
-  private strongPasswordValidator(control: any) {
-    const value = control.value;
-    if (!value) return null;
-
-    const hasMinLength = value.length >= 12;
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSpecialChar = /[^A-Za-z0-9]/.test(value);
-
-    const isValid = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar;
-
-    return isValid ? null : { weakPassword: true };
   }
 
   onPasswordResetSubmit(){
@@ -80,18 +59,14 @@ export class ResetPasswordComponent {
 
       this.authService.setNewPassword(newPassword, this.token).subscribe({
         next: () => {
-          //succesfully changed password, logout
+          this.notificationService.showSuccess('Password successfully changed !');
           this.authService.logout().subscribe();
         },
         error: () => {
-          //error, incorrect old password or missmatch
-          alert('Invalid password');
+          this.errorMessage = 'Something went wrong, please try again later';
         }
       })
     }
   }
 
-  navigateTo(url: string) {
-    this.router.navigateByUrl(url)
-  }
 }

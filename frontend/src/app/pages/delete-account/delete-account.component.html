@@ -13,15 +13,19 @@
         </p>
 
         <br>
-        <input type="text" formControlName="confirmationText" placeholder='Type "DELETE" to confirm'>
-        <input type="password" formControlName="currentPassword" placeholder="Current password">
 
-        @if (deleteAccountForm.hasError('invalidConfirmation') && deleteAccountForm.touched) {
-            <small class="error">Please type "DELETE" to confirm</small>
+        <input type="text" formControlName="confirmationText" placeholder='Type "DELETE" to confirm'>
+        @if (formValidator.isInvalid(deleteAccountForm, 'confirmationText')) {
+            <p class="error-message">{{ formValidator.getErrorMessage(deleteAccountForm, 'confirmationText') }}</p>
         }
 
-        @if (deleteAccountForm.hasError('invalidPassword') && deleteAccountForm.touched) {
-            <small class="error">Invalid password</small>
+        <input type="password" formControlName="currentPassword" placeholder="Current password">
+        @if (formValidator.isInvalid(deleteAccountForm, 'currentPassword')) {
+            <p class="error-message">{{ formValidator.getErrorMessage(deleteAccountForm, 'currentPassword') }}</p>
+        }
+
+        @if (errorMessage){
+            <div class="error-message">{{ errorMessage }}</div>
         }
 
         <button type="submit" [disabled]="!deleteAccountForm.valid" class="delete-btn">DELETE MY ACCOUNT FOREVER</button>

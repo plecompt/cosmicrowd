@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Models\User;
 use App\Models\RecoveryToken;
 use App\Rules\StrongPassword;
+use App\Models\SolarSystem;
+use App\Models\LikeSolarSystem;
+use App\Models\LikePlanet;
+use App\Models\LikeMoon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -24,7 +28,7 @@ class AuthController
 
     // Check if email is available
     public function checkEmailAvailability(Request $request) {
-        $available = !User::where('email', $request->email)->exists();
+        $available = !User::where('user_email', $request->email)->exists();
         
         return response()->json(['available' => $available]);
     }

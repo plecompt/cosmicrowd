@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\SolarSystem;
+use App\Models\LikeSolarSystem;
+use App\Models\LikePlanet;
+use App\Models\LikeMoon;
 
 class User extends Authenticatable
 {
@@ -36,12 +40,13 @@ class User extends Authenticatable
         'user_date_inscription' => 'datetime'
     ];
 
-    // Override Laravel auth methods
+    // Override Laravel auth methods, replace user.password for user.user_password
     public function getAuthPassword()
     {
         return $this->user_password;
     }
 
+    // Override Laravel auth methods, replace user.email for user.user_email
     public function getEmailForPasswordReset()
     {
         return $this->user_email;

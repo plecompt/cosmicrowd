@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth/auth.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
+import { FormValidatorService } from '../../services/form-validators/form-validator-service';
+import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
+import { NotificationService } from '../../services/notifications/notification.service';
 
 @Component({
   selector: 'app-change-password',
@@ -11,13 +14,19 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 })
 export class ChangePasswordComponent {
   changePasswordForm!: any;
+  changePasswordErrorMessage: string = "";
 
-  constructor(private fb: FormBuilder, public authService: AuthService){}
+  constructor(private fb: FormBuilder, public authService: AuthService, private notificationService: NotificationService, public formValidator: FormValidatorService, customValidator: CustomValidatorsService){}
 
   ngAfterViewInit(): void {
   }
 
   ngOnInit(): void {
+    // If user is not logged in
+    if (!this.authService.isLoggedIn()) {
+        this.authService.navigateTo('/home');
+        return;
+    }
     this.initPasswordForm();
   }
 
@@ -26,37 +35,9 @@ export class ChangePasswordComponent {
     this.changePasswordForm = this.fb.group({
       currentPassword: ['', Validators.required],
       currentPasswordBis: ['', Validators.required],
-      newPassword: ['', [Validators.required, this.strongPasswordValidator]],
-      newPasswordBis: ['', [Validators.required, this.strongPasswordValidator]]
-    }, { validators: [this.passwordsMatchValidator, this.newPasswordMatchValidator] });
-  }
-
-  //custom math validators
-  private passwordsMatchValidator(group: any) {
-    const pass = group.get('currentPassword')?.value;
-    const passBis = group.get('currentPasswordBis')?.value;
-    return pass === passBis ? null : { passwordsMismatch: true };
-  }
-  //same for new password
-  private newPasswordMatchValidator(group: any) {
-    const newPass = group.get('newPassword')?.value;
-    const newPassBis = group.get('newPasswordBis')?.value;
-    return newPass === newPassBis ? null : { newPasswordMismatch: true };
-  }
-
-  // Strong password validator
-  private strongPasswordValidator(control: any) {
-    const value = control.value;
-    if (!value) return null;
-
-    const hasMinLength = value.length >= 12;
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSpecialChar = /[^A-Za-z0-9]/.test(value);
-
-    const isValid = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar;
-
-    return isValid ? null : { weakPassword: true };
+      newPassword: ['', [Validators.required, CustomValidatorsService.strongPassword()]],
+      newPasswordBis: ['', [Validators.required, CustomValidatorsService.strongPassword()]]
+    }, { validators: [CustomValidatorsService.passwordsMatch('currentPassword', 'currentPasswordBis'), CustomValidatorsService.passwordsMatch('newPassword', 'newPasswordBis', 'newPasswordMatch')] });
   }
 
   onPasswordChangeSubmit(){
@@ -65,14 +46,15 @@ export class ChangePasswordComponent {
 
       this.authService.changePassword(currentPassword, newPassword).subscribe({
         next: () => {
-          //succesfully changed password, logout
+          this.notificationService.showSuccess('Password successfully modified !');
           this.authService.logout().subscribe();
         },
         error: () => {
-          //error, incorrect old password or missmatch
-          alert('Invalid password');
+          this.changePasswordErrorMessage = "Something went wrong, please try again later";
         }
       })
+    } else {
+      this.changePasswordForm.markAllAsTouched();
     }
   }
 }

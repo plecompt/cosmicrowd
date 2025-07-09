@@ -44,24 +44,25 @@ class CheckOwnershipMiddleware
         return $next($request);
     }
     
+    // A REVOIR
     // Check if user owns the resource.
-    private function checkOwnership($userId, $resource, $resourceId): bool
-    {
-        switch ($resource) {
-            case 'star':
-                $star = Star::find($resourceId);
-                return $star && $star->user_id === $userId;
+    // private function checkOwnership($userId, $resource, $resourceId): bool
+    // {
+    //     switch ($resource) {
+    //         case 'star':
+    //             $star = Star::find($resourceId);
+    //             return $star && $star->user_id === $userId;
                 
-            case 'planet':
-                $planet = Planet::with('star')->find($resourceId);
-                return $planet && $planet->star->user_id === $userId;
+    //         case 'planet':
+    //             $planet = Planet::with('star')->find($resourceId);
+    //             return $planet && $planet->star->user_id === $userId;
                 
-            case 'moon':
-                $moon = Moon::with('planet.star')->find($resourceId);
-                return $moon && $moon->planet->star->user_id === $userId;
+    //         case 'moon':
+    //             $moon = Moon::with('planet.star')->find($resourceId);
+    //             return $moon && $moon->planet->star->user_id === $userId;
                 
-            default:
-                return false;
-        }
-    }
+    //         default:
+    //             return false;
+    //     }
+    // }
 }

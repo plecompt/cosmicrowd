@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-systems',
@@ -7,13 +8,16 @@ import { Router } from '@angular/router';
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.css'
 })
-export class SystemsComponent {
+export class SystemsComponent implements OnInit{
 
-  constructor(private router: Router){}
+  constructor(public authService: AuthService){}
 
-
-  navigateTo(url: string) {
-    this.router.navigateByUrl(url)
+  ngOnInit(): void {
+    // If user is not logged in
+    if (!this.authService.isLoggedIn()) {
+        this.authService.navigateTo('/home');
+        return;
+    }
   }
 
 }

@@ -1,8 +1,13 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth/auth.service';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
+import { FormValidatorService } from '../../services/form-validators/form-validator-service';
+import { NotificationService } from '../../services/notifications/notification.service';
+import { User } from '../../models/user/user.model';
+import { TitleCasePipe } from '@angular/common';
+import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 
 @Component({
   selector: 'app-login',
@@ -12,45 +17,61 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 })
 export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   loginForm!: FormGroup;
+  loginError: String = "";
+  user!: User;
+  private titleCasePipe = new TitleCasePipe();
 
-  constructor(private router: Router, public authService: AuthService, private fb: FormBuilder) { 
-  }
 
-  ngOnDestroy(): void {
-  }
+  constructor(
+    private router: Router, 
+    public authService: AuthService, 
+    private fb: FormBuilder, 
+    public formValidator: FormValidatorService,
+    private notificationService: NotificationService,
+    private customFormValidator: CustomValidatorsService,
+  ) { }
 
-  ngAfterViewInit(): void {
-  }
+  ngOnDestroy(): void {}
+
+  ngAfterViewInit(): void {}
 
   ngOnInit(): void {
+    // If user is allready logged in
+    if (this.authService.isLoggedIn()) {
+        this.authService.navigateTo('/home');
+        return;
+    }
     this.initLoginForm();
   }
 
-
   initLoginForm(){
     this.loginForm = this.fb.group({
-      email: [''],
-      password: ['']
+      email: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   onLoginSubmit(){
-    //Here we need to check form, wont do it here, because i'll have to redo it
-    //let's just check inputs are not empty
-    if (this.loginForm.value.email && this.loginForm.value.email.length > 0 && this.loginForm.value.password && this.loginForm.value.password.length > 0){
-
-      this.authService.login(this.loginForm.value.email , this.loginForm.value.password).subscribe({
+    if (this.loginForm.valid) {
+      this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
         next: () => {
-          this.router.navigateByUrl('/home');
+          this.authService.me().subscribe({
+            next: (response: any) => {
+              this.user = response.user;
+              const capitalizedLogin = this.titleCasePipe.transform(this.user.user_login);
+              this.notificationService.showSuccess(`Welcome back, ${capitalizedLogin} !`);
+              setTimeout(() => {
+                this.router.navigateByUrl('/home');
+              }, 1500);
+            }
+          });
         },
         error: () => {
-          alert("Invalid email/password");
+          this.loginError = 'Invalid email/password combination';
         }
-      })
+      });
+    } else {
+      this.loginForm.markAllAsTouched();
     }
-  }
-
-  navigateTo(url: string) {
-    this.router.navigateByUrl(url)
   }
 }

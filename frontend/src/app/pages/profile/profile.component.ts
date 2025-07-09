@@ -12,9 +12,14 @@ import { User } from '../../models/user/user.model';
 export class ProfileComponent implements OnInit{
   user!: User;
 
-  constructor(private router: Router, private authService: AuthService) { }
+  constructor(public authService: AuthService) { }
 
   ngOnInit(): void {
+    // If user is not logged in
+    if (!this.authService.isLoggedIn()) {
+        this.authService.navigateTo('/home');
+        return;
+    }
     this.getUser();
   }
 
@@ -25,9 +30,4 @@ export class ProfileComponent implements OnInit{
       }
     })
   }
-
-  navigateTo(url: string) {
-    this.router.navigateByUrl(url)
-  }
-
 }

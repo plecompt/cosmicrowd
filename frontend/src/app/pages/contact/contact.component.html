@@ -7,14 +7,23 @@
         Please fill this form to contact us
     </p>
 
-    <input type="email" formControlName="email" placeholder="your.email@mail.com">
+    <input type="email" formControlName="email" placeholder="your.email@mail.com" [class.invalid]="formValidator.isInvalid(contactForm, 'email')" [class.valid]="formValidator.isValid(contactForm, 'email')">
+    @if (formValidator.isInvalid(contactForm, 'email')) {
+        <p class="error-message">{{ formValidator.getErrorMessage(contactForm, 'email') }}</p>
+    }
 
-    <input type="login" formControlName="login" placeholder="Login">
+    <input type="text" formControlName="login" placeholder="Login">
 
-    <input type="subject" formControlName="subject" placeholder="Subject">
+    <input type="text" formControlName="subject" placeholder="Subject">
 
-    <textarea formControlName="message" placeholder="Your message"> </textarea>
+    <textarea formControlName="message" placeholder="Your message" [class.invalid]="formValidator.isInvalid(contactForm, 'message')" [class.valid]="formValidator.isValid(contactForm, 'message')"></textarea>
+    @if (formValidator.isInvalid(contactForm, 'message')) {
+        <p class="error-message">{{ formValidator.getErrorMessage(contactForm, 'message') }}</p>
+    }
+
+    @if (contactError) {
+        <div class="error-message">{{ contactError }}</div>
+      }
 
     <button type="submit">Submit</button>
-
 </form>

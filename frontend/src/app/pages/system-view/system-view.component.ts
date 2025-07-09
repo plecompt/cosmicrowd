@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-system-view',
@@ -6,6 +7,16 @@ import { Component } from '@angular/core';
   templateUrl: './system-view.component.html',
   styleUrl: './system-view.component.css'
 })
-export class SystemViewComponent {
+export class SystemViewComponent implements OnInit {
+
+  constructor(public authService: AuthService){}
+
+  ngOnInit(): void {
+      // If user is not logged in
+      if (!this.authService.isLoggedIn()) {
+          this.authService.navigateTo('/home');
+          return;
+      }
+    }
 
 }

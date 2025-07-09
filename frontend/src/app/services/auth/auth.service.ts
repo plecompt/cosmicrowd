@@ -12,6 +12,10 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  navigateTo(url: string) {
+    this.router.navigateByUrl(url);
+  }
+
   private setSession(authResult: any) {
     localStorage.setItem('token', authResult.access_token);
     localStorage.setItem('user_id', authResult.user.user_id.toString());
@@ -28,7 +32,7 @@ export class AuthService {
   public clearSession(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user_id');
-    this.router.navigateByUrl('/home');
+    this.navigateTo('/home');
   }
 
   //register

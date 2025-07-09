@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { AuthService } from '../../services/auth/auth.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
-import { Router } from '@angular/router';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
+import { ModalService } from '../../services/modal/modal.service';
+import { NotificationService } from '../../services/notifications/notification.service';
 
 @Component({
   selector: 'app-delete-account',
@@ -12,17 +13,25 @@ import { CustomValidatorsService } from '../../services/custom-validators/custom
   templateUrl: './delete-account.component.html',
   styleUrls: ['./delete-account.component.css', '../../shared/styles/form.template.css']
 })
-export class DeleteAccountComponent {
+export class DeleteAccountComponent implements OnInit {
   deleteAccountForm!: FormGroup;
+  errorMessage: string = "";
 
   constructor(
-    private router: Router, 
+    private modalService: ModalService,
     public authService: AuthService, 
+    private notificationService: NotificationService,
     private fb: FormBuilder, 
-    private formValidator: FormValidatorService
+    public formValidator: FormValidatorService,
+    public customValidators: CustomValidatorsService
   ) {}
 
   ngOnInit(): void {
+    // If user is not logged in
+    if (!this.authService.isLoggedIn()) {
+        this.authService.navigateTo('/home');
+        return;
+    }
     this.initDeleteAccountForm();
   }
 
@@ -30,7 +39,7 @@ export class DeleteAccountComponent {
     this.deleteAccountForm = this.fb.group({
       confirmationText: ['', [
         Validators.required,
-        CustomValidatorsService.passwordsMatch('DELETE')
+        CustomValidatorsService.exactMatch('DELETE')
       ]],
       currentPassword: ['', [
         Validators.required,
@@ -40,35 +49,38 @@ export class DeleteAccountComponent {
   }
 
   onAccountDeletionSubmit() {
-    // this.formErrors = this.formValidator.validateForm(this.deleteAccountForm);
     
     if (!this.formValidator.canSubmit(this.deleteAccountForm)) {
       return;
     }
+    this.showModal();
+  }
 
-    // Final confirmation
-    if (!confirm('Are you absolutely sure? This action cannot be undone!')) {
-      return;
-    }
 
-    this.authService.deleteAccount(
-      this.deleteAccountForm.value.currentPassword
-    ).subscribe({
-      next: () => {
-        this.authService.clearSession();
-        this.router.navigateByUrl('/');
+  private showModal(): void {
+    this.modalService.show({
+      title: 'Delete Account Forever',
+      content: 'This action cannot be undone. Your account and all associated data will be permanently deleted. Your claimed solar systems will become available for other explorers.',
+      showCancel: true,
+      onConfirm: () => {
+        this.authService.deleteAccount(
+          this.deleteAccountForm.value.currentPassword
+        ).subscribe({
+          next: () => {
+            this.authService.clearSession();
+            this.notificationService.showSuccess('Account successfully deleted !');
+            this.authService.navigateTo('/home');
+          },
+          error: () => {
+            this.errorMessage = 'Wrong password';
+            this.deleteAccountForm.markAllAsTouched();
+          }
+        });
       },
-      error: () => {
-        alert('Something went wrong');
+      onCancel: () => {
+        return;
       }
     });
   }
 
-  onCancel() {
-    this.router.navigateByUrl('/profile');
-  }
-
-  navigateTo(url: string) {
-    this.router.navigateByUrl(url);
-  }
 }

@@ -41,19 +41,44 @@ export class CustomValidatorsService {
     };
   }
 
+  // Match exact string validator
+  static exactMatch(expectedValue: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      
+      return control.value === expectedValue ? null : { 
+        stringMatch: { expected: expectedValue, actual: control.value } 
+      }
+    };
+  }
+
+  // Match emails validator
+  static emailsMatch(emailField: string = 'email', confirmEmailField: string = 'emailBis'): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      if (!(group instanceof FormGroup)) return null;
+
+      const email = group.get(emailField);
+      const confirmEmail = group.get(confirmEmailField);
+
+      if (!email || !confirmEmail) return null;
+
+      return email.value === confirmEmail.value ? null : { emailMatch: { expected: email.value, actual: confirmEmail.value } };
+    };
+  }
+
   // Match passwords validator
-static passwordsMatch(passwordField: string = 'password', confirmPasswordField: string = 'passwordBis'): ValidatorFn {
-  return (group: AbstractControl): ValidationErrors | null => {
-    if (!(group instanceof FormGroup)) return null;
+  static passwordsMatch(passwordField: string = 'password', confirmPasswordField: string = 'passwordBis', errorLabel: string = 'passwordMatch'): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      if (!(group instanceof FormGroup)) return null;
 
-    const password = group.get(passwordField);
-    const confirmPassword = group.get(confirmPasswordField);
+      const password = group.get(passwordField);
+      const confirmPassword = group.get(confirmPasswordField);
 
-    if (!password || !confirmPassword) return null;
+      if (!password || !confirmPassword) return null;
 
-    return password.value === confirmPassword.value ? null : { passwordMatch: { expected: password.value, actual: confirmPassword.value } };
-  };
-}
+      return password.value === confirmPassword.value ? null : { [errorLabel]: { expected: password.value, actual: confirmPassword.value } };
+    };
+  }
 
   // Username validator
   static username(): ValidatorFn {
@@ -133,14 +158,13 @@ static passwordsMatch(passwordField: string = 'password', confirmPasswordField: 
       // Return null if no value to validate
       if (!control.value) return of(null);
 
-        console.log('hereLOgin');
       // Call API to check login availability
       return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/auth/check-login', { login: control.value })
         .pipe(
           // Debounce to avoid too many API calls
           debounceTime(200),
           // Return error if login is taken, null if available
-          map(response => response.available ? null : { loginTaken: true }),
+          map(response => response.available ? null : { loginNotAvailable: true }),
           // Return null on API error
           catchError(() => of(null))
         );
@@ -159,7 +183,7 @@ static passwordsMatch(passwordField: string = 'password', confirmPasswordField: 
           // Debounce to avoid too many API calls
           debounceTime(200),
           // Return error if email is taken, null if available
-          map(response => response.available ? null : { emailTaken: true }),
+          map(response => response.available ? null : { emailNotAvailable: true }),
           // Return null on API error
           catchError(() => of(null))
         );

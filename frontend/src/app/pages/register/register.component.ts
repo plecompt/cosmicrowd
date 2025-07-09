@@ -6,6 +6,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 import { AuthService } from '../../services/auth/auth.service';
+import { NotificationService } from '../../services/notifications/notification.service';
 
 @Component({
   selector: 'app-register',
@@ -16,16 +17,23 @@ import { AuthService } from '../../services/auth/auth.service';
 export class RegisterComponent implements OnInit{
   registerForm!: FormGroup;
   submitted: boolean = false;
+  registrationError: string = "";
 
   constructor(
     private router: Router, 
     public authService: AuthService, 
     private fb: FormBuilder, 
     public formValidator: FormValidatorService, 
-    private customValidators: CustomValidatorsService
+    private customValidators: CustomValidatorsService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
+    // If user is allready logged in
+    if (this.authService.isLoggedIn()) {
+        this.authService.navigateTo('/home');
+        return;
+    }
     this.initRegisterForm();
   }
 
@@ -76,10 +84,11 @@ export class RegisterComponent implements OnInit{
       this.registerForm.value.email
     ).subscribe({
       next: () => {
+        this.notificationService.showSuccess('Account created successfully! Welcome to CosmiCrowd !');
         this.router.navigateByUrl('/home');
       },
       error: () => {
-        alert('Registration failed. Please try again.');
+        this.registrationError = "Registration failed. Please try again.";
       }
     });
   }

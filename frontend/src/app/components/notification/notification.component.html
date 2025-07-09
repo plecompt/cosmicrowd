@@ -1,0 +1,9 @@
+@if (notification) {
+  <div class="notification-overlay">
+    <div class="notification-content" [class]="notification.type">
+      <div class="notification-message">
+        {{ notification.message }}
+      </div>
+    </div>
+  </div>
+}

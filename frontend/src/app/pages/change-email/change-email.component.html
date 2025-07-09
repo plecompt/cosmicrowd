@@ -10,18 +10,37 @@
             new email address.
         </p>
 
-        <input type="password" formControlName="currentPassword" placeholder="Current password">
-        <input type="password" formControlName="currentPasswordBis" placeholder="Repeat current password">
-
-        @if (changeEmailForm.hasError('passwordsMismatch') && changeEmailForm.touched) {
-        <small class="error">Passwords do not match</small>
+        <input type="password" formControlName="password" placeholder="Current password">
+        @if (formValidator.isInvalid(changeEmailForm, 'password')) {
+            <div class="error-message">{{ formValidator.getErrorMessage(changeEmailForm, 'password') }}</div>
         }
 
-        <input type="email" formControlName="newEmail" placeholder="New email">
-        <input type="email" formControlName="newEmailBis" placeholder="Repeat new email">
+        <input type="password" formControlName="passwordBis" placeholder="Repeat current password">
+        @if(formValidator.isInvalid(changeEmailForm, 'passwordBis')) {
+            <div class="error-message">{{ formValidator.getErrorMessage(changeEmailForm, 'passwordBis') }}</div>
+        }
 
-        @if (changeEmailForm.hasError('emailsMismatch') && changeEmailForm.touched) {
-        <small class="error">Emails do not match</small>
+        @if (changeEmailForm.hasError('passwordMatch') && changeEmailForm.get('passwordBis')?.touched) {
+            <div class="error-message">{{ formValidator.getFormErrorMessage(changeEmailForm, 'passwordMatch') }}</div>
+        }
+
+        
+        <input type="email" formControlName="email" placeholder="New email">
+        @if (formValidator.isInvalid(changeEmailForm, 'email')) {
+            <div class="error-message">{{ formValidator.getErrorMessage(changeEmailForm, 'email') }}</div>
+        }
+
+        <input type="email" formControlName="emailBis" placeholder="Repeat new email">
+        @if (formValidator.isInvalid(changeEmailForm, 'emailBis')) {
+            <div class="error-message">{{ formValidator.getErrorMessage(changeEmailForm, 'emailBis') }}</div>
+        }
+
+        @if (changeEmailForm.hasError('emailMatch') && changeEmailForm.get('emailBis')?.touched) {
+            <div class="error-message">{{ formValidator.getFormErrorMessage(changeEmailForm, 'emailMatch') }}</div>
+        }
+
+        @if (changeEmailErrorMessage){
+            <div class="error-message">{{changeEmailErrorMessage}}</div>
         }
 
         <button type="submit">Submit</button>

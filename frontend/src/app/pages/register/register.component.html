@@ -1,34 +1,40 @@
 <app-background-stars [numberOfStars]="30"></app-background-stars>
 
-<div class="container">
+@if (!authService.isLoggedIn()){
+  <div class="container">
 
-  <form (ngSubmit)="onRegisterSubmit()" [formGroup]="registerForm" class="flex-column">
-    <h1>Register</h1>
+    <form (ngSubmit)="onRegisterSubmit()" [formGroup]="registerForm" class="flex-column">
+      <h1>Register</h1>
 
-    <input type="text" placeholder="Login" formControlName="login" [class.valid]="formValidator.isFieldValid(registerForm, 'login')" [class.invalid]="formValidator.hasError(registerForm, 'login', submitted)">
-    @if (formValidator.hasError(registerForm, 'login', submitted)) {
-      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'login') }}</div>
-    }
+      <input type="text" placeholder="Login" formControlName="login" [class.valid]="formValidator.isValid(registerForm, 'login')" [class.invalid]="formValidator.isInvalid(registerForm, 'login')">
+      @if (formValidator.isInvalid(registerForm, 'login')) {
+        <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'login') }}</div>
+      }
 
-    <input type="email" placeholder="Email" formControlName="email">
-    @if (formValidator.hasError(registerForm, 'email', submitted)) {
-      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'email') }}</div>
-    }
+      <input type="email" placeholder="Email" formControlName="email" [class.valid]="formValidator.isValid(registerForm, 'email')" [class.invalid]="formValidator.isInvalid(registerForm, 'email')">
+      @if (formValidator.isInvalid(registerForm, 'email')) {
+        <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'email') }}</div>
+      }
 
-    <input type="password" placeholder="Password" formControlName="password">
-    @if (formValidator.hasError(registerForm, 'password', submitted)) {
-      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'password') }}</div>
-    }
-    
-    <input type="password" placeholder="Password Confirmation" formControlName="passwordBis">
-    @if (formValidator.hasError(registerForm, 'passwordBis', submitted)) {
-      <div class="error">{{ formValidator.getErrorMessage(registerForm, 'passwordBis') }}</div>
-    }
-    @if (registerForm.errors?.['passwordMatch'] && submitted) {
-      <div class="error">Passwords do not match</div>
-    }
+      <input type="password" placeholder="Password" formControlName="password">
+      @if (formValidator.isInvalid(registerForm, 'password')) {
+        <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'password') }}</div>
+      }
+      
+      <input type="password" placeholder="Password Confirmation" formControlName="passwordBis">
+      @if (formValidator.isInvalid(registerForm, 'passwordBis')) {
+        <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'passwordBis') }}</div>
+      }
+      @if (registerForm.errors?.['passwordMatch'] && submitted) {
+        <div class="error-message">Passwords do not match</div>
+      }
+      @if (registrationError){
+        <div class="error-message">{{ registrationError }}</div>
+      }
 
-    <button type="submit">Register</button>
-  </form>
+      <button type="submit">Register</button>
+    </form>
 
-</div>
+  </div>
+
+}
