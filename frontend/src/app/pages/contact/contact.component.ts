@@ -45,8 +45,7 @@ export class ContactComponent implements OnInit, AfterViewInit {
 
       this.authService.contact(email, message, login, subject).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Message sent successfully!');
-          this.authService.navigateTo('/home');
+          this.notificationService.showSuccess('Message sent successfully!', 3000, '/home');
         },
         error: () => {
           this.contactError = 'Something went wrong. Please, try again later';

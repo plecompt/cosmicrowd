@@ -21,7 +21,7 @@ export class ForgotPasswordComponent {
   ngOnInit(): void {
     // If user is allready logged in
     if (this.authService.isLoggedIn()) {
-        this.authService.navigateTo('/home');
+        this.notificationService.showError('You can\'t access this page', 3000, '/home');
         return;
     }
     this.initForgotPasswordForm();
@@ -41,8 +41,7 @@ export class ForgotPasswordComponent {
 
       this.authService.forgotPassword(email).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Password reset instructions have been sent to your email. Please check your inbox and spam folder.');
-          this.authService.navigateTo('/home');
+          this.notificationService.showSuccess('Password reset instructions have been sent to your email. Please check your inbox and spam folder.', 3000, '/home');
         },
         error: () => {
           this.notificationService.showError('Unable to send password reset email. Please verify your email address and try again.', 5000);

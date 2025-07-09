@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth/auth.service';
+import { NotificationService } from '../../services/notifications/notification.service';
 
 @Component({
   selector: 'app-system-view',
@@ -9,12 +10,12 @@ import { AuthService } from '../../services/auth/auth.service';
 })
 export class SystemViewComponent implements OnInit {
 
-  constructor(public authService: AuthService){}
+  constructor(public authService: AuthService, private notificationService: NotificationService){}
 
   ngOnInit(): void {
       // If user is not logged in
       if (!this.authService.isLoggedIn()) {
-          this.authService.navigateTo('/home');
+          this.notificationService.showError('You can\'t access this page', 3000, '/home');
           return;
       }
     }

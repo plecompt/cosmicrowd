@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     // If user is allready logged in
     if (this.authService.isLoggedIn()) {
-        this.authService.navigateTo('/home');
+        this.notificationService.showError('You can\'t access this page', 3000, '/home');
         return;
     }
     this.initLoginForm();
@@ -59,10 +59,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
             next: (response: any) => {
               this.user = response.user;
               const capitalizedLogin = this.titleCasePipe.transform(this.user.user_login);
-              this.notificationService.showSuccess(`Welcome back, ${capitalizedLogin} !`);
-              setTimeout(() => {
-                this.router.navigateByUrl('/home');
-              }, 1500);
+              this.notificationService.showSuccess(`Welcome back, ${capitalizedLogin} !`, 1500, '/home');
             }
           });
         },

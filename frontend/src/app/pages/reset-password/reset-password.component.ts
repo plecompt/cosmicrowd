@@ -59,7 +59,7 @@ export class ResetPasswordComponent implements OnInit {
 
       this.authService.setNewPassword(newPassword, this.token).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Password successfully changed !');
+          this.notificationService.showSuccess('Password successfully changed !', 3000, '/home');
           this.authService.logout().subscribe();
         },
         error: () => {

@@ -32,7 +32,6 @@ export class AuthService {
   public clearSession(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user_id');
-    this.navigateTo('/home');
   }
 
   //register

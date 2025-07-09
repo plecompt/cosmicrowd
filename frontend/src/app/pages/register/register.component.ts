@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
@@ -31,7 +30,7 @@ export class RegisterComponent implements OnInit{
   ngOnInit(): void {
     // If user is allready logged in
     if (this.authService.isLoggedIn()) {
-        this.authService.navigateTo('/home');
+        this.notificationService.showError('You can\'t access this page', 3000, '/home');
         return;
     }
     this.initRegisterForm();
@@ -84,8 +83,7 @@ export class RegisterComponent implements OnInit{
       this.registerForm.value.email
     ).subscribe({
       next: () => {
-        this.notificationService.showSuccess('Account created successfully! Welcome to CosmiCrowd !');
-        this.router.navigateByUrl('/home');
+        this.notificationService.showSuccess('Account created successfully! Welcome to CosmiCrowd !', 3000, '/home');
       },
       error: () => {
         this.registrationError = "Registration failed. Please try again.";

@@ -24,7 +24,7 @@ export class ChangePasswordComponent {
   ngOnInit(): void {
     // If user is not logged in
     if (!this.authService.isLoggedIn()) {
-        this.authService.navigateTo('/home');
+        this.notificationService.showError('You can\'t access this page', 3000, '/home');
         return;
     }
     this.initPasswordForm();
@@ -46,7 +46,7 @@ export class ChangePasswordComponent {
 
       this.authService.changePassword(currentPassword, newPassword).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Password successfully modified !');
+          this.notificationService.showSuccess('Password successfully modified !', 3000, '/home');
           this.authService.logout().subscribe();
         },
         error: () => {

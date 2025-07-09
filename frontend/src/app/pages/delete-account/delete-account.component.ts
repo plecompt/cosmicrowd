@@ -29,7 +29,7 @@ export class DeleteAccountComponent implements OnInit {
   ngOnInit(): void {
     // If user is not logged in
     if (!this.authService.isLoggedIn()) {
-        this.authService.navigateTo('/home');
+        this.notificationService.showError('You can\'t access this page', 3000, '/home');
         return;
     }
     this.initDeleteAccountForm();
@@ -68,8 +68,7 @@ export class DeleteAccountComponent implements OnInit {
         ).subscribe({
           next: () => {
             this.authService.clearSession();
-            this.notificationService.showSuccess('Account successfully deleted !');
-            this.authService.navigateTo('/home');
+            this.notificationService.showSuccess('Account successfully deleted !', 3000, '/home');
           },
           error: () => {
             this.errorMessage = 'Wrong password';
