@@ -10,7 +10,12 @@
         <pre>{{ modalData.content }}</pre> 
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" (click)="onConfirm()">OK</button>
+        @if (modalData.showClaim) {
+          <button class="btn btn-secondary" (click)="onClaim()">Claim</button>
+        }
+        @if (modalData.showConfirm){
+          <button class="btn btn-primary" (click)="onConfirm()">OK</button>
+        }
         @if (modalData.showCancel) {
           <button class="btn btn-secondary" (click)="onCancel()">Cancel</button>
         }

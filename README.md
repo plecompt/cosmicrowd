@@ -165,9 +165,11 @@ By default, there is two users:
 - Planet: User-created celestial bodies orbiting stars
 - Moon: User-created satellites orbiting planets
 - User: Authentication and user management
+- Wallpaper: User-created settings for wallpaper generation
 - Like_Solar_System: User appreciation system for Solar_System
 - Like_Planet: User appreciation system for Planet
 - Like_Moon: User appreciation system for Moon
+- Like_Wallpaper: User appreciation system for wallpapers
 - Recovery_Token: Allow users to reset their password when lost
 
 ## Contribution ##

@@ -30,7 +30,8 @@ class GalaxyController
         $galaxy = Galaxy::findOrFail($id);
         
         $solarSystems = $galaxy->solarSystems()
-            ->select('*')
+            ->leftJoin('user', 'solar_system.user_id', '=', 'user.user_id')
+            ->select('solar_system.*', 'user.user_login')
             ->get();
             
         return response()->json($solarSystems);

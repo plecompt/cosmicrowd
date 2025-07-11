@@ -19,21 +19,7 @@ class SolarSystemController
     {
         try {
             $solarSystems = SolarSystem::where('galaxy_id', $galaxyId)
-                ->select([
-                    'solar_system_id',
-                    'solar_system_name',
-                    'solar_system_desc',
-                    'solar_system_type',
-                    'solar_system_gravity',
-                    'solar_system_surface_temp',
-                    'solar_system_diameter',
-                    'solar_system_mass',
-                    'solar_system_luminosity',
-                    'solar_system_initial_x',
-                    'solar_system_initial_y',
-                    'solar_system_initial_z',
-                    'galaxy_id'
-                ])
+                ->select('*')
                 ->get();
 
             return response()->json($solarSystems);
@@ -48,21 +34,7 @@ class SolarSystemController
         try {
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)
                 ->where('solar_system_id', $solarSystemId)
-                ->select([
-                    'solar_system_id',
-                    'solar_system_name',
-                    'solar_system_desc',
-                    'solar_system_type',
-                    'solar_system_gravity',
-                    'solar_system_surface_temp',
-                    'solar_system_diameter',
-                    'solar_system_mass',
-                    'solar_system_luminosity',
-                    'solar_system_initial_x',
-                    'solar_system_initial_y',
-                    'solar_system_initial_z',
-                    'galaxy_id'
-                ])
+                ->select('*')
                 ->first();
 
             if (!$solarSystem) {
@@ -87,17 +59,30 @@ class SolarSystemController
             ->where('galaxy_id', $galaxyId)
             ->findOrFail($solarSystemId);
 
-            if (!$solarSystem->owner) {
-                return response()->json([
-                    'error' => 'No owner for this solar system'
-                ], 404);
-            }
-
             return response()->json([
-                'owner' => $solarSystem->owner
+                'owner' => $solarSystem->owner ? $solarSystem->owner->user_login : null
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error while getting owner'], 500);
+        }
+    }
+
+    // Get all solar systems for given user
+    public function getSolarSystemsByUser($galaxyId): JsonResponse
+    {
+        try {
+            $userId = request()->get('user_id');
+            
+            $solarSystems = SolarSystem::with(['planets.moons'])
+                ->where('user_id', $userId)
+                ->where('galaxy_id', $galaxyId)
+                ->get();
+
+            return response()->json([
+                'solar_systems' => $solarSystems
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error while getting solar systems'], 500);
         }
     }
 

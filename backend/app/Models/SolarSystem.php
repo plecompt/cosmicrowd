@@ -16,6 +16,7 @@ class SolarSystem extends Model
 
     protected $fillable = [
         'galaxy_id',
+        'user_id',
         'solar_system_name',
         'solar_system_desc',
         'solar_system_type',
@@ -41,14 +42,7 @@ class SolarSystem extends Model
 
     public function owner()
     {
-        return $this->hasOneThrough(
-            User::class,
-            UserSolarSystemOwnership::class,
-            'solar_system_id',
-            'user_id',
-            'solar_system_id',
-            'user_id'
-        );
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function planets()

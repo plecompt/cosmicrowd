@@ -97,7 +97,6 @@ class GalaxySeeder extends Seeder
                     $this->gaussianRandom(0, self::CONFIG['GALAXY_THICKNESS']), 
                     $i * 2 * M_PI / self::CONFIG['NUM_ARMS']
                 );
-
                 // Star type with probability
                 $starType = $this->getRandomStarType();
                 
@@ -116,7 +115,7 @@ class GalaxySeeder extends Seeder
                     'solar_system_initial_x' => $position->x,
                     'solar_system_initial_y' => $position->y,
                     'solar_system_initial_z' => $position->z,
-                    'galaxy_id' => $galaxyId
+                    'galaxy_id' => $galaxyId,
                 ]);
             }
         }

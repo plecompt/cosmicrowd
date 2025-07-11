@@ -5,8 +5,11 @@ export interface ModalData {
   title: string;
   content: string;
   showCancel?: boolean; //optionnal
+  showClaim?: boolean; //optionnal
+  showConfirm?: boolean; //optionnal
   onConfirm?: () => void; //optionnal
   onCancel?: () => void; //optionnal
+  onClaim?: () => void; //optionnal
 }
 
 @Injectable({

@@ -9,26 +9,22 @@ use App\Http\Controllers\Api\PlanetController;
 use App\Http\Controllers\Api\MoonController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\SearchController;
-use App\Http\Controllers\Api\LikeMoonController;
-use App\Http\Controllers\Api\LikePlanetController;
-use App\Http\Controllers\Api\LikeSolarSystemController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\UserSolarSystemOwnershipController;
-use App\Http\Controllers\Api\UserSystemOwnershipController;
-
+use App\Http\Controllers\Api\ClaimController;
 use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\RateLimitMiddleware as RateLimit;
 
 // Routes publiques (pas d'authentification requise)
 Route::prefix('v1')->group(function () {
     // Authentification
-    Route::post('auth/register', [AuthController::class, 'register']);
-    Route::post('auth/login', [AuthController::class, 'login']);
-    Route::post('auth/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('auth/verify-token', [AuthController::class, 'verifyToken']);
-    Route::post('auth/reset-password', [AuthController::class, 'resetPassword']);
-    Route::post('auth/check-login', [AuthController::class, 'checkLoginAvailability']);
-    Route::post('auth/check-email', [AuthController::class, 'checkEmailAvailability']);
-    Route::post('auth/contact', [AuthController::class, 'contact']);
+    Route::post('auth/register', [AuthController::class, 'register']); //inscription
+    Route::post('auth/login', [AuthController::class, 'login']); //login
+    Route::post('auth/forgot-password', [AuthController::class, 'forgotPassword']); //envoi du token par mail
+    Route::post('auth/verify-token', [AuthController::class, 'verifyToken']); // verification du token
+    Route::post('auth/reset-password', [AuthController::class, 'resetPassword']); // changement de mdp apres mdp oublié
+    Route::post('auth/check-login', [AuthController::class, 'checkLoginAvailability']); //verifie si un login est disponible en bdd
+    Route::post('auth/check-email', [AuthController::class, 'checkEmailAvailability']); //verifie si un mdp est disponible en bdd
+    Route::post('auth/contact', [AuthController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utiliateur
 
     // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
@@ -39,6 +35,7 @@ Route::prefix('v1')->group(function () {
     
     // SOLAR SYSTEMS d'une galaxie
     Route::get('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'index']); //liste des systemes solaire pour cette galaxie
+    Route::get('galaxies/{galaxyId}/solar-systems/systems', [SolarSystemController::class, 'getSolarSystemsByUser']); //liste des systemes owned pour l'utilisateur donné
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'show']); //le systeme solaire avec ses stats pour cette galaxie
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/owner', [SolarSystemController::class, 'getOwner']); //le propriétaire du systeme solaire
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes', [LikeController::class, 'countSolarSystemLikes']); //nombre de likes pour ce systeme solaire
@@ -59,33 +56,26 @@ Route::prefix('v1')->group(function () {
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes-stats', [LikeController::class, 'getMoonLikesStats']); //stats des likes (infos plus completes) pour cette lune
     
     // Search
-    Route::get('search', [SearchController::class, 'globalSearch']); //retourne une liste de systemes solaires, planetes, lunes, galaxies, etc.
+    Route::get('search', [SearchController::class, 'globalSearch']); //retourne une liste de systemes solaires, planetes, lunes, galaxies, etc... qui matchent la requette.
     
-    // User Solar System Ownership (lecture seule)
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [UserSystemOwnershipController::class, 'isClaimable']);
+    // ClaimController, check if the system is claimable for given user id
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [ClaimController::class, 'isClaimable']); //retourne si le system est 'claimable' pour l'utilisateur donné
 
     // User
-    Route::get('/user/{userId}', [UserController::class, 'view']);
+    Route::get('/user/{userId}', [UserController::class, 'view']);//retourne un user
 });
 
 // Routes protégées (authentification requise)
-Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function () {
+Route::prefix('v1')->middleware(['auth:sanctum', RateLimit::class])->group(function () {
     // Authentification
-    Route::get('auth/me', [AuthController::class, 'me']);
-    Route::post('auth/logout', [AuthController::class, 'logout']);
-    Route::post('auth/change-password', [AuthController::class, 'changePassword']);
-    Route::post('auth/change-email', [AuthController::class, 'changeEmail']);
-    Route::post('auth/delete-account', [AuthController::class, 'deleteAccount']);
-    
-    // Galaxies (modification) Pas de modification des galaxies, seul l'admin peut les modifier/creer/supprimer
-    //Route::post('galaxies', [GalaxyController::class, 'store']);
-    //Route::put('galaxies/{id}', [GalaxyController::class, 'update']);
-    //Route::delete('galaxies/{id}', [GalaxyController::class, 'destroy']);
-    
-    // Solar Systems (modification) Pour l'instant, pas de modification des systemes solaires, a voir plus tard
-    //Route::post('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'store']);
-    //Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update']);
-    //Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'destroy']);
+    Route::get('auth/me', [AuthController::class, 'me']); //retourn qui est l'user actuellement connecté (grace au token)
+    Route::post('auth/logout', [AuthController::class, 'logout']); //deconnexion
+    Route::post('auth/change-password', [AuthController::class, 'changePassword']); //changement mdp via profil
+    Route::post('auth/change-email', [AuthController::class, 'changeEmail']); //changement de mail via profil
+    Route::post('auth/delete-account', [AuthController::class, 'deleteAccount']); //suppression du compte
+      
+    // Solar Systems (modification) Pour l'instant, pas d'ajout et de suppression des systemes solaires, juste modifications des systems pré-générés, a voir plus tard
+    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update']);
     
     // Planets (modification)
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'store']);
@@ -103,10 +93,22 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'rate.limit'])->group(function 
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon']); //to like ou unlike une lune
     
     // Routes pour les claims de systèmes solaires
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [UserSystemOwnershipController::class, 'claim']);
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [UserSystemOwnershipController::class, 'unclaim']);
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [ClaimController::class, 'claim']); //claim le solarSystem
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [ClaimController::class, 'unclaim']); //unclaim le solarSystem
+});
 
+// Routes Admin (authentification + admin requise)
+Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api', IsAdmin::class])->group(function () {
+    // Galaxies
+    Route::post('galaxies', [GalaxyController::class, 'store']); //Création
+    Route::put('galaxies/{id}', [GalaxyController::class, 'update']); //Modification
+    Route::delete('galaxies/{id}', [GalaxyController::class, 'destroy']); //Suppression
+    
+    // Solar Systems
+    Route::post('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'store']); //creation d'un system solaire
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'destroy']); //suppression d'un systeme solaire
+    
     // User
-    Route::post('/user/{userId}', [UserController::class, 'add'])->middleware(IsAdmin::class);
-    Route::delete('/user/{userId}', [UserController::class, 'delete']);
+    Route::post('/user/{userId}', [UserController::class, 'add']); //ajout d'un user
+    Route::delete('/user/{userId}', [UserController::class, 'delete']); //suppression d'un user
 });

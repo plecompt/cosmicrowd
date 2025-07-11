@@ -6,7 +6,6 @@ use App\Models\Planet;
 use App\Models\Star;
 use App\Models\SolarSystem;
 use App\Models\UserSolarSystemOwnership;
-use App\Models\UserSystemOwnership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;

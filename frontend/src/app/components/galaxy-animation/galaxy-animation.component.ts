@@ -6,7 +6,8 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { ModalService } from '../../services/modal/modal.service';
-import { SolarSystemAnimation } from '../../interfaces/solar-system/solar-system.interface';
+import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
+import { NotificationService } from '../../services/notifications/notification.service';
 
 type StarType = keyof ReturnType<GalaxyAnimationComponent['getStarColorMap']>;
 
@@ -16,6 +17,10 @@ type StarType = keyof ReturnType<GalaxyAnimationComponent['getStarColorMap']>;
   styleUrls: ['./galaxy-animation.component.css']
 })
 export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
+  // Current User
+  userLogin: string = localStorage.getItem('user_login') || '';
+  userId: string = localStorage.getItem('user_id') || '';
+
   // Reference to the canvas container DOM element
   @ViewChild('canvasContainer', { static: true }) canvasContainer!: ElementRef;
 
@@ -26,18 +31,18 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   private composer!: EffectComposer;
   private controls!: OrbitControls;
   private bloomPass!: UnrealBloomPass;
-  
+
   // Animation and interaction variables
   private animationId = 0;
   private raycaster = new THREE.Raycaster();
   private mouse = new THREE.Vector2();
-  
+
   // Solar systems data and sprites
   private systems: THREE.Sprite[] = [];
-  private systemsData: SolarSystemAnimation[] = [];
+  private systemsData: SolarSystem[] = [];
   private scaleFactor = 1;
 
-  constructor(private galaxyService: GalaxiesService, private modalService: ModalService) {}
+  constructor(private galaxyService: GalaxiesService, private modalService: ModalService, private notificationService: NotificationService) { }
 
   ngAfterViewInit(): void {
     // Initialize Three.js scene
@@ -89,7 +94,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
     // Load solar systems data
     this.loadSystems();
-    
+
     // Set initial camera position for panoramic view
     this.setCameraPositionAndOrientation(16, -265, 45, -160, 80);
   }
@@ -206,31 +211,56 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     }
   };
 
-  private showModal(starData: any): void {
-    // Extract star name
+  private async showModal(starData: any): Promise<void> {
+    // Extract star name and owner, if system is allready claimed
     const name = starData.solar_system_name;
+
     // Format system information for display
     const formattedMessage = `
-    ${starData.solar_system_desc}
-    Type: ${starData.solar_system_type}
-    Diameter: ${starData.solar_system_diameter.toLocaleString()} km
-    Mass: ${starData.solar_system_mass} solar masses
-    Surface Temperature: ${starData.solar_system_surface_temp} K
-    Gravity: ${starData.solar_system_gravity} g`;
-
+      ${starData.solar_system_desc}
+      Type: ${starData.solar_system_type}
+      Diameter: ${starData.solar_system_diameter.toLocaleString()} m
+      Mass: ${starData.solar_system_mass} solar masses
+      Surface Temperature: ${starData.solar_system_surface_temp} K
+      Gravity: ${starData.solar_system_gravity} g
+      Owner: ${starData.user_login || 'Unclaimed'}
+    `;
     // Open modal with system information
     this.modalService.show({
       title: name,
       content: formattedMessage,
-      showCancel: true,
-      onConfirm: () => {
-        console.log('modal confirmed');
-      },
-      onCancel: () => {
-        console.log('modal cancelled');
+      showClaim: starData.user_login ? false : true,
+      onClaim: () => {
+        // Check if user can claim this system
+        this.galaxyService.isSolarSystemClaimable(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
+          next: (response: any) => {
+            if (response.data.claimable) {
+              // User can claim, proceed with claim
+              this.galaxyService.claimSolarSystem(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
+                next: (claimResponse: any) => {
+                  starData.user_login = this.userLogin;
+                  starData.user_id = this.userId;
+                  this.notificationService.showSuccess(claimResponse.message, 3000, '/systems');
+                },
+                error: (error) => {
+                  const errorMessage = error.error?.message || 'Something went wrong, please try again later.';
+                  this.notificationService.showError(errorMessage, 5000, '/home');
+                }
+              });
+            } else {
+              const reason = response.data.reason || 'System cannot be claimed';
+              this.notificationService.showError(reason, 5000, '/home');
+            }
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || 'Something went wrong, please try again later.';
+            this.notificationService.showError(errorMessage, 5000, '/home');
+          }
+        });
       }
     });
   }
+
 
   setCameraPositionAndOrientation(posX: number, posY: number, posZ: number, yawDeg: number, pitchDeg: number): void {
     // Set camera position in 3D space

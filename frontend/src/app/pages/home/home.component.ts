@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalaxyAnimationComponent } from '../../components/galaxy-animation/galaxy-animation.component';
 import { GalaxiesService } from '../../services/galaxies/galaxies.service';
-import { SolarSystemAnimation } from '../../interfaces/solar-system/solar-system.interface';
+import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { GalaxyStats } from '../../interfaces/galaxy/galaxy.interface'
 
 @Component({
@@ -15,9 +15,9 @@ import { GalaxyStats } from '../../interfaces/galaxy/galaxy.interface'
 })
 export class HomeComponent implements OnInit {
   stats: GalaxyStats | null = null;
-  selectedSolarSystem: SolarSystemAnimation | null = null;
-  recentSolarSystems: SolarSystemAnimation[] = [];
-  mostLikedSolarSystems: SolarSystemAnimation[] = [];
+  selectedSolarSystem: SolarSystem | null = null;
+  recentSolarSystems: SolarSystem[] = [];
+  mostLikedSolarSystems: SolarSystem[] = [];
 
   constructor(private galaxiesService: GalaxiesService) { }
 
@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  onSolarSystemClick(solarSystem: SolarSystemAnimation): void {
+  onSolarSystemClick(solarSystem: SolarSystem): void {
     this.selectedSolarSystem = solarSystem;
   }
 
