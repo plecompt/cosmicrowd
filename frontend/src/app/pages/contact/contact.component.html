@@ -6,17 +6,20 @@
     <p>
         Please fill this form to contact us
     </p>
-
-    <input type="email" formControlName="email" placeholder="your.email@mail.com" [class.invalid]="formValidator.isInvalid(contactForm, 'email')" [class.valid]="formValidator.isValid(contactForm, 'email')">
+    <label for="email" class="screen-reader-only">Email</label>
+    <input type="email" formControlName="email" id="email" placeholder="your.email@mail.com" [class.invalid]="formValidator.isInvalid(contactForm, 'email')" [class.valid]="formValidator.isValid(contactForm, 'email')">
     @if (formValidator.isInvalid(contactForm, 'email')) {
         <p class="error-message">{{ formValidator.getErrorMessage(contactForm, 'email') }}</p>
     }
 
-    <input type="text" formControlName="login" placeholder="Login">
+    <label for="login" class="screen-reader-only">Login</label>
+    <input type="text" formControlName="login" id="login" placeholder="Login">
 
-    <input type="text" formControlName="subject" placeholder="Subject">
+    <label for="subject" class="screen-reader-only">Subject</label>
+    <input type="text" formControlName="subject" id="subject" placeholder="Subject">
 
-    <textarea formControlName="message" placeholder="Your message" [class.invalid]="formValidator.isInvalid(contactForm, 'message')" [class.valid]="formValidator.isValid(contactForm, 'message')"></textarea>
+    <label for="message" class="screen-reader-only">Your message</label>
+    <textarea formControlName="message" placeholder="Your message" id="message" [class.invalid]="formValidator.isInvalid(contactForm, 'message')" [class.valid]="formValidator.isValid(contactForm, 'message')"></textarea>
     @if (formValidator.isInvalid(contactForm, 'message')) {
         <p class="error-message">{{ formValidator.getErrorMessage(contactForm, 'message') }}</p>
     }

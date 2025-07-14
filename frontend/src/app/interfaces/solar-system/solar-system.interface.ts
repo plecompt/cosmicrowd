@@ -15,6 +15,7 @@ export interface SolarSystem {
   solar_system_initial_z: number;
   planets: Planet[];
   galaxy_id: number;
+  likes_count?: number;
   planetsCount?: number;
   moonsCount?: number;
 }

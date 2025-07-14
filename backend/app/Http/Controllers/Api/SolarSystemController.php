@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\SolarSystem;
 use App\Models\User;
-use App\Models\Planet;
 use App\Models\Moon;
+use App\Models\Planet;
+use App\Models\SolarSystem;
+use App\Models\Wallpaper;
+use App\Models\LikeSolarSystem;
+use App\Models\LikePlanet;
+use App\Models\LikeMoon;
+use App\Models\LikeWallpaper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -67,7 +72,7 @@ class SolarSystemController
         }
     }
 
-    // Get all solar systems for given user
+    // Get all solar systems for given user with likes for each body
     public function getSolarSystemsByUser($galaxyId): JsonResponse
     {
         try {
@@ -77,6 +82,19 @@ class SolarSystemController
                 ->where('user_id', $userId)
                 ->where('galaxy_id', $galaxyId)
                 ->get();
+
+            // Add likes count to each element
+            foreach ($solarSystems as $system) {
+                $system->likes_count = LikeSolarSystem::where('solar_system_id', $system->solar_system_id)->count();
+                
+                foreach ($system->planets as $planet) {
+                    $planet->likes_count = LikePlanet::where('planet_id', $planet->planet_id)->count();
+                    
+                    foreach ($planet->moons as $moon) {
+                        $moon->likes_count = LikeMoon::where('moon_id', $moon->moon_id)->count();
+                    }
+                }
+            }
 
             return response()->json([
                 'solar_systems' => $solarSystems

@@ -6,22 +6,26 @@
     <form (ngSubmit)="onRegisterSubmit()" [formGroup]="registerForm" class="flex-column">
       <h1>Register</h1>
 
-      <input type="text" placeholder="Login" formControlName="login" [class.valid]="formValidator.isValid(registerForm, 'login')" [class.invalid]="formValidator.isInvalid(registerForm, 'login')">
+      <label for="login" class="screen-reader-only">Login</label>
+      <input type="text" id="login" placeholder="Login" formControlName="login" [class.valid]="formValidator.isValid(registerForm, 'login')" [class.invalid]="formValidator.isInvalid(registerForm, 'login')">
       @if (formValidator.isInvalid(registerForm, 'login')) {
         <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'login') }}</div>
       }
 
-      <input type="email" placeholder="Email" formControlName="email" [class.valid]="formValidator.isValid(registerForm, 'email')" [class.invalid]="formValidator.isInvalid(registerForm, 'email')">
+      <label for="email" class="screen-reader-only">Email</label>
+      <input type="email" id="email" placeholder="Email" formControlName="email" [class.valid]="formValidator.isValid(registerForm, 'email')" [class.invalid]="formValidator.isInvalid(registerForm, 'email')">
       @if (formValidator.isInvalid(registerForm, 'email')) {
         <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'email') }}</div>
       }
 
-      <input type="password" placeholder="Password" formControlName="password">
+      <label for="password" class="screen-reader-only">Password</label>
+      <input type="password" id="password" placeholder="Password" formControlName="password">
       @if (formValidator.isInvalid(registerForm, 'password')) {
         <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'password') }}</div>
       }
       
-      <input type="password" placeholder="Password Confirmation" formControlName="passwordBis">
+      <label for="passwordBis" class="screen-reader-only">Password again</label>
+      <input type="password" id="passwordBis" placeholder="Password Confirmation" formControlName="passwordBis">
       @if (formValidator.isInvalid(registerForm, 'passwordBis')) {
         <div class="error-message">{{ formValidator.getErrorMessage(registerForm, 'passwordBis') }}</div>
       }

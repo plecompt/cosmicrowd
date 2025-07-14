@@ -1,79 +1,112 @@
-Pierre, voici la structure complète avec les détails des planètes et lunes :
+<app-background-stars [numberOfStars]="30"></app-background-stars>
 
-@if (authService.isLoggedIn() && this.solarSystems){
-    <div class="systems-container">
-        @for (solarSystem of this.solarSystems; track solarSystem.solar_system_id;){
-            <div class="system-container flex-column">
-                
-                <!-- Image section -->
-                <div class="wallpaper-container">
-                    <img src="https://threesolar.netlify.app/images/social.png" alt="{{solarSystem.solar_system_name}}">
-                </div> 
+@if (authService.isLoggedIn() && this.solarSystems && this.isLoaded) {
+<div class="systems-container">
+    @for (solarSystem of this.solarSystems; track solarSystem.solar_system_id;) {
+    <div class="system-container flex-column">
 
-                <!-- Star info section -->
-                <div class="star-container">
-                    <h3>{{solarSystem.solar_system_name}}</h3>
-                    
-                    <div class="info-item flex">
-                        <span class="label">Type:</span>
-                        <span class="value">{{solarSystem.solar_system_type}}</span>
-                    </div>
+        <!-- Image -->
+        <div class="wallpaper-container">
+            <img src="https://threesolar.netlify.app/images/social.png" alt="{{solarSystem.solar_system_name}}">
+        </div>
 
-                    <div class="info-item flex">
-                        <span class="label">Description:</span>
-                        <span class="value">{{solarSystem.solar_system_desc}}</span>
-                    </div>
-
-                    <div class="info-item flex">
-                        <span class="label">Position:</span>
-                        <span class="value">x: {{solarSystem.solar_system_initial_x}}, y: {{solarSystem.solar_system_initial_y}}, z: {{solarSystem.solar_system_initial_z}}</span>
-                    </div>
-
-                    <div class="info-item flex">
-                        <span class="label">Diameter:</span>
-                        <span class="value">{{solarSystem.solar_system_diameter}} m</span>
-                    </div>
-
-                    <div class="info-item flex">
-                        <span class="label">Mass:</span>
-                        <span class="value">{{solarSystem.solar_system_mass}} kg</span>
-                    </div>
-
-                    <div class="info-item flex">
-                        <span class="label">Gravity:</span>
-                        <span class="value">{{solarSystem.solar_system_gravity}} m/s²</span>
-                    </div>
-
-                    <div class="info-item flex">
-                        <span class="label">Luminosity:</span>
-                        <span class="value">{{solarSystem.solar_system_luminosity}} L</span>
-                    </div>
-
-                    <div class="info-item flex">
-                        <span class="label">Temperature:</span>
-                        <span class="value">{{solarSystem.solar_system_surface_temp}} K</span>
-                    </div>
-                </div>
-                
-                <!-- Planets and moons section -->
-                <div class="planets-and-moons-container">
-                    <p><strong>{{getPlanetsCountForSystem(solarSystem)}} Planets, {{getMoonsCountForSystem(solarSystem)}} Moons</strong></p>
-                    
-                    @for (planet of solarSystem.planets; track planet.planet_id) {
-                        <div class="planet-item">
-                            <span class="planet-name">🪐 {{planet.planet_name}}</span>
-                            @if (planet.moons.length > 0) {
-                                <span class="moons-count">({{planet.moons.length}} moons)</span>
-                            }
-                        </div>
-                    }
-                </div>
-
-                <div class="actions-container">
-                    <button>edit system</button>
-                </div>
-
+        <!-- Star informations -->
+        <div class="star-container">
+            <div class="star-title">
+                <h3>{{solarSystem.solar_system_name}}</h3>
             </div>
-        }
+            <div class="star-content flex-column">
+                <div class="info-item flex"><span>Type: </span><span>{{getFormattedTypeForSystem(solarSystem)}}</span>
+                </div>
+                <div class="info-item flex"><span>Description: </span><span>{{solarSystem.solar_system_desc}}</span>
+                </div>
+                <div class="info-item flex"><span>Position: </span>
+                    <span>x: {{solarSystem.solar_system_initial_x}}, y: {{solarSystem.solar_system_initial_y}}, z:
+                        {{solarSystem.solar_system_initial_z}}</span>
+                </div>
+                <div class="info-item flex"><span>Diameter: </span><span>{{solarSystem.solar_system_diameter}} m</span>
+                </div>
+                <div class="info-item flex"><span>Mass: </span><span>{{solarSystem.solar_system_mass}} kg</span></div>
+                <div class="info-item flex"><span>Gravity: </span><span>{{solarSystem.solar_system_gravity}} m/s²</span>
+                </div>
+                <div class="info-item flex"><span>Luminosity: </span><span>{{solarSystem.solar_system_luminosity}}
+                        L</span></div>
+                <div class="info-item flex"><span>Temperature: </span><span>{{solarSystem.solar_system_surface_temp}}
+                        K</span></div>
+            </div>
+
+        </div>
+
+        <!-- Planets and moons-->
+        <div class="planets-and-moons-container">
+            <p class="planet-count"><strong>{{getPlanetsCountForSystem(solarSystem)}} Planets,
+                    {{getMoonsCountForSystem(solarSystem)}} Moons</strong></p>
+
+            <div class="planets-grid">
+                @for (planet of solarSystem.planets; track planet.planet_id) {
+                <div class="planet-card flex-column" [class.expanded]="isPlanetExpanded(planet)"
+                    [class.hidden]="expandedPlanetId && !isPlanetExpanded(planet)"
+                    (click)="togglePlanetExpansion(planet, $event)">
+
+                    <!-- Likes of this planet -->
+                    <span id="planet-likes">{{planet.likes_count}}</span>
+
+                    <div class="planet-card-top flex-column">
+                        <img class="planet-img" src="{{getImageForPlanetType(planet)}}" alt="{{planet.planet_name}}">
+                    </div>
+
+                    <div class="planet-card-bottom flex">
+                        <!-- Name of the planet and moons count -->
+                        @if (!isPlanetExpanded(planet)){
+                            <span class="planet-name truncate">
+                                {{planet.planet_name}}
+                                @if (planet.moons.length > 0) {
+                                <span class="moons-count"> ({{planet.moons.length}} moons)</span>
+                                }
+                            </span>
+                        } @else {
+                            <div class="left flex-column">
+                                <div class="info-item flex"><strong><span>{{planet.planet_name}}</span></strong></div>
+                                <div class="info-item flex"><span>Type: </span><span>{{planet.planet_type}}</span></div>
+                                <div class="info-item flex"><span>Description: </span><span>{{planet.planet_desc}}</span>
+                                </div>
+                                <div class="info-item flex"><span>Position: </span>
+                                    <span>x: {{planet.planet_initial_x}}, y: {{planet.planet_initial_y}}, z:
+                                        {{planet.planet_initial_z}}</span>
+                                </div>
+                                <div class="info-item flex"><span>Diameter: </span><span>{{planet.planet_diameter}} m</span>
+                                </div>
+                                <div class="info-item flex"><span>Mass: </span><span>{{planet.planet_mass}} kg</span></div>
+                                <div class="info-item flex"><span>Gravity: </span><span>{{planet.planet_gravity}}
+                                        m/s²</span></div>
+                                <div class="info-item flex"><span>Distance: </span><span>{{planet.planet_average_distance}}
+                                        L</span></div>
+                                <div class="info-item flex"><span>Temperature: </span><span>{{planet.planet_surface_temp}}
+                                        K</span></div>
+                            </div>
+                            @if (planet.moons.length > 0) {
+                                <div class="right flex-column">
+
+                                    <strong><span>Moons</span></strong>
+                                    @for (moon of planet.moons; track moon.moon_id) {
+                                    <span class="moon-item">{{moon.moon_name}} (likes: {{moon.likes_count}})</span>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-and-likes-container flex">
+            <span>Likes: {{solarSystem.likes_count}}</span>
+            <button>edit system</button>
+        </div>
+
     </div>
+    }
+</div>
 }

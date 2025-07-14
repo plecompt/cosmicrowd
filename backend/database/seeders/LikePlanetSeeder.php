@@ -20,6 +20,36 @@ class LikePlanetSeeder extends Seeder
                 'planet_id' => 1,
                 'like_planet_date' => now(),
             ],
+            [
+                'user_id' => 3,
+                'planet_id' => 1,
+                'like_planet_date' => now(),
+            ],
+            [
+                'user_id' => 4,
+                'planet_id' => 1,
+                'like_planet_date' => now(),
+            ],
+            [
+                'user_id' => 1,
+                'planet_id' => 2,
+                'like_planet_date' => now(),
+            ],
+            [
+                'user_id' => 2,
+                'planet_id' => 3,
+                'like_planet_date' => now(),
+            ],
+            [
+                'user_id' => 3,
+                'planet_id' => 4,
+                'like_planet_date' => now(),
+            ],
+            [
+                'user_id' => 4,
+                'planet_id' => 5,
+                'like_planet_date' => now(),
+            ],
         ]);
     }
 }

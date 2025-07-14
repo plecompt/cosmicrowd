@@ -21,10 +21,12 @@ export interface Planet {
   planet_rings: number;
   planet_initial_x: number;
   planet_initial_y: number;
-  plane_initial_z: number;
+  planet_initial_z: number;
   moons: Moon[];
   galaxy_id: number;
   user_id: number;
+  likes_count?: number;
+  expanded: boolean;
 }
 
 // Enum types de planet

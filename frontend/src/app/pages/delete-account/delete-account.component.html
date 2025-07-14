@@ -14,12 +14,14 @@
 
         <br>
 
-        <input type="text" formControlName="confirmationText" placeholder='Type "DELETE" to confirm'>
+        <label for="confirmationText" class="screen-reader-only">Type DELETE</label>        
+        <input type="text" id="confirmationText" formControlName="confirmationText" placeholder='Type "DELETE" to confirm'>
         @if (formValidator.isInvalid(deleteAccountForm, 'confirmationText')) {
             <p class="error-message">{{ formValidator.getErrorMessage(deleteAccountForm, 'confirmationText') }}</p>
         }
 
-        <input type="password" formControlName="currentPassword" placeholder="Current password">
+        <label for="currentPassword" class="screen-reader-only">Current Password</label>        
+        <input type="password" id="currentPassword" formControlName="currentPassword" placeholder="Current password">
         @if (formValidator.isInvalid(deleteAccountForm, 'currentPassword')) {
             <p class="error-message">{{ formValidator.getErrorMessage(deleteAccountForm, 'currentPassword') }}</p>
         }

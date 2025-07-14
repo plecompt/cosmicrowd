@@ -12,12 +12,42 @@ class LikeSolarSystemSeeder extends Seeder
         DB::table('like_solar_system')->insert([
             [
                 'user_id' => 1,
-                'solar_system_id' => 1,
+                'solar_system_id' => 8002,
                 'like_solar_system_date' => now(),
             ],
             [
                 'user_id' => 2,
-                'solar_system_id' => 1,
+                'solar_system_id' => 8002,
+                'like_solar_system_date' => now(),
+            ],
+            [
+                'user_id' => 3,
+                'solar_system_id' => 8002,
+                'like_solar_system_date' => now(),
+            ],
+            [
+                'user_id' => 4,
+                'solar_system_id' => 8002,
+                'like_solar_system_date' => now(),
+            ],
+            [
+                'user_id' => 1,
+                'solar_system_id' => 8003,
+                'like_solar_system_date' => now(),
+            ],
+            [
+                'user_id' => 2,
+                'solar_system_id' => 8003,
+                'like_solar_system_date' => now(),
+            ],
+            [
+                'user_id' => 3,
+                'solar_system_id' => 8001,
+                'like_solar_system_date' => now(),
+            ],
+            [
+                'user_id' => 4,
+                'solar_system_id' => 8001,
                 'like_solar_system_date' => now(),
             ],
         ]);

@@ -35,8 +35,8 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
     this.changeEmailForm = this.fb.group({
       password: ['', Validators.required],
       passwordBis: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()]],
-      emailBis: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()]]
+      email: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()], [this.customValidators.checkEmailAvailability()]],
+      emailBis: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()], [this.customValidators.checkEmailAvailability()]]
     }, { validators: [CustomValidatorsService.passwordsMatch(), CustomValidatorsService.emailsMatch()] });
   }
 

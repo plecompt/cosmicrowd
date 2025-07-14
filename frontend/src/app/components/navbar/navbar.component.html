@@ -4,7 +4,8 @@
       <h1 class="logo" (click)="navigateTo('home')">CosmiCrowd</h1>
       <div class="search-container" (pointerdown)="this.isMenuOpen = false">
         <!-- Since event pass through parent div and cause the input to be unfocusable, we need to stop propagation -->
-        <input type="text" placeholder="Search solar systems..." class="search-input" (pointerdown)="$event.stopPropagation()" [(ngModel)]="searchQuery" >
+        <label for="search-input" class="screen-reader-only">Search Bar</label>
+        <input type="text" placeholder="Search solar systems..." class="search-input" id="search-input" (pointerdown)="$event.stopPropagation()" [(ngModel)]="searchQuery">
         <button class="search-btn" (click)="onSearch()">🔍</button>
       </div>
     </div>

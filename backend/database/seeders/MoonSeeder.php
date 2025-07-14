@@ -666,7 +666,7 @@ class MoonSeeder extends Seeder
             'moon_initial_x' => 0,
             'moon_initial_y' => 0,
             'moon_initial_z' => 0,
-            'planet_id' => 14,
+            'planet_id' => 15,
             'user_id' => 2,
         ]);
 
@@ -691,7 +691,7 @@ class MoonSeeder extends Seeder
             'moon_initial_x' => 0,
             'moon_initial_y' => 0,
             'moon_initial_z' => 0,
-            'planet_id' => 14,
+            'planet_id' => 15,
             'user_id' => 2,
         ]);
 
@@ -716,7 +716,7 @@ class MoonSeeder extends Seeder
             'moon_initial_x' => 0,
             'moon_initial_y' => 0,
             'moon_initial_z' => 0,
-            'planet_id' => 14,
+            'planet_id' => 15,
             'user_id' => 2,
         ]);
 
@@ -742,7 +742,7 @@ class MoonSeeder extends Seeder
             'moon_initial_x' => 0,
             'moon_initial_y' => 0,
             'moon_initial_z' => 0,
-            'planet_id' => 14,
+            'planet_id' => 16,
             'user_id' => 2,
         ]);
 
@@ -767,7 +767,7 @@ class MoonSeeder extends Seeder
             'moon_initial_x' => 0,
             'moon_initial_y' => 0,
             'moon_initial_z' => 0,
-            'planet_id' => 14,
+            'planet_id' => 16,
             'user_id' => 2,
         ]);
 
@@ -792,7 +792,7 @@ class MoonSeeder extends Seeder
             'moon_initial_x' => 0,
             'moon_initial_y' => 0,
             'moon_initial_z' => 0,
-            'planet_id' => 14,
+            'planet_id' => 16,
             'user_id' => 2,
         ]);
     }

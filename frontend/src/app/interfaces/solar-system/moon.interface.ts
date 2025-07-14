@@ -22,6 +22,7 @@ export interface Moon {
   moon_initial_z: number;
   galaxy_id: number;
   user_id: number;
+  likes_count?: number;
 }
 
 // Enum types de solar system
