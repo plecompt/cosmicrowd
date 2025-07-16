@@ -33,22 +33,22 @@ class SolarSystemController
         }
     }
 
-    // Get SolarSystem for given solarSystemId
+    // Get SolarSystem with planets and moons for given solarSystemId
     public function show($galaxyId, $solarSystemId): JsonResponse
     {
         try {
-            $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)
+            $solarSystem = SolarSystem::with(['planets.moons'])
                 ->where('solar_system_id', $solarSystemId)
-                ->select('*')
+                ->where('galaxy_id', $galaxyId)
                 ->first();
 
             if (!$solarSystem) {
-                return response()->json([
-                    'error' => 'Solar system not found'
-                ], 404);
+                return response()->json(['error' => 'Solar system not found'], 404);
             }
 
-            return response()->json($solarSystem);
+            return response()->json([
+                'solar_system' => $solarSystem
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error while getting solar system'], 500);
         }

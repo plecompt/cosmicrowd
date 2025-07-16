@@ -4,12 +4,14 @@ import { BehaviorSubject } from 'rxjs';
 export interface ModalData {
   title: string;
   content: string;
+  showView?: boolean; //optionnal
   showCancel?: boolean; //optionnal
   showClaim?: boolean; //optionnal
   showConfirm?: boolean; //optionnal
-  onConfirm?: () => void; //optionnal
+  onView?: () => void; //optionnel
   onCancel?: () => void; //optionnal
   onClaim?: () => void; //optionnal
+  onConfirm?: () => void; //optionnal
 }
 
 @Injectable({

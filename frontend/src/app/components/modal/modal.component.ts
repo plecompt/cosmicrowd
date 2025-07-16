@@ -35,4 +35,9 @@ export class ModalComponent implements OnInit {
     this.modalData?.onClaim?.();
     this.modalService.close();
   }
+
+  onView(): void {
+    this.modalData?.onView?.();
+    this.modalService.close();
+  }
 }

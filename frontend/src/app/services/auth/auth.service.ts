@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs'; 
 import { tap, shareReplay, finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { User } from '../../interfaces/user/user.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -37,12 +36,12 @@ export class AuthService {
 
   //register
   register(user_login: string, user_password: string, user_email: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/register', {user_login, user_password, user_email});
+    return this.http.post('http://localhost:8000/api/v1/users/register', {user_login, user_password, user_email});
   }
 
   //delete
   deleteAccount(current_password: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/delete-account', {current_password});
+    return this.http.post('http://localhost:8000/api/v1/users/delete-account', {current_password});
   }
 
   //login
@@ -65,7 +64,7 @@ export class AuthService {
 
   //user send an email
   contact(user_email: string, user_message: string, user_name: string = "", subject: string = ""){
-    return this.http.post('http://localhost:8000/api/v1/auth/contact', {user_email, user_message, user_name, subject});
+    return this.http.post('http://localhost:8000/api/v1/users/contact', {user_email, user_message, user_name, subject});
   }
 
   //return connected user
@@ -76,26 +75,26 @@ export class AuthService {
   //3 step forgotten password
   //send email to user with the token in the url
   forgotPassword(user_email: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/forgot-password', {user_email});
+    return this.http.post('http://localhost:8000/api/v1/users/forgot-password', {user_email});
   }
 
   //can check if the token is valid (before showing view to reset)
   verifyResetToken(token: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/verify-token', {token});
+    return this.http.post('http://localhost:8000/api/v1/users/verify-token', {token});
   }
 
   //update the password
   setNewPassword(new_password: string, token: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/reset-password', {new_password, token});
+    return this.http.post('http://localhost:8000/api/v1/users/reset-password', {new_password, token});
   }
 
   //password modify
   changePassword(current_password: string, new_password: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/change-password', {current_password, new_password});
+    return this.http.post('http://localhost:8000/api/v1/users/change-password', {current_password, new_password});
   }
 
   //email modify
   changeEmail(current_password: string, new_email: string){
-    return this.http.post('http://localhost:8000/api/v1/auth/change-email', {current_password, new_email});
+    return this.http.post('http://localhost:8000/api/v1/users/change-email', {current_password, new_email});
   }
 }

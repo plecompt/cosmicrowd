@@ -11,9 +11,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             GalaxySeeder::class,
-            SolarSystemSeeder::class,
-            PlanetSeeder::class,
-            MoonSeeder::class,
             LikeSolarSystemSeeder::class,
             LikePlanetSeeder::class,
             LikeMoonSeeder::class,

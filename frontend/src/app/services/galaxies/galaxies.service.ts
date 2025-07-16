@@ -10,19 +10,24 @@ export class GalaxiesService {
 
   constructor(private http: HttpClient) {}
 
-  // Méthode principale pour l'accueil
-  getGalaxies(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxy`);
-  }
+  // // Méthode principale pour l'accueil
+  // getGalaxies(): Observable<any> {
+  //   return this.http.get(`${this.apiUrl}/galaxy`);
+  // }
 
-  // Récupérer les statistiques
-  getStats(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxy/stats`);
-  }
+  // // Récupérer les statistiques
+  // getStats(): Observable<any> {
+  //   return this.http.get(`${this.apiUrl}/galaxy/stats`);
+  // }
 
   // Récupérer les étoiles pour l'animation
   getSolarSystemsForAnimation(galaxyId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/animation`);
+  }
+
+  // Get solarSystem for given galaxyId && solarSystemId
+  getSolarSystem(galaxyId: number, solarSystemId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}`);
   }
 
   // Get solarSystem for given userId && galaxyId
@@ -31,7 +36,7 @@ export class GalaxiesService {
   }
 
   // Get user for given solarSystem
-  getSolarSystemOwner(userId: number, galaxyId: number, solarSystemId: number){
+  getSolarSystemOwner(userId: number, galaxyId: number, solarSystemId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/owner`);
   }
 

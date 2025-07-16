@@ -9,10 +9,10 @@ class GalaxyFactory extends Factory
     public function definition(): array
     {
         return [
-            'galaxy_name' => $this->faker->unique()->words(3, true),
-            'galaxy_desc' => $this->faker->sentence(),
-            'galaxy_size' => $this->faker->numberBetween(1000, 100000),
-            'galaxy_age' => $this->faker->numberBetween(1000000000, 14000000000),
+            'galaxy_name' => fake()->words(2, true) . ' Galaxy',
+            'galaxy_desc' => fake()->sentence(10),
+            'galaxy_size' => fake()->numberBetween(500, 2000),
+            'galaxy_age' => fake()->numberBetween(8, 14),
         ];
     }
-} 
+}

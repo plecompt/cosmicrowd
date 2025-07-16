@@ -8,6 +8,7 @@ import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { ModalService } from '../../services/modal/modal.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { NotificationService } from '../../services/notifications/notification.service';
+import { Router } from '@angular/router';
 
 type StarType = keyof ReturnType<GalaxyAnimationComponent['getStarColorMap']>;
 
@@ -42,7 +43,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   private systemsData: SolarSystem[] = [];
   private scaleFactor = 1;
 
-  constructor(private galaxyService: GalaxiesService, private modalService: ModalService, private notificationService: NotificationService) { }
+  constructor(private galaxiesService: GalaxiesService, private modalService: ModalService, private notificationService: NotificationService, private router: Router) { }
 
   ngAfterViewInit(): void {
     // Initialize Three.js scene
@@ -111,7 +112,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
   private loadSystems() {
     // Fetch solar systems data from service
-    this.galaxyService.getSolarSystemsForAnimation(1).subscribe(systems => {
+    this.galaxiesService.getSolarSystemsForAnimation(1).subscribe(systems => {
       this.systemsData = systems || [];
       // Create sprites for each system
       this.createSprites();
@@ -207,7 +208,16 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     if (intersects.length > 0) {
       const selectedSprite = intersects[0].object;
       const starData = selectedSprite.userData;
-      this.showModal(starData);
+      //we need to load detailed data...
+      this.galaxiesService.getSolarSystem(starData['galaxy_id'], starData['solar_system_id']).subscribe({
+        next: (systemInformation) => {
+            this.showModal(systemInformation.solar_system);
+        },
+        error: (error) => {
+          const errorMessage = error.error?.message || 'Something went wrong, please try again later.';
+          this.notificationService.showError(errorMessage, 5000, '/home');
+        }
+      })
     }
   };
 
@@ -219,10 +229,12 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     const formattedMessage = `
       ${starData.solar_system_desc}
       Type: ${starData.solar_system_type}
-      Diameter: ${starData.solar_system_diameter.toLocaleString()} m
+      Diameter: ${starData.solar_system_diameter.toString()} m
       Mass: ${starData.solar_system_mass} solar masses
       Surface Temperature: ${starData.solar_system_surface_temp} K
       Gravity: ${starData.solar_system_gravity} g
+      Planets: ${this.getPlanetsCountForSystem(starData) || '0'}
+      Moons: ${this.getMoonsCountForSystem(starData) || '0'}
       Owner: ${starData.user_login || 'Unclaimed'}
     `;
     // Open modal with system information
@@ -230,13 +242,14 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       title: name,
       content: formattedMessage,
       showClaim: starData.user_login ? false : true,
+      showView: true,
       onClaim: () => {
         // Check if user can claim this system
-        this.galaxyService.isSolarSystemClaimable(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
+        this.galaxiesService.isSolarSystemClaimable(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
           next: (response: any) => {
             if (response.data.claimable) {
               // User can claim, proceed with claim
-              this.galaxyService.claimSolarSystem(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
+              this.galaxiesService.claimSolarSystem(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
                 next: (claimResponse: any) => {
                   starData.user_login = this.userLogin;
                   starData.user_id = this.userId;
@@ -257,10 +270,21 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
             this.notificationService.showError(errorMessage, 5000, '/home');
           }
         });
+      },
+      onView: () => {
+        //user clicked on view, sending him to view-system
+        this.router.navigate(['/view-system', starData.solar_system_id]);
       }
     });
   }
 
+  getMoonsCountForSystem(system: SolarSystem): number {
+    return system.planets.reduce((acc, planet) => acc + planet.moons.length, 0);
+  }
+
+  getPlanetsCountForSystem(system: SolarSystem): number {
+    return system.planets.length;
+  }
 
   setCameraPositionAndOrientation(posX: number, posY: number, posZ: number, yawDeg: number, pitchDeg: number): void {
     // Set camera position in 3D space

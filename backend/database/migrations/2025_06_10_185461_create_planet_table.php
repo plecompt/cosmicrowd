@@ -21,21 +21,21 @@ return new class extends Migration
             $table->float('planet_surface_temp');
             $table->float('planet_orbital_longitude')->unsigned();
             $table->float('planet_eccentricity')->unsigned();
-            $table->integer('planet_apogee')->unsigned();
-            $table->integer('planet_perigee')->unsigned();
+            $table->bigInteger('planet_apogee')->unsigned();
+            $table->bigInteger('planet_perigee')->unsigned();
             $table->integer('planet_orbital_inclination')->unsigned();
             $table->bigInteger('planet_average_distance')->unsigned();
             $table->integer('planet_orbital_period')->unsigned();
             $table->integer('planet_inclination_angle')->unsigned();
             $table->integer('planet_rotation_period')->unsigned();
-            $table->bigInteger('planet_mass')->unsigned();
-            $table->integer('planet_diameter')->unsigned();
+            $table->bigInteger('planet_mass')->unsigned(); // x 10^24kg
+            $table->bigInteger('planet_diameter')->unsigned();
             $table->integer('planet_rings')->unsigned();
             $table->integer('planet_initial_x');
             $table->integer('planet_initial_y');
             $table->integer('planet_initial_z');
             $table->foreignId('solar_system_id')->references('solar_system_id')->on('solar_system');
-            $table->foreignId('user_id')->references('user_id')->on('user');
+            $table->foreignId('user_id')->nullable()->references('user_id')->on('user')->onDelete('set null');
         });
 
         // Adding check constrains

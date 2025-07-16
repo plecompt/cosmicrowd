@@ -1,6 +1,6 @@
 <app-background-stars [numberOfStars]="30"></app-background-stars>
 
-@if (authService.isLoggedIn() && this.solarSystems && this.isLoaded) {
+@if (authService.isLoggedIn() && this.solarSystems && this.solarSystems.length > 0 && this.isLoaded) {
 <div class="systems-container">
     @for (solarSystem of this.solarSystems; track solarSystem.solar_system_id;) {
     <div class="system-container flex-column">
@@ -49,7 +49,10 @@
                     (click)="togglePlanetExpansion(planet, $event)">
 
                     <!-- Likes of this planet -->
-                    <span id="planet-likes">{{planet.likes_count}}</span>
+                    <div id="planet-likes" class="likes flex">
+                        <span>{{solarSystem.likes_count}}</span>
+                        <img id="like-icon" src="/icons/like.png" alt="">
+                    </div>
 
                     <div class="planet-card-top flex-column">
                         <img class="planet-img" src="{{getImageForPlanetType(planet)}}" alt="{{planet.planet_name}}">
@@ -58,41 +61,46 @@
                     <div class="planet-card-bottom flex">
                         <!-- Name of the planet and moons count -->
                         @if (!isPlanetExpanded(planet)){
-                            <span class="planet-name truncate">
-                                {{planet.planet_name}}
-                                @if (planet.moons.length > 0) {
-                                <span class="moons-count"> ({{planet.moons.length}} moons)</span>
-                                }
-                            </span>
-                        } @else {
-                            <div class="left flex-column">
-                                <div class="info-item flex"><strong><span>{{planet.planet_name}}</span></strong></div>
-                                <div class="info-item flex"><span>Type: </span><span>{{planet.planet_type}}</span></div>
-                                <div class="info-item flex"><span>Description: </span><span>{{planet.planet_desc}}</span>
-                                </div>
-                                <div class="info-item flex"><span>Position: </span>
-                                    <span>x: {{planet.planet_initial_x}}, y: {{planet.planet_initial_y}}, z:
-                                        {{planet.planet_initial_z}}</span>
-                                </div>
-                                <div class="info-item flex"><span>Diameter: </span><span>{{planet.planet_diameter}} m</span>
-                                </div>
-                                <div class="info-item flex"><span>Mass: </span><span>{{planet.planet_mass}} kg</span></div>
-                                <div class="info-item flex"><span>Gravity: </span><span>{{planet.planet_gravity}}
-                                        m/s²</span></div>
-                                <div class="info-item flex"><span>Distance: </span><span>{{planet.planet_average_distance}}
-                                        L</span></div>
-                                <div class="info-item flex"><span>Temperature: </span><span>{{planet.planet_surface_temp}}
-                                        K</span></div>
-                            </div>
+                        <span class="planet-name truncate">
+                            {{planet.planet_name}}
                             @if (planet.moons.length > 0) {
-                                <div class="right flex-column">
-
-                                    <strong><span>Moons</span></strong>
-                                    @for (moon of planet.moons; track moon.moon_id) {
-                                    <span class="moon-item">{{moon.moon_name}} (likes: {{moon.likes_count}})</span>
-                                    }
-                                </div>
+                            <span class="moons-count"> ({{planet.moons.length}} moons)</span>
                             }
+                        </span>
+                        } @else {
+                        <div class="left flex-column">
+                            <div class="info-item flex"><strong><span>{{planet.planet_name}}</span></strong></div>
+                            <div class="info-item flex"><span>Type: </span><span>{{planet.planet_type}}</span></div>
+                            <div class="info-item flex"><span>Description: </span><span>{{planet.planet_desc}}</span>
+                            </div>
+                            <div class="info-item flex"><span>Position: </span>
+                                <span>x: {{planet.planet_initial_x}}, y: {{planet.planet_initial_y}}, z:
+                                    {{planet.planet_initial_z}}</span>
+                            </div>
+                            <div class="info-item flex"><span>Diameter: </span><span>{{planet.planet_diameter}} m</span>
+                            </div>
+                            <div class="info-item flex"><span>Mass: </span><span>{{planet.planet_mass}} kg</span></div>
+                            <div class="info-item flex"><span>Gravity: </span><span>{{planet.planet_gravity}}
+                                    m/s²</span></div>
+                            <div class="info-item flex"><span>Distance: </span><span>{{planet.planet_average_distance}}
+                                    L</span></div>
+                            <div class="info-item flex"><span>Temperature: </span><span>{{planet.planet_surface_temp}}
+                                    K</span></div>
+                        </div>
+                        @if (planet.moons.length > 0) {
+                        <div class="right flex-column">
+                            <strong><span>Moons</span></strong>
+                            @for (moon of planet.moons; track moon.moon_id) {
+                            <div class="likes flex" id="moon-likes">
+                                <span class="moon-item">{{moon.moon_name}}</span>
+                                <div class="like flex">
+                                    <span>{{solarSystem.likes_count}}</span>
+                                    <img id="like-icon" src="/icons/like.png" alt="">
+                                </div>
+                            </div>
+                            }
+                        </div>
+                        }
                         }
                     </div>
                 </div>
@@ -102,11 +110,19 @@
 
         <!-- Actions -->
         <div class="actions-and-likes-container flex">
-            <span>Likes: {{solarSystem.likes_count}}</span>
-            <button>edit system</button>
+            <div class="likes flex">
+                <span>{{solarSystem.likes_count}}</span>
+                <img id="like-icon" src="/icons/like.png" alt="">
+            </div>
+            <button (click)="unclaimSystem(solarSystem.solar_system_id)">unclaim system</button>
+            <button (click)="editSystem(solarSystem.solar_system_id)">edit system</button>
         </div>
 
     </div>
     }
 </div>
+} @else if (this.isLoaded) {
+    <div class="no-systems flex">
+        <span>You have nothing to edit, you can claim up to 3 solar systems !</span>
+    </div>
 }

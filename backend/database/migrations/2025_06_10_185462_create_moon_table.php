@@ -28,14 +28,14 @@ return new class extends Migration
             $table->integer('moon_orbital_period')->unsigned();
             $table->integer('moon_inclination_angle')->unsigned();
             $table->integer('moon_rotation_period')->unsigned();
-            $table->bigInteger('moon_mass')->unsigned();
-            $table->integer('moon_diameter')->unsigned();
+            $table->bigInteger('moon_mass')->unsigned(); // x 10^24kg
+            $table->bigInteger('moon_diameter')->unsigned();
             $table->integer('moon_rings')->unsigned();
             $table->integer('moon_initial_x');
             $table->integer('moon_initial_y');
             $table->integer('moon_initial_z');
             $table->foreignId('planet_id')->references('planet_id')->on('planet');
-            $table->foreignId('user_id')->references('user_id')->on('user');
+            $table->foreignId('user_id')->nullable()->references('user_id')->on('user')->onDelete('set null');
         });
 
         // Adding check constrains

@@ -5,7 +5,7 @@ import { SolarSystem } from '../../interfaces/solar-system/solar-system.interfac
 import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { Planet } from '../../interfaces/solar-system/planet.interface';
-import { LikesService } from '../../services/likes/likes.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-systems',
@@ -19,7 +19,7 @@ export class SystemsComponent implements OnInit {
   isLoaded: boolean = false;
   expandedPlanetId: number | null = null;
 
-  constructor(public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private likesService: LikesService) { }
+  constructor(private router: Router, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService) { }
 
   ngOnInit(): void {
     // If user is not logged in
@@ -35,7 +35,7 @@ export class SystemsComponent implements OnInit {
     this.galaxiesService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
       next: (data) => {
         this.solarSystems = data.solar_systems;
-        console.log(this.solarSystems);
+        //here we need to get images....
         this.isLoaded = true;
       },
       error: (error) => {
@@ -63,7 +63,6 @@ export class SystemsComponent implements OnInit {
       }, 500);
     }
   }
-
 
   isPlanetExpanded(planet: any): boolean {
     return this.expandedPlanetId === planet.planet_id;
@@ -139,4 +138,23 @@ export class SystemsComponent implements OnInit {
     return system.planets.length;
   }
 
+  unclaimSystem(solarSystemId: number){
+    this.galaxiesService.unclaimSolarSystem(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, solarSystemId).subscribe({
+      next: (data) => {
+        this.getSystems();
+        this.notificationService.showSuccess('You successfully unclaimed this system', 2500, '/systems');
+      },
+      error: (error) => {
+        this.notificationService.showError(error.error?.message || 'Something went wrong, please try again later', 5000, '/home');
+      }
+    });
+  }
+
+  editSystem(solarSystemId: number){
+    this.router.navigate(['/edit-system', solarSystemId]);
+  }
+
+  noSystemNotification(){
+    this.notificationService.showError('You can claim up to 3 solar systems', 2500, '/home');
+  }
 }

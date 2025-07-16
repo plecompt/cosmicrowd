@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Models\SolarSystem;
+use App\Models\Planet;
+use App\Models\Moon;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -68,6 +70,16 @@ class ClaimController
         $solarSystem->user_id = $userId;
         $solarSystem->save();
 
+        // Claim all planets and their moons
+        $planets = Planet::where('solar_system_id', $solarSystemId)->get();
+        
+        foreach ($planets as $planet) {
+            $planet->user_id = $userId;
+            $planet->save();
+            // Claim all moons of this planet
+            Moon::where('planet_id', $planet->planet_id)->update(['user_id' => $userId]);
+        }
+
         return $this->success($solarSystem, 'Solar system claimed successfully !');
     }
 
@@ -94,6 +106,16 @@ class ClaimController
 
         $solarSystem->user_id = null;
         $solarSystem->save();
+
+        // Unclaim all planets and their moons
+        $planets = Planet::where('solar_system_id', $solarSystemId)->get();
+        
+        foreach ($planets as $planet) {
+            $planet->user_id = null;
+            $planet->save();
+            // Unclaim all moons of this planet
+            Moon::where('planet_id', $planet->planet_id)->update(['user_id' => null]);
+        }
 
         return $this->success($solarSystem, 'Solar system unclaimed successfully !');
     }

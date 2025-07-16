@@ -106,13 +106,15 @@
   gap: 10px;
 }
 
-.planet-card-bottom, .planet-card-top {
+.planet-card-bottom,
+.planet-card-top {
   width: 100%;
   height: 50%;
   justify-content: space-evenly;
 }
 
-.left, .right {
+.left,
+.right {
   width: auto;
   height: 100%;
   gap: 5px;
@@ -149,10 +151,6 @@
   text-overflow: ellipsis;
 }
 
-.moon-item {
-  margin-top: 2px;
-}
-
 .actions-and-likes-container {
   display: flex;
   justify-content: space-between;
@@ -161,8 +159,31 @@
 
 #planet-likes {
   position: absolute;
-  left: 10px;
-  top: 10px;
+  left: 5px;
+  top: 0px;
+}
+
+#moon-likes {
+  gap: 10px;
+}
+
+.likes, .like {
+  align-items: center;
+}
+
+.no-systems {
+  width: 90%;
+  height: 80%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  justify-content: center;
+  align-items: center;
+  
+  span {
+    font-size: 20px;
+  }
 }
 
 @media (width < 1100px) or (height < 1000px) {
@@ -187,12 +208,18 @@
 
   .planet-card.expanded {
     width: 90vw;
-    height: 60vh;
+    height: auto;
   }
 
-  .planet-card-top, .planet-card-bottom {
-    height: 50%;
+  .planet-card-top,
+  .planet-card-bottom {
+    height: auto;
     width: 100%;
+    gap: 20px;
+  }
+
+  .planet-card-bottom {
+    flex-direction: column;
   }
 
   .planet-card img {
@@ -200,5 +227,4 @@
     height: 100%;
     width: 100%;
   }
-
 }

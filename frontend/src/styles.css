@@ -76,3 +76,9 @@ input {
   position: absolute;
   left: -100000px;
 }
+
+#like-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+}

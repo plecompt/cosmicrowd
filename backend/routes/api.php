@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MoonController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ClaimController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\RateLimitMiddleware as RateLimit;
@@ -17,14 +18,17 @@ use App\Http\Middleware\RateLimitMiddleware as RateLimit;
 // Routes publiques (pas d'authentification requise)
 Route::prefix('v1')->group(function () {
     // Authentification
-    Route::post('auth/register', [AuthController::class, 'register']); //inscription
     Route::post('auth/login', [AuthController::class, 'login']); //login
-    Route::post('auth/forgot-password', [AuthController::class, 'forgotPassword']); //envoi du token par mail
-    Route::post('auth/verify-token', [AuthController::class, 'verifyToken']); // verification du token
-    Route::post('auth/reset-password', [AuthController::class, 'resetPassword']); // changement de mdp apres mdp oublié
-    Route::post('auth/check-login', [AuthController::class, 'checkLoginAvailability']); //verifie si un login est disponible en bdd
-    Route::post('auth/check-email', [AuthController::class, 'checkEmailAvailability']); //verifie si un mdp est disponible en bdd
-    Route::post('auth/contact', [AuthController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utiliateur
+    
+    // User
+    Route::post('users/register', [UserController::class, 'register']); //inscription
+    Route::post('users/forgot-password', [UserController::class, 'forgotPassword']); //envoi du token par mail
+    Route::post('users/verify-token', [UserController::class, 'verifyToken']); // verification du token
+    Route::post('users/reset-password', [UserController::class, 'resetPassword']); // changement de mdp apres mdp oublié
+    Route::post('users/check-login', [UserController::class, 'checkLoginAvailability']); //verifie si un login est disponible en bdd
+    Route::post('users/check-email', [UserController::class, 'checkEmailAvailability']); //verifie si un mdp est disponible en bdd
+    Route::post('users/contact', [UserController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utiliateur
+    Route::get('/user/{userId}', [UserController::class, 'view']);//retourne un user
 
     // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
@@ -60,19 +64,18 @@ Route::prefix('v1')->group(function () {
     
     // ClaimController, check if the system is claimable for given user id
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [ClaimController::class, 'isClaimable']); //retourne si le system est 'claimable' pour l'utilisateur donné
-
-    // User
-    Route::get('/user/{userId}', [UserController::class, 'view']);//retourne un user
 });
 
 // Routes protégées (authentification requise)
 Route::prefix('v1')->middleware(['auth:sanctum', RateLimit::class])->group(function () {
-    // Authentification
-    Route::get('auth/me', [AuthController::class, 'me']); //retourn qui est l'user actuellement connecté (grace au token)
+    // Auth
     Route::post('auth/logout', [AuthController::class, 'logout']); //deconnexion
-    Route::post('auth/change-password', [AuthController::class, 'changePassword']); //changement mdp via profil
-    Route::post('auth/change-email', [AuthController::class, 'changeEmail']); //changement de mail via profil
-    Route::post('auth/delete-account', [AuthController::class, 'deleteAccount']); //suppression du compte
+    Route::get('auth/me', [AuthController::class, 'me']); //retourn l'utilisateur actuel
+
+    // User
+    Route::post('users/change-password', [UserController::class, 'changePassword']); //changement mdp via profil
+    Route::post('users/change-email', [UserController::class, 'changeEmail']); //changement de mail via profil
+    Route::post('users/delete-account', [UserController::class, 'deleteAccount']); //suppression du compte
       
     // Solar Systems (modification) Pour l'instant, pas d'ajout et de suppression des systemes solaires, juste modifications des systems pré-générés, a voir plus tard
     Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update']);
@@ -109,6 +112,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api', IsAdmin::class]
     Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'destroy']); //suppression d'un systeme solaire
     
     // User
-    Route::post('/user/{userId}', [UserController::class, 'add']); //ajout d'un user
-    Route::delete('/user/{userId}', [UserController::class, 'delete']); //suppression d'un user
+    Route::post('/user/{userId}', [AdminController::class, 'add']); //ajout d'un user
+    Route::delete('/user/{userId}', [AdminController::class, 'delete']); //suppression d'un user
 });

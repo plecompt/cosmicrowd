@@ -7,11 +7,12 @@ import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password
 import { ChangePasswordComponent } from './pages/change-password/change-password.component';
 import { ChangeEmailComponent } from './pages/change-email/change-email.component';
 import { SystemViewComponent } from './pages/system-view/system-view.component';
+import { SystemEditComponent } from './pages/system-edit/system-edit.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { DeleteAccountComponent } from './pages/delete-account/delete-account.component';
 import { ContactComponent } from './pages/contact/contact.component';
-import { StylizedSystemComponent } from './pages/poc/poc';
+
 
 export const routes: Routes = [
     { path: '', component: HomeComponent, title: 'CosmiCrowd'},
@@ -26,7 +27,7 @@ export const routes: Routes = [
     { path: 'reset-password', component: ResetPasswordComponent, title: 'CosmiCrowd - Reset Password' },
     { path: 'profile', component: ProfileComponent, title: 'CosmiCrowd - Profile' },
     { path: 'systems', component: SystemsComponent, title: 'CosmiCrowd - Systems' },
-    { path: 'system-view', component: SystemViewComponent, title: 'CosmiCrowd - System' },
-    { path: 'poc', component: StylizedSystemComponent, title: 'CosmiCrowd - System' },
+    { path: 'view-system/:id', component: SystemViewComponent, title: 'CosmiCrowd - View System' },
+    { path: 'edit-system/:id', component: SystemEditComponent, title: 'CosmiCrowd - Edit System' },
     { path: '**', redirectTo: '' }
 ];

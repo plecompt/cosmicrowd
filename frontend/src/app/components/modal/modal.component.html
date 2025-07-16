@@ -10,6 +10,9 @@
         <pre>{{ modalData.content }}</pre> 
       </div>
       <div class="modal-footer">
+        @if (modalData.showView) {
+          <button class="btn btn-secondary" (click)="onView()">View</button>
+        }
         @if (modalData.showClaim) {
           <button class="btn btn-secondary" (click)="onClaim()">Claim</button>
         }

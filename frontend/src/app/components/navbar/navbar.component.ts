@@ -47,6 +47,7 @@ export class NavigationBarComponent {
    logout(){
     this.isMenuOpen = false; //closing dropdown menu
     this.authService.logout().subscribe();
+    this.authService.navigateTo('/home');
    }
 
    toggleMenu(){

@@ -32,46 +32,47 @@ export class HomeComponent implements OnInit {
   }
 
 
-  loadStats(): void {
-    this.galaxiesService.getStats().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.stats = response.stats;
-        }
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des statistiques:', error);
-      }
-    });
-  }
+  // loadStats(): void {
+  //   this.galaxiesService.getStats().subscribe({
+  //     next: (response) => {
+  //       if (response.success) {
+  //         this.stats = response.stats;
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Erreur lors du chargement des statistiques:', error);
+  //     }
+  //   });
+  // }
 
-  loadRecentSolarSystems(): void {
-    this.galaxiesService.getRecentSolarSystems().subscribe({
-      next: (response) => {
-        if (response) {
-          this.recentSolarSystems = response.recent_solar_systems;
-        }
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des system solaires récents:', error);
-      }
-    });
-  }
+  // loadRecentSolarSystems(): void {
+  //   this.galaxiesService.getRecentSolarSystems().subscribe({
+  //     next: (response) => {
+  //       if (response) {
+  //         this.recentSolarSystems = response.recent_solar_systems;
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Erreur lors du chargement des system solaires récents:', error);
+  //     }
+  //   });
+  // }
+
+  
+  // loadMostLikedSolarSytems(): void {
+  //   this.galaxiesService.getMostLikedSolarSystems().subscribe({
+  //     next: (response) => {
+  //       if (response) {
+  //         this.mostLikedSolarSystems = response.most_liked_solar_systems;
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Erreur lors du chargement des étoiles populaires:', error);
+  //     }
+  //   });
+  // }
 
   onSolarSystemClick(solarSystem: SolarSystem): void {
     this.selectedSolarSystem = solarSystem;
-  }
-
-  loadMostLikedSolarSytems(): void {
-    this.galaxiesService.getMostLikedSolarSystems().subscribe({
-      next: (response) => {
-        if (response) {
-          this.mostLikedSolarSystems = response.most_liked_solar_systems;
-        }
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des étoiles populaires:', error);
-      }
-    });
   }
 }

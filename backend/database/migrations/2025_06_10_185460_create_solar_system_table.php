@@ -21,9 +21,9 @@ return new class extends Migration
             ]);
             $table->float('solar_system_gravity')->unsigned();
             $table->float('solar_system_surface_temp');
-            $table->integer('solar_system_diameter')->unsigned();
-            $table->bigInteger('solar_system_mass')->unsigned();
-            $table->integer('solar_system_luminosity')->unsigned();
+            $table->bigInteger('solar_system_diameter')->unsigned();
+            $table->bigInteger('solar_system_mass')->unsigned(); // x 10^24kg
+            $table->bigInteger('solar_system_luminosity')->unsigned();
             $table->integer('solar_system_initial_x');
             $table->integer('solar_system_initial_y');
             $table->integer('solar_system_initial_z');

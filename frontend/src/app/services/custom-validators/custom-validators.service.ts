@@ -159,7 +159,7 @@ export class CustomValidatorsService {
       if (!control.value) return of(null);
 
       // Call API to check login availability
-      return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/auth/check-login', { login: control.value })
+      return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/users/check-login', { login: control.value })
         .pipe(
           // Debounce to avoid too many API calls
           debounceTime(200),
@@ -178,7 +178,7 @@ export class CustomValidatorsService {
       if (!control.value) return of(null);
 
       // Call API to check email availability
-      return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/auth/check-email', { email: control.value })
+      return this.http.post<{available: boolean}>('http://localhost:8000/api/v1/users/check-email', { email: control.value })
         .pipe(
           // Debounce to avoid too many API calls
           debounceTime(200),
