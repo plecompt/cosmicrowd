@@ -1,0 +1,145 @@
+@if (isVisible && planet) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Planet: {{ planet.planet_name }}</h3>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-grid">
+          <!-- Basic Information -->
+          <div class="form-group">
+            <label>Name:</label>
+            <input type="text" [(ngModel)]="planet.planet_name" maxlength="50" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Description:</label>
+            <textarea [(ngModel)]="planet.planet_desc" maxlength="255" class="form-textarea" rows="3"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Type:</label>
+            <select [(ngModel)]="planet.planet_type" class="form-select">
+              <option value="terrestrial">Terrestrial</option>
+              <option value="gas_giant">Gas Giant</option>
+              <option value="ice_giant">Ice Giant</option>
+              <option value="dwarf">Dwarf</option>
+              <option value="asteroid">Asteroid</option>
+            </select>
+          </div>
+          
+          <!-- Physical Properties -->
+          <div class="form-group">
+            <label>Gravity (m/s²):</label>
+            <input type="number" [(ngModel)]="planet.planet_gravity" min="0" step="0.1" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Surface Temperature (K):</label>
+            <input type="number" [(ngModel)]="planet.planet_surface_temp" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Mass (×10²⁴ kg):</label>
+            <input type="number" [(ngModel)]="planet.planet_mass" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Diameter (km):</label>
+            <input type="number" [(ngModel)]="planet.planet_diameter" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Rings:</label>
+            <input type="number" [(ngModel)]="planet.planet_rings" min="0" class="form-input">
+          </div>
+          
+          <!-- Orbital Properties -->
+          <div class="form-group">
+            <label>Orbital Longitude (°):</label>
+            <input type="number" [(ngModel)]="planet.planet_orbital_longitude" min="0" max="360" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Eccentricity:</label>
+            <input type="number" [(ngModel)]="planet.planet_eccentricity" min="0" max="1" step="0.01" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Apogee (km):</label>
+            <input type="number" [(ngModel)]="planet.planet_apogee" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Perigee (km):</label>
+            <input type="number" [(ngModel)]="planet.planet_perigee" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Orbital Inclination (°):</label>
+            <input type="number" [(ngModel)]="planet.planet_orbital_inclination" min="0" max="360" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Average Distance (km):</label>
+            <input type="number" [(ngModel)]="planet.planet_average_distance" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Orbital Period (days):</label>
+            <input type="number" [(ngModel)]="planet.planet_orbital_period" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Inclination Angle (°):</label>
+            <input type="number" [(ngModel)]="planet.planet_inclination_angle" min="0" max="360" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Rotation Period (hours):</label>
+            <input type="number" [(ngModel)]="planet.planet_rotation_period" min="0" class="form-input">
+          </div>
+        </div>
+        
+        <!-- Moons Section -->
+        <div class="moons-section">
+          <div class="section-header">
+            <h4>Moons ({{ planet.moons.length }})</h4>
+            <button type="button" (click)="addMoon()" class="btn btn-add">Add Moon</button>
+          </div>
+          
+          @if (planet.moons.length === 0) {
+            <div class="empty-state">
+              <p>No moons yet. Click "Add Moon" to create one!</p>
+            </div>
+          } @else {
+            <div class="moons-list">
+              @for (moon of planet.moons; track moon.moon_id) {
+                <div class="moon-item">
+                  <div class="moon-info">
+                    <h5>{{ moon.moon_name }}</h5>
+                    <p>{{ moon.moon_type | titlecase }} - {{ moon.moon_diameter }}km</p>
+                  </div>
+                  <div class="moon-actions">
+                    <button type="button" (click)="editMoon(moon)" class="btn btn-edit">Edit</button>
+                    <button type="button" (click)="deleteMoon(moon.moon_id)" class="btn btn-delete">Delete</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" (click)="closeModal()" class="btn btn-secondary">Cancel</button>
+        <button type="button" (click)="savePlanet()" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Moon Edit -->
+<app-moon-edit [moon]="selectedMoon" [isVisible]="isMoonEditVisible" (save)="onMoonSaved($event)" (close)="closeMoonModal()"></app-moon-edit>

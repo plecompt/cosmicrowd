@@ -1,0 +1,116 @@
+@if (isVisible && moon) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Moon: {{ moon.moon_name }}</h3>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-grid">
+          <!-- Basic Information -->
+          <div class="form-group">
+            <label>Name:</label>
+            <input type="text" [(ngModel)]="moon.moon_name" maxlength="50" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Description:</label>
+            <textarea [(ngModel)]="moon.moon_desc" maxlength="255" class="form-textarea" rows="3"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Type:</label>
+            <select [(ngModel)]="moon.moon_type" class="form-select">
+              <option value="rocky">Rocky</option>
+              <option value="icy">Icy</option>
+              <option value="mixed">Mixed</option>
+              <option value="primitive">Primitive</option>
+              <option value="regular">Regular</option>
+              <option value="irregular">Irregular</option>
+              <option value="trojan">Trojan</option>
+              <option value="coorbital">Coorbital</option>
+            </select>
+          </div>
+          
+          <!-- Physical Properties -->
+          <div class="form-group">
+            <label>Gravity (m/s²):</label>
+            <input type="number" [(ngModel)]="moon.moon_gravity" min="0" step="0.1" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Surface Temperature (K):</label>
+            <input type="number" [(ngModel)]="moon.moon_surface_temp" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Mass (×10²⁴ kg):</label>
+            <input type="number" [(ngModel)]="moon.moon_mass" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Diameter (km):</label>
+            <input type="number" [(ngModel)]="moon.moon_diameter" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Rings:</label>
+            <input type="number" [(ngModel)]="moon.moon_rings" min="0" class="form-input">
+          </div>
+          
+          <!-- Orbital Properties -->
+          <div class="form-group">
+            <label>Orbital Longitude (°):</label>
+            <input type="number" [(ngModel)]="moon.moon_orbital_longitude" min="0" max="360" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Eccentricity:</label>
+            <input type="number" [(ngModel)]="moon.moon_eccentricity" min="0" max="1" step="0.01" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Apogee (km):</label>
+            <input type="number" [(ngModel)]="moon.moon_apogee" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Perigee (km):</label>
+            <input type="number" [(ngModel)]="moon.moon_perigee" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Orbital Inclination (°):</label>
+            <input type="number" [(ngModel)]="moon.moon_orbital_inclination" min="0" max="360" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Average Distance (km):</label>
+            <input type="number" [(ngModel)]="moon.moon_average_distance" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Orbital Period (days):</label>
+            <input type="number" [(ngModel)]="moon.moon_orbital_period" min="0" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Inclination Angle (°):</label>
+            <input type="number" [(ngModel)]="moon.moon_inclination_angle" min="0" max="360" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label>Rotation Period (hours):</label>
+            <input type="number" [(ngModel)]="moon.moon_rotation_period" min="0" class="form-input">
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" (click)="closeModal()" class="btn btn-secondary">Cancel</button>
+        <button type="button" (click)="saveMoon()" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+}

@@ -13,12 +13,7 @@ return new class extends Migration
             $table->id('solar_system_id');
             $table->string('solar_system_name', 50);
             $table->string('solar_system_desc', 255)->nullable();
-            $table->enum('solar_system_type', [
-                'brown_dwarf', 'red_dwarf', 'yellow_dwarf', 'white_dwarf',
-                'red_giant', 'blue_giant', 'red_supergiant', 'blue_supergiant',
-                'hypergiant', 'neutron_star', 'pulsar', 'variable',
-                'binary', 'ternary', 'black_hole'
-            ]);
+            $table->enum('solar_system_type', ['brown_dwarf', 'red_dwarf', 'yellow_dwarf', 'white_dwarf', 'red_giant', 'blue_giant', 'red_supergiant', 'blue_supergiant', 'hypergiant', 'neutron_star', 'pulsar', 'variable', 'binary', 'ternary', 'black_hole']);
             $table->float('solar_system_gravity')->unsigned();
             $table->float('solar_system_surface_temp');
             $table->bigInteger('solar_system_diameter')->unsigned();

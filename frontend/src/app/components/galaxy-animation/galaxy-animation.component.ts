@@ -98,6 +98,9 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
     // Set initial camera position for panoramic view
     this.setCameraPositionAndOrientation(16, -265, 45, -160, 80);
+
+    // Load SkyBox
+    this.createSkyBox();
   }
 
   private onResize = () => {
@@ -144,6 +147,19 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       this.scene.add(sprite);
       this.systems.push(sprite);
     });
+  }
+
+  private createSkyBox(){
+    const loader = new THREE.CubeTextureLoader();
+    const skybox = loader.load([
+      'skybox/galaxy/right.png',
+      'skybox/galaxy/left.png',
+      'skybox/galaxy/top.png',
+      'skybox/galaxy/bottom.png',
+      'skybox/galaxy/front.png',
+      'skybox/galaxy/back.png'
+    ]);
+    this.scene.background = skybox;
   }
 
   private createTexture(color: THREE.Color): THREE.Texture {

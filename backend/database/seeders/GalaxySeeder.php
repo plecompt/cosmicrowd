@@ -6,31 +6,34 @@ use Illuminate\Database\Seeder;
 use App\Models\Galaxy;
 use App\Models\SolarSystem;
 use App\Utils\Vector3;
-use App\Utils\StellarRanges;
 use App\Models\Planet;
 use App\Models\Moon;
-
 
 class GalaxySeeder extends Seeder
 {
     // Galaxy configuration
     private const CONFIG = [
-        'NUM_SYSTEMS' => 2000, // per arm
+        'NUM_SYSTEMS' => 2000,
         'NUM_ARMS' => 4,
         'GALAXY_THICKNESS' => 5,
-        'CORE_X_DIST' => 33,
-        'CORE_Y_DIST' => 33,
-        'GALAXY_RADIUS' => 1000,
         'ARM_X_DIST' => 100,
         'ARM_Y_DIST' => 50,
-        'ARM_X_MEAN' => 50, // arm center
-        'ARM_Y_MEAN' => 25, // arm center
-        'SPIRAL_FORCE' => 2.0, // spiral strength
+        'ARM_X_MEAN' => 50,
+        'ARM_Y_MEAN' => 25,
+        'SPIRAL_FORCE' => 2.0,
+        'GALAXY_RADIUS' => 1000,
+    ];
+
+    // Planet types by distance zones
+    private const PLANET_ZONES = [
+        'inner' => ['terrestrial', 'lava', 'super_earth'], // Rocky planets close to star
+        'habitable' => ['terrestrial', 'ocean', 'super_earth'], // Goldilocks zone
+        'outer' => ['gas', 'ice', 'sub_neptune'], // Gas giants far from star
+        'kuiper' => ['ice', 'dwarf'] // Frozen objects at edge
     ];
 
     public function run()
     {      
-        // Create galaxy
         $galaxy = Galaxy::factory()->create([
             'galaxy_name' => 'CosmiCrowd Galaxy',
             'galaxy_desc' => 'Collaborative spiral galaxy generated for CosmiCrowd',
@@ -38,7 +41,6 @@ class GalaxySeeder extends Seeder
             'galaxy_age' => rand(8, 14)
         ]);
         
-        // Generate solar systems
         $this->generateSolarSystems($galaxy->galaxy_id);
     }
 
@@ -60,16 +62,133 @@ class GalaxySeeder extends Seeder
                     'galaxy_id' => $galaxyId,
                 ]);
 
-                // Generate planets for this system
-                $this->generatePlanets($solarSystem->solar_system_id);
+                $this->generatePlanets($solarSystem);
             }
         }
     }
 
-    /**
-     * Generate random number following Gaussian/Normal distribution
-     * Uses Box-Muller transformation
-     */
+    private function generatePlanets($solarSystem)
+    {
+        $numPlanets = rand(0, 8);
+        $starDiameter = $solarSystem->solar_system_diameter;
+        
+        for($i = 0; $i < $numPlanets; $i++) {
+            // Calculate orbital distance (closer planets first)
+            $baseDistance = 50000000 + ($i * 200000000); // 50M km base + 200M km per planet
+            $orbitalDistance = $baseDistance + rand(-20000000, 20000000); // Add variation
+            
+            // Determine planet zone and type
+            $zone = $this->getPlanetZone($i, $numPlanets);
+            $planetType = $this->getRandomElement(self::PLANET_ZONES[$zone]);
+            
+            // Planet size based on zone and star size
+            $planetDiameter = $this->calculatePlanetDiameter($zone, $starDiameter);
+            
+            // Calculate orbital position for Three.js with orbital inclination
+            $orbitalInclination = rand(-15, 15) * M_PI / 180; // Small inclination
+            $orbitalAngle = rand(0, 360) * M_PI / 180;
+            $orbitalRadius = $orbitalDistance / 50000000; // Better scale for Three.js (1 unit = 50M km)
+            
+            $planet = Planet::factory()->create([
+                'solar_system_id' => $solarSystem->solar_system_id,
+                'user_id' => null,
+                'planet_type' => $planetType,
+                'planet_diameter' => $planetDiameter,
+                'planet_average_distance' => $orbitalDistance,
+                'planet_perigee' => $orbitalDistance * 0.98,
+                'planet_apogee' => $orbitalDistance * 1.02,
+                'planet_initial_x' => cos($orbitalAngle) * $orbitalRadius,
+                'planet_initial_y' => sin($orbitalInclination) * $orbitalRadius,
+                'planet_initial_z' => sin($orbitalAngle) * $orbitalRadius,
+                'planet_mass' => $this->calculatePlanetMass($planetDiameter, $planetType),
+                'planet_surface_temp' => $this->calculatePlanetTemperature($orbitalDistance),
+                // 'planet_orbital_inclination' => $orbitalInclination * 180 / M_PI,
+            ]);
+            
+            $this->generateMoons($planet);
+        }
+    }
+
+    private function generateMoons($planet)
+    {
+        // Gas giants have more moons
+        $maxMoons = in_array($planet->planet_type, ['gas', 'sub_neptune']) ? 5 : 2;
+        $numMoons = rand(0, $maxMoons);
+        
+        for($i = 0; $i < $numMoons; $i++) {
+            $moonDistance = 500000 + ($i * 300000); // 500k km base + 300k km per moon
+            $moonInclination = rand(-30, 30) * M_PI / 180; // More varied inclination for moons
+            $moonAngle = rand(0, 360) * M_PI / 180;
+            $orbitalRadius = $moonDistance / 10000000; // Scale for Three.js (1 unit = 10M km)
+            
+            // Calculate moon position relative to planet
+            $moonRelativeX = cos($moonAngle) * $orbitalRadius;
+            $moonRelativeY = sin($moonInclination) * $orbitalRadius;
+            $moonRelativeZ = sin($moonAngle) * $orbitalRadius;
+            
+            Moon::factory()->create([
+                'planet_id' => $planet->planet_id,
+                'user_id' => null,
+                'moon_diameter' => $planet->planet_diameter * rand(10, 30) / 100,
+                'moon_average_distance' => $moonDistance,
+                'moon_perigee' => $moonDistance * 0.95,
+                'moon_apogee' => $moonDistance * 1.05,
+                'moon_initial_x' => $planet->planet_initial_x + $moonRelativeX,
+                'moon_initial_y' => $planet->planet_initial_y + $moonRelativeY,
+                'moon_initial_z' => $planet->planet_initial_z + $moonRelativeZ,
+                'moon_mass' => rand(10, 100),
+                // 'moon_orbital_inclination' => $moonInclination * 180 / M_PI,
+            ]);
+        }
+    }
+
+    private function getPlanetZone(int $planetIndex, int $totalPlanets): string
+    {
+        $ratio = $planetIndex / max($totalPlanets - 1, 1);
+        
+        if ($ratio < 0.2) return 'inner';
+        if ($ratio < 0.4) return 'habitable';
+        if ($ratio < 0.8) return 'outer';
+        return 'kuiper';
+    }
+
+    private function calculatePlanetDiameter(string $zone, int $starDiameter): int
+    {
+        $maxDiameter = $starDiameter * 0.1; // Max 10% of star size
+        
+        return match($zone) {
+            'inner' => rand(2000000, min(15000000, $maxDiameter)), // Small rocky
+            'habitable' => rand(8000000, min(20000000, $maxDiameter)), // Earth-like
+            'outer' => rand(40000000, min(140000000, $maxDiameter)), // Gas giants
+            'kuiper' => rand(1000000, min(5000000, $maxDiameter)), // Dwarf planets
+        };
+    }
+
+    private function calculatePlanetMass(int $diameter, string $type): int
+    {
+        $baseMass = ($diameter / 1000000) * 10; // Base calculation
+        
+        return match($type) {
+            'gas', 'sub_neptune' => $baseMass * rand(80, 120) / 100, // Less dense
+            'terrestrial', 'super_earth' => $baseMass * rand(120, 150) / 100, // Dense
+            default => $baseMass
+        };
+    }
+
+    private function calculatePlanetTemperature(int $distance): float
+    {
+        // Simplified temperature calculation based on distance
+        $solarConstant = 1361; // W/m²
+        $temperature = 278 * pow($distance / 149597870700, -0.5); // Kelvin
+        
+        return max(0, min(773, $temperature));
+    }
+
+    private function getRandomElement(array $array): mixed
+    {
+        return $array[array_rand($array)];
+    }
+
     private function gaussianRandom(float $center = 0.0, float $deviation = 1.0): float 
     {
         $u = mt_rand() / mt_getrandmax();
@@ -88,32 +207,5 @@ class GalaxySeeder extends Seeder
         $theta += ($r / self::CONFIG['ARM_X_DIST']) * self::CONFIG['SPIRAL_FORCE'];
 
         return new Vector3($r * cos($theta), $r * sin($theta), $z);
-    }
-
-    private function generatePlanets(int $solarSystemId)
-    {
-        $numPlanets = rand(0, 8);
-        
-        for($i = 0; $i < $numPlanets; $i++) {
-            $planet = Planet::factory()->create([
-                'solar_system_id' => $solarSystemId,
-                'user_id' => null, // Not claimed initially
-            ]);
-            
-            // Generate moons for this planet
-            $this->generateMoons($planet->planet_id);
-        }
-    }
-
-    private function generateMoons(int $planetId)
-    {
-        $numMoons = rand(0, 3);
-        
-        for($i = 0; $i < $numMoons; $i++) {
-            Moon::factory()->create([
-                'planet_id' => $planetId,
-                'user_id' => null, // Not claimed initially
-            ]);
-        }
     }
 }

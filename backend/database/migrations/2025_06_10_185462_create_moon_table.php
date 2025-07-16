@@ -13,10 +13,7 @@ return new class extends Migration
             $table->id('moon_id');
             $table->string('moon_desc', 255)->nullable();
             $table->string('moon_name', 50);
-            $table->enum('moon_type', [
-                'rocky', 'icy', 'mixed', 'primitive',
-                'regular', 'irregular', 'trojan', 'coorbital'
-            ]);
+            $table->enum('moon_type', ['rocky', 'icy', 'mixed', 'primitive', 'regular', 'irregular', 'trojan', 'coorbital']);
             $table->float('moon_gravity')->unsigned();
             $table->float('moon_surface_temp');
             $table->float('moon_orbital_longitude')->unsigned();

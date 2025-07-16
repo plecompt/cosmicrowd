@@ -13,10 +13,7 @@ return new class extends Migration
             $table->id('planet_id');
             $table->string('planet_desc', 255)->nullable();
             $table->string('planet_name', 50);
-            $table->enum('planet_type', [
-                'terrestrial', 'gas', 'ice', 'super_earth',
-                'sub_neptune', 'dwarf', 'lava', 'carbon', 'ocean'
-            ]);
+            $table->enum('planet_type', ['terrestrial', 'gas', 'ice', 'super_earth', 'sub_neptune', 'dwarf', 'lava', 'carbon', 'ocean']);
             $table->float('planet_gravity')->unsigned();
             $table->float('planet_surface_temp');
             $table->float('planet_orbital_longitude')->unsigned();

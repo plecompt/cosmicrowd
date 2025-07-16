@@ -20,6 +20,7 @@ export interface Moon {
   moon_initial_x: number;
   moon_initial_y: number;
   moon_initial_z: number;
+  planet_id: number;
   galaxy_id: number;
   user_id: number;
   likes_count?: number;

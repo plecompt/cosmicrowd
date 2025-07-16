@@ -1,5 +1,8 @@
+galaxy:
 https://beltoforion.de/en/spiral_galaxy_renderer/
-
 https://www.youtube.com/watch?app=desktop&v=rd_VCToelw4
-
 https://www.youtube.com/watch?v=o_bEveIFfoM&t=4521s
+
+skybox:
+https://steamcommunity.com/sharedfiles/filedetails/?id=1858089917
+https://sourceforge.net/projects/spacescape/

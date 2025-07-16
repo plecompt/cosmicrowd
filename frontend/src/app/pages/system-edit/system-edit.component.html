@@ -1,3 +1,159 @@
-@if (authService.isLoggedIn() && this.solarSystem) {
-    <p>Bonjour</p>
-}
+<div class="edit-container">
+  @if (authService.isLoggedIn() && solarSystem) {
+    <app-system-animation [solarSystem]="solarSystem" [viewMode]="'edit'"></app-system-animation>
+    
+    <div class="edit-overlay">
+      <div class="edit-panel">
+        <div class="panel-header">
+          <h2>Edit Solar System</h2>
+          <button class="close-btn" (click)="goBack()">×</button>
+        </div>
+        
+        <div class="panel-content">
+          <!-- System Basic Info -->
+          <div class="section">
+            <h3>System Information</h3>
+            <div class="form-group">
+              <label>Name:</label>
+              <input 
+                type="text" 
+                [(ngModel)]="solarSystem.solar_system_name" 
+                (blur)="updateSystemName()"
+                maxlength="50"
+                class="form-input">
+            </div>
+            
+            <div class="form-group">
+              <label>Description:</label>
+              <textarea 
+                [(ngModel)]="solarSystem.solar_system_desc" 
+                (blur)="updateSystemDescription()"
+                maxlength="255"
+                class="form-textarea"
+                rows="3">
+              </textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Star Type:</label>
+              <select 
+                [(ngModel)]="solarSystem.solar_system_type" 
+                (change)="updateStarType()"
+                class="form-select">
+                <option value="brown_dwarf">Brown Dwarf</option>
+                <option value="red_dwarf">Red Dwarf</option>
+                <option value="yellow_dwarf">Yellow Dwarf</option>
+                <option value="white_dwarf">White Dwarf</option>
+                <option value="red_giant">Red Giant</option>
+                <option value="blue_giant">Blue Giant</option>
+                <option value="red_supergiant">Red Supergiant</option>
+                <option value="blue_supergiant">Blue Supergiant</option>
+                <option value="hypergiant">Hypergiant</option>
+                <option value="neutron_star">Neutron Star</option>
+                <option value="pulsar">Pulsar</option>
+                <option value="variable">Variable</option>
+                <option value="binary">Binary</option>
+                <option value="ternary">Ternary</option>
+                <option value="black_hole">Black Hole</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Star Properties -->
+          <div class="section">
+            <h3>Star Properties</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Gravity:</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="solarSystem.solar_system_gravity" 
+                  (blur)="updateStarProperties()"
+                  min="0"
+                  step="0.1"
+                  class="form-input">
+              </div>
+              
+              <div class="form-group">
+                <label>Surface Temperature (K):</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="solarSystem.solar_system_surface_temp" 
+                  (blur)="updateStarProperties()"
+                  min="0"
+                  step="1"
+                  class="form-input">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Diameter (km):</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="solarSystem.solar_system_diameter" 
+                  (blur)="updateStarProperties()"
+                  min="0"
+                  step="1"
+                  class="form-input">
+              </div>
+              
+              <div class="form-group">
+                <label>Mass (x10²⁴kg):</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="solarSystem.solar_system_mass" 
+                  (blur)="updateStarProperties()"
+                  min="0"
+                  step="1"
+                  class="form-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Luminosity (L):</label>
+              <input 
+                type="number" 
+                [(ngModel)]="solarSystem.solar_system_luminosity" 
+                (blur)="updateStarProperties()"
+                min="0"
+                step="1"
+                class="form-input">
+            </div>
+          </div>
+
+          <!-- Planets List -->
+          <div class="section">
+            <h3>Planets ({{ solarSystem.planets.length || 0 }})</h3>
+            <div class="planets-list">
+              @for (planet of solarSystem.planets; track planet.planet_id) {
+                <div class="planet-item">
+                  <div class="planet-info">
+                    <span class="planet-name">{{ planet.planet_name }}</span>
+                    <span class="planet-type">{{ planet.planet_type }}</span>
+                    <span class="moon-count">{{ planet.moons.length || 0 }} moons</span>
+                  </div>
+                  <div class="planet-actions">
+                    <button class="btn-edit" (click)="planetEdit(planet)">Edit</button>
+                    <button class="btn-delete" (click)="deletePlanet(planet.planet_id)">Delete</button>
+                  </div>
+                </div>
+              }
+            </div>
+            <button class="btn-add" (click)="addPlanet()">Add Planet</button>
+          </div>
+
+          <!-- Actions -->
+          <div class="section actions">
+            <button class="btn-save" (click)="saveChanges()">Save Changes</button>
+            <button class="btn-cancel" (click)="goBack()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Planet Edit Modal -->
+    <app-planet-edit [planet]="selectedPlanet" [isVisible]="showPlanetEdit" (close)="closePlanetEdit()" (save)="savePlanet($event)" (editMoonEvent)="editMoon($event)" (deleteMoonEvent)="deleteMoon($event)" (addMoonEvent)="addMoon()"></app-planet-edit>
+
+  }
+</div>
