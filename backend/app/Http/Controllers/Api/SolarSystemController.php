@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use App\Models\Moon;
 use App\Models\Planet;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Log;
 
 class SolarSystemController
 {
+    use ApiResponse;
+
     // Get all solarSystem for given galaxyId with full information
     public function index($galaxyId): JsonResponse
     {
@@ -27,9 +30,9 @@ class SolarSystemController
                 ->select('*')
                 ->get();
 
-            return response()->json($solarSystems);
+            return $this->success($solarSystems);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while getting solar systems'], 500);
+            return $this->error('Error while getting solar systems', 500);
         }
     }
 
@@ -43,14 +46,12 @@ class SolarSystemController
                 ->first();
 
             if (!$solarSystem) {
-                return response()->json(['error' => 'Solar system not found'], 404);
+                return $this->error('Solar system not found', 404);
             }
 
-            return response()->json([
-                'solar_system' => $solarSystem
-            ]);
+            return $this->success(['solar_system' => $solarSystem]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while getting solar system'], 500);
+            return $this->error('Error while getting solar system', 500);
         }
     }
 
@@ -64,11 +65,9 @@ class SolarSystemController
             ->where('galaxy_id', $galaxyId)
             ->findOrFail($solarSystemId);
 
-            return response()->json([
-                'owner' => $solarSystem->owner ? $solarSystem->owner->user_login : null
-            ]);
+            return $this->success(['owner' => $solarSystem->owner ? $solarSystem->owner->user_login : null]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while getting owner'], 500);
+            return $this->error('Error while getting owner', 500);
         }
     }
 
@@ -96,11 +95,9 @@ class SolarSystemController
                 }
             }
 
-            return response()->json([
-                'solar_systems' => $solarSystems
-            ]);
+            return $this->success(['solar_systems' => $solarSystems]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while getting solar systems'], 500);
+            return $this->error('Error while getting solar systems', 500);
         }
     }
 
@@ -122,7 +119,7 @@ class SolarSystemController
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return $this->error('Validation failed', 422, $validator->errors());
         }
 
         try {
@@ -130,10 +127,9 @@ class SolarSystemController
             $solarSystem->galaxy_id = $galaxyId;
             $solarSystem->save();
 
-            return response()->json(['message' => 'Solar system created successfully', 'solar_system' => $solarSystem], 201);
+            return $this->success(['solar_system' => $solarSystem], 'Solar system created successfully', 201);
         } catch (\Exception $e) {
-            Log::error('Error adding solar system: ' . $e->getMessage());
-            return response()->json(['error' => 'Error while adding solar system'], 500);
+            return $this->error('Error while adding solar system', 500);
         }
     }
 
@@ -155,22 +151,21 @@ class SolarSystemController
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return $this->error('Validation failed', 422, $validator->errors());
         }
 
         try {
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)->where('solar_system_id', $solarSystemId)->first();
 
             if (!$solarSystem) {
-                return response()->json(['error' => 'Solar system not found'], 404);
+                return $this->error('Solar system not found', 404);
             }
 
             $solarSystem->update($validator->validated());
 
-            return response()->json(['message' => 'Solar system updated successfully', 'solar_system' => $solarSystem]);
+            return $this->success(['solar_system' => $solarSystem], 'Solar system updated successfully');
         } catch (\Exception $e) {
-            Log::error('Error updating solar system: ' . $e->getMessage());
-            return response()->json(['error' => 'Error while updating solar system'], 500);
+            return $this->error('Error while updating solar system', 500);
         }
     }
 
@@ -181,15 +176,14 @@ class SolarSystemController
             $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)->where('solar_system_id', $solarSystemId)->first();
 
             if (!$solarSystem) {
-                return response()->json(['error' => 'Solar system not found'], 404);
+                return $this->error('Solar system not found', 404);
             }
 
             $solarSystem->delete();
 
-            return response()->json(['message' => 'Solar system deleted successfully']);
+            return $this->success(null, 'Solar system deleted successfully');
         } catch (\Exception $e) {
-            Log::error('Error deleting solar system: ' . $e->getMessage());
-            return response()->json(['error' => 'Error while deleting solar system'], 500);
+            return $this->error('Error while deleting solar system', 500);
         }
     }
 }

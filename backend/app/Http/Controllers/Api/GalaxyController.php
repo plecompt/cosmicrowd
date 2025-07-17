@@ -2,65 +2,61 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Traits\ApiResponse;
 use App\Models\Galaxy;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class GalaxyController
 {
-    // Return the list of all galaxy with their solarSystems, their planets and moons
-    public function index()
+    use ApiResponse;
+
+    // Return the list of all galaxies with their solarSystems, planets and moons count
+    public function index(): JsonResponse
     {
         $galaxies = Galaxy::withCount(['solarSystems', 'planets', 'moons'])->get();
-        
-        return response()->json($galaxies);
+        return $this->success($galaxies, 'All galaxies retrieved');
     }
 
-    // Return the given galaxy with galaxy's solarSystems, planets and moons
-    public function show($id)
+    // Return a specific galaxy with solarSystems, planets and moons count
+    public function show($id): JsonResponse
     {
         $galaxy = Galaxy::withCount(['solarSystems', 'planets', 'moons'])
             ->findOrFail($id);
-            
-        return response()->json($galaxy);
+        return $this->success($galaxy, 'Galaxy retrieved');
     }
 
-    // Return the list of SolarSystems in the given galaxy, used for main animation
-    public function getSolarSystemsForAnimation($id)
+    // Return the list of solarSystems in the given galaxy, used for main animation
+    public function getSolarSystemsForAnimation($id): JsonResponse
     {
         $galaxy = Galaxy::findOrFail($id);
-        
         $solarSystems = $galaxy->solarSystems()
             ->leftJoin('user', 'solar_system.user_id', '=', 'user.user_id')
             ->select('solar_system.*', 'user.user_login')
             ->get();
-            
-        return response()->json($solarSystems);
+        return $this->success($solarSystems, 'Solar systems for animation retrieved');
     }
 
     // Return the most liked solarSystems
-    public function getMostLikedSolarSystems($id)
+    public function getMostLikedSolarSystems($id): JsonResponse
     {
         $galaxy = Galaxy::findOrFail($id);
-        
         $solarSystems = $galaxy->solarSystems()
             ->withCount('likes')
             ->orderBy('likes_count', 'desc')
-            ->take(10) // See later => may be an .env variable
+            ->take(10)
             ->get();
-            
-        return response()->json($solarSystems);
+        return $this->success($solarSystems, 'Most liked solar systems retrieved');
     }
 
     // Return the most recent solarSystems
-    public function getRecentSolarSystems($id)
+    public function getRecentSolarSystems($id): JsonResponse
     {
         $galaxy = Galaxy::findOrFail($id);
-        
         $solarSystems = $galaxy->solarSystems()
             ->orderBy('created_at', 'desc')
-            ->take(10) // See later => may be an .env variable
+            ->take(10)
             ->get();
-            
-        return response()->json($solarSystems);
+        return $this->success($solarSystems, 'Most recent solar systems retrieved');
     }
 }

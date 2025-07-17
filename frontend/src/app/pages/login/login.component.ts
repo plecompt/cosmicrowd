@@ -57,7 +57,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         next: () => {
           this.authService.me().subscribe({
             next: (response: any) => {
-              this.user = response.user;
+              this.user = response.data.user;
               const capitalizedLogin = this.titleCasePipe.transform(this.user.user_login);
               this.notificationService.showSuccess(`Welcome back, ${capitalizedLogin} !`, 1500, '/home');
             }

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use App\Models\RecoveryToken;
 use App\Rules\StrongPassword;
 use App\Models\SolarSystem;
+use App\Models\Planet;
+use App\Models\Moon;
 use App\Models\LikeSolarSystem;
 use App\Models\LikePlanet;
 use App\Models\LikeMoon;
@@ -19,18 +22,20 @@ use Illuminate\Validation\ValidationException;
 
 class UserController
 {
+    use ApiResponse;
+
     // Check if login is available
     public function checkLoginAvailability(Request $request) {
         $available = !User::where('user_login', $request->login)->exists();
         
-        return response()->json(['available' => $available]);
+        return $this->success(['available' => $available]);
     }
 
     // Check if email is available
     public function checkEmailAvailability(Request $request) {
         $available = !User::where('user_email', $request->email)->exists();
         
-        return response()->json(['available' => $available]);
+        return $this->success(['available' => $available]);
     }
 
     // Return a user
@@ -40,16 +45,12 @@ class UserController
             $userId = $request->input('userId');
             
             if (!$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Need a userId'
-                ], 400);
+                return $this->error('Need a userId', 400);
             }
             
             $user = User::findOrFail($userId);
             
-            return response()->json([
-                'success' => true,
+            return $this->success([
                 'user' => [
                     'user_id' => $user->user_id,
                     'user_login' => $user->user_login,
@@ -59,13 +60,10 @@ class UserController
                     'user_last_login' => $user->user_last_login,
                     'user_date_inscription' => $user->user_date_inscription
                 ]
-            ], 200);
+            ]);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found'
-            ], 404);
+            return $this->error('User not found', 404);
         }
     }
 
@@ -81,10 +79,7 @@ class UserController
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => $validator->errors()
-                ], 400);
+                return $this->error('Validation failed', 400, $validator->errors());
             }
 
             $contactData = [
@@ -109,16 +104,10 @@ class UserController
                     ->subject('Message Received - CosmiCrowd');
             });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Mail succesfully send'
-            ], 200);
+            return $this->success(null, 'Mail successfully send');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error while sending your email, please try again.'
-            ], 500);
+            return $this->error('Error while sending your email, please try again.', 500);
         }
     }
 
@@ -142,11 +131,11 @@ class UserController
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
+        return $this->success([
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user
-        ], 201);
+        ], 'User registered successfully', 201);
     }
 
     // Change password
@@ -169,7 +158,7 @@ class UserController
             'user_password' => Hash::make($request->new_password)
         ]);
 
-        return response()->json(['message' => 'Password successfully changed.']);
+        return $this->success(null, 'Password successfully changed.');
     }
 
     // Change email
@@ -192,7 +181,7 @@ class UserController
             'user_email' => $request->new_email
         ]);
 
-        return response()->json(['message' => 'Email successfully changed.']);
+        return $this->success(null, 'Email successfully changed.');
     }
 
     // ForgotPassword, send an email with a token to reset password
@@ -203,19 +192,13 @@ class UserController
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 400);
+            return $this->error('Validation failed', 400, $validator->errors());
         }
 
         $user = User::where('user_email', $request->user_email)->first();
 
         if (!$user->user_active) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This account has been disabled.'
-            ], 403);
+            return $this->error('This account has been disabled.', 403);
         }
 
         $recoveryToken = RecoveryToken::createForUser($user->user_id);
@@ -226,10 +209,7 @@ class UserController
             $message->subject('Password reset request');
         });
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Recovery email sent.'
-        ]);
+        return $this->success(null, 'Recovery email sent.');
     }
 
     // Return if the current token is valid or not (expired, used, invalid)
@@ -238,22 +218,20 @@ class UserController
         $token = RecoveryToken::where('recovery_token_value', $request->token)->first();
 
         if (!$token) {
-            return response()->json(['success' => false, 'message' => 'Token not found.'], 404);
+            return $this->error('Token not found.', 404);
         }
 
         if ($token->recovery_token_used) {
-            return response()->json(['success' => false, 'message' => 'Token already used.'], 409);
+            return $this->error('Token already used.', 409);
         }
 
         if ($token->recovery_token_expires_at <= now()) {
-            return response()->json(['success' => false, 'message' => 'Token expired.'], 410);
+            return $this->error('Token expired.', 410);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Valid token.',
+        return $this->success([
             'user_id' => $token->recovery_token_user_id
-        ]);
+        ], 'Valid token.');
     }
 
     //change the password after a forgotten password
@@ -265,27 +243,18 @@ class UserController
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 400);
+            return $this->error('Validation failed', 400, $validator->errors());
         }
 
         $recoveryToken = RecoveryToken::findValidToken($request->token);
 
         if (!$recoveryToken) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid or expired token.'
-            ], 400);
+            return $this->error('Invalid or expired token.', 400);
         }
 
         $user = $recoveryToken->user;
         if (!$user->user_active) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This account has been disabled.'
-            ], 403);
+            return $this->error('This account has been disabled.', 403);
         }
 
         $user->update([
@@ -294,10 +263,7 @@ class UserController
 
         $recoveryToken->markAsUsed();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Password successfully reset.'
-        ]);
+        return $this->success(null, 'Password successfully reset.');
     }
 
     // Delete account
@@ -333,8 +299,6 @@ class UserController
         // Deleting user
         $user->delete();
 
-        return response()->json([
-            'message' => 'Account successfully deleted.'
-        ]);
+        return $this->success(null, 'Account successfully deleted.');
     }
 }

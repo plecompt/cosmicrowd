@@ -33,13 +33,13 @@ export class SystemsComponent implements OnInit {
   getSystems() {
     const user_id = parseInt(localStorage.getItem('user_id') || '');
     this.galaxiesService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
-      next: (data) => {
-        this.solarSystems = data.solar_systems;
+      next: (systems) => {
+        this.solarSystems = systems.data.solar_systems;
         //here we need to get images....
         this.isLoaded = true;
       },
       error: (error) => {
-        this.notificationService.showError(error.error?.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }
@@ -140,12 +140,12 @@ export class SystemsComponent implements OnInit {
 
   unclaimSystem(solarSystemId: number){
     this.galaxiesService.unclaimSolarSystem(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, solarSystemId).subscribe({
-      next: (data) => {
+      next: () => {
         this.getSystems();
         this.notificationService.showSuccess('You successfully unclaimed this system', 2500, '/systems');
       },
       error: (error) => {
-        this.notificationService.showError(error.error?.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }

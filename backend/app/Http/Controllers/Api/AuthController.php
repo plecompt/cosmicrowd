@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use App\Models\RecoveryToken;
 use App\Rules\StrongPassword;
@@ -19,6 +20,8 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController
 {
+    use ApiResponse;
+
     // Login
     public function login(Request $request): JsonResponse
     {
@@ -47,11 +50,11 @@ class AuthController
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
+        return $this->success([
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user
-        ]);
+        ], 'Login successful');
     }
 
     // Logout
@@ -59,14 +62,14 @@ class AuthController
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Successfully logged out.']);
+        return $this->success(null, 'Successfully logged out');
     }
 
-    // me, return current user using token in header
+    // Me, return current user using token in header
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['succes' => true, 'user' => $request->user()]);
+        return $this->success([
+            'user' => $request->user()
+        ], 'Current user retrieved');
     }
-
-
 }

@@ -51,7 +51,7 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
           this.authService.logout().subscribe();
         },
         error: () => {
-          this.changeEmailErrorMessage = "Invalid password, or email is allready taken";
+          this.changeEmailErrorMessage = "Invalid password or email is allready taken";
         }
       })
     } else {

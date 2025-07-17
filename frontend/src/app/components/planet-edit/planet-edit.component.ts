@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Moon, MoonType } from '../../interfaces/solar-system/moon.interface';
 import { User } from '../../interfaces/user/user.interface';
@@ -12,9 +12,9 @@ import { TitleCasePipe } from '@angular/common';
   standalone: true,
   imports: [FormsModule, MoonEditComponent, TitleCasePipe],
   templateUrl: './planet-edit.component.html',
-  styleUrls: ['./planet-edit.component.css']
+  styleUrls: ['./planet-edit.component.css', '../../shared/styles/edit.template.css']
 })
-export class PlanetEditComponent {
+export class PlanetEditComponent implements OnInit {
   @Input() planet: any = null;
   @Input() isVisible: boolean = false;
   @Output() close = new EventEmitter<void>();
@@ -30,14 +30,18 @@ export class PlanetEditComponent {
 
   constructor(private authService: AuthService, private notificationService: NotificationService){}
 
+  ngOnInit(): void {
+    this.getUser();
+  }
+
   //get current user
   getUser(){
     this.authService.me().subscribe({
       next: (response: any) => {
-        this.user = response.user;
+        this.user = response.data.user;
       },
       error: () => {
-        this.notificationService.showError('Something wen`t wrong, please try again later', 5000, '/systems');
+        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
       }
     })
   }
@@ -80,6 +84,11 @@ export class PlanetEditComponent {
 
   addMoon(): void {
     if (!this.planet) return;
+
+    // Initialize moons array if it doesn't exist
+    if (!this.planet.moons) {
+      this.planet.moons = [];
+    }
 
     const newMoon: Moon = {
       moon_id: -42, // Temporary ID

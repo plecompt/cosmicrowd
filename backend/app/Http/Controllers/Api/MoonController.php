@@ -2,47 +2,49 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Traits\ApiResponse;
 use App\Models\Moon;
-use App\Models\Planet;
+use App\Models\UserSystemOwnership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 
 class MoonController
 {
+    use ApiResponse;
+
     // Return the list of moons for given planetId
-    public function index($galaxyId, $solarSystemId, $planetId)
+    public function index($galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
             $moons = Moon::where('planet_id', $planetId)->get();
-            return response()->json($moons);
+            return $this->success($moons, 'Moons retrieved');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while fetching moons'], 500);
+            return $this->error('Error while fetching moons', 500);
         }
     }
 
     // Return the moon for given moonId
-    public function show($galaxyId, $solarSystemId, $planetId, $moonId)
+    public function show($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
             $moon = Moon::findOrFail($moonId);
-            return response()->json($moon);
+            return $this->success($moon, 'Moon retrieved');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while fetching moon'], 500);
+            return $this->error('Error while fetching moon', 500);
         }
     }
 
     // Create a new moon for given galaxyId/solarSystemId/planetId
-    public function store(Request $request, $galaxyId, $solarSystemId, $planetId)
+    public function store(Request $request, $galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
-            // Verify that user own the current solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
 
             if (!$ownership) {
-                return response()->json(['error' => 'You don\'t own this solar system'], 403);
+                return $this->error("You don't own this solar system", 403);
             }
 
             $validated = $request->validate([
@@ -68,53 +70,31 @@ class MoonController
                 'moon_initial_z' => 'required|integer'
             ]);
 
-            // Verify perigee is lower than apogee
             if ($validated['moon_perigee'] > $validated['moon_apogee']) {
-                return response()->json(['error' => 'Perigee must be less than apogee'], 422);
+                return $this->error('Perigee must be less than apogee', 422);
             }
 
-            $moon = Moon::create([
+            $moon = Moon::create(array_merge($validated, [
                 'planet_id' => $planetId,
-                'user_id' => Auth::id(),
-                'moon_name' => $validated['moon_name'],
-                'moon_desc' => $validated['moon_desc'],
-                'moon_type' => $validated['moon_type'],
-                'moon_gravity' => $validated['moon_gravity'],
-                'moon_surface_temp' => $validated['moon_surface_temp'],
-                'moon_orbital_longitude' => $validated['moon_orbital_longitude'],
-                'moon_eccentricity' => $validated['moon_eccentricity'],
-                'moon_apogee' => $validated['moon_apogee'],
-                'moon_perigee' => $validated['moon_perigee'],
-                'moon_orbital_inclination' => $validated['moon_orbital_inclination'],
-                'moon_average_distance' => $validated['moon_average_distance'],
-                'moon_orbital_period' => $validated['moon_orbital_period'],
-                'moon_inclination_angle' => $validated['moon_inclination_angle'],
-                'moon_rotation_period' => $validated['moon_rotation_period'],
-                'moon_mass' => $validated['moon_mass'],
-                'moon_diameter' => $validated['moon_diameter'],
-                'moon_rings' => $validated['moon_rings'],
-                'moon_initial_x' => $validated['moon_initial_x'],
-                'moon_initial_y' => $validated['moon_initial_y'],
-                'moon_initial_z' => $validated['moon_initial_z']
-            ]);
+                'user_id' => Auth::id()
+            ]));
 
-            return response()->json($moon, 201);
+            return $this->success($moon, 'Moon created successfully', 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while creating moon'], 500);
+            return $this->error('Error while creating moon', 500);
         }
     }
 
-    // Updating a moon for given galaxyId/solarSystemId/planetId
-    public function update(Request $request, $galaxyId, $solarSystemId, $planetId, $moonId)
+    // Update a moon
+    public function update(Request $request, $galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
-            // Verify that owner own the solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
 
             if (!$ownership) {
-                return response()->json(['error' => 'You don\'t own this solar system'], 403);
+                return $this->error("You don't own this solar system", 403);
             }
 
             $moon = Moon::findOrFail($moonId);
@@ -142,44 +122,41 @@ class MoonController
                 'moon_initial_z' => 'sometimes|integer'
             ]);
 
-            // perigee must be lower than apogee
-            if (isset($validated['moon_perigee']) && isset($validated['moon_apogee'])) {
-                if ($validated['moon_perigee'] > $validated['moon_apogee']) {
-                    return response()->json(['error' => 'Perigee must be less than apogee'], 422);
-                }
+            if (isset($validated['moon_perigee'], $validated['moon_apogee']) &&
+                $validated['moon_perigee'] > $validated['moon_apogee']) {
+                return $this->error('Perigee must be less than apogee', 422);
             }
 
             $moon->update($validated);
 
-            return response()->json($moon);
+            return $this->success($moon, 'Moon updated successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while updating moon'], 500);
+            return $this->error('Error while updating moon', 500);
         }
     }
 
-    // Delete moon for given galaxyId/solarSystemId/planetId
-    public function destroy($galaxyId, $solarSystemId, $planetId, $moonId)
+    // Delete moon
+    public function destroy($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
-            // Verify owner own solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
 
             if (!$ownership) {
-                return response()->json(['error' => 'You don\'t own this solar system'], 403);
+                return $this->error("You don't own this solar system", 403);
             }
 
             $moon = Moon::findOrFail($moonId);
             $moon->delete();
 
-            return response()->json(['message' => 'Moon deleted successfully']);
+            return $this->success(null, 'Moon deleted successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while deleting moon'], 500);
+            return $this->error('Error while deleting moon', 500);
         }
     }
 
-    // Get current owner for given galaxyId/solarSystemId/planetId/moonId
+    // Get current owner of the moon
     public function getOwner($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
@@ -190,18 +167,12 @@ class MoonController
             ->find($moonId);
 
             if (!$moon) {
-                return response()->json([
-                    'error' => 'Moon not found'
-                ], 404);
+                return $this->error('Moon not found', 404);
             }
 
-            return response()->json([
-                'owner' => $moon->user
-            ]);
+            return $this->success(['owner' => $moon->user], 'Moon owner retrieved');
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error while getting owner'
-            ], 500);
+            return $this->error('Error while getting owner', 500);
         }
     }
 }

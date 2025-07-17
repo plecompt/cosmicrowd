@@ -2,35 +2,43 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Traits\ApiResponse;
 use App\Models\LikeSolarSystem;
 use App\Models\LikePlanet;
 use App\Models\LikeMoon;
 use App\Models\LikeWallpaper;
-use App\Models\Moon;
-use App\Models\Planet;
-use App\Models\SolarSystem;
-use App\Models\Wallpaper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class LikeController
 {
-    // WIP
-    function countSolarSystemLikes($solarSystemId) {
-        return LikeSolarSystem::where('solar_system_id', $solarSystemId)->count();
+    use ApiResponse;
+
+    // WIP: Count likes for a solar system
+    public function countSolarSystemLikes($solarSystemId): JsonResponse
+    {
+        $count = LikeSolarSystem::where('solar_system_id', $solarSystemId)->count();
+        return $this->success(['count' => $count], 'Solar system like count retrieved');
     }
 
-    function countPlanetLikes($planetId) {
-        return LikePlanet::where('planet_id', $planetId)->count();
+    // WIP: Count likes for a planet
+    public function countPlanetLikes($planetId): JsonResponse
+    {
+        $count = LikePlanet::where('planet_id', $planetId)->count();
+        return $this->success(['count' => $count], 'Planet like count retrieved');
     }
 
-    function countMoonLikes($moonId) {
-        return LikeMoon::where('moon_id', $moonId)->count();
+    // WIP: Count likes for a moon
+    public function countMoonLikes($moonId): JsonResponse
+    {
+        $count = LikeMoon::where('moon_id', $moonId)->count();
+        return $this->success(['count' => $count], 'Moon like count retrieved');
     }
 
-    function countWallpaperLikes($wallpaperId) {
-        return LikeWallpaper::where('wallpaper_id', $wallpaperId)->count();
+    // WIP: Count likes for a wallpaper
+    public function countWallpaperLikes($wallpaperId): JsonResponse
+    {
+        $count = LikeWallpaper::where('wallpaper_id', $wallpaperId)->count();
+        return $this->success(['count' => $count], 'Wallpaper like count retrieved');
     }
-} 
+}

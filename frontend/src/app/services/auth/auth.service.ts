@@ -16,9 +16,9 @@ export class AuthService {
   }
 
   private setSession(authResult: any) {
-    localStorage.setItem('token', authResult.access_token);
-    localStorage.setItem('user_id', authResult.user.user_id.toString());
-    localStorage.setItem('user_login', authResult.user.user_login.toString());
+    localStorage.setItem('token', authResult.data.access_token);
+    localStorage.setItem('user_id', authResult.data.user.user_id.toString());
+    localStorage.setItem('user_login', authResult.data.user.user_login.toString());
   }
 
   public isLoggedIn(){

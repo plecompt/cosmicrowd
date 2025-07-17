@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { FormsModule } from '@angular/forms';
 import { ModalService } from '../../services/modal/modal.service';
+import { NotificationService } from '../../services/notifications/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,7 +17,7 @@ export class NavigationBarComponent {
   searchQuery: string = '';
   searchResults: any[] = [];
 
-  constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService, private modalService: ModalService){}
+  constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService, private modalService: ModalService, private notificationService: NotificationService){}
 
   onSearch(): void {
     this.isMenuOpen = false; //closing dropdown menu
@@ -24,11 +25,11 @@ export class NavigationBarComponent {
     if (this.searchQuery.trim()) {
       this.galaxiesService.searchStars(this.searchQuery).subscribe({
         next: (response) => {
-          this.searchResults = response.results || [];
+          this.searchResults = response.data.results || [];
           this.showModal(this.searchResults);
         },
         error: (error) => {
-          alert(`error in the backend: ${error}`);
+          this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
         }
       });
     }

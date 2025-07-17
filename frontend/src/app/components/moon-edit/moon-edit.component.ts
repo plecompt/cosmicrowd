@@ -8,7 +8,7 @@ import { Moon } from '../../interfaces/solar-system/moon.interface';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './moon-edit.component.html',
-  styleUrls: ['./moon-edit.component.css']
+  styleUrls: ['./moon-edit.component.css', '../../shared/styles/edit.template.css']
 })
 export class MoonEditComponent {
   @Input() moon: Moon | null = null;

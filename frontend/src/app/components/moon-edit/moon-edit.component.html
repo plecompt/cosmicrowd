@@ -91,18 +91,18 @@
           </div>
           
           <div class="form-group">
-            <label>Orbital Period (days):</label>
-            <input type="number" [(ngModel)]="moon.moon_orbital_period" min="0" class="form-input">
+            <label>Position (relative to planet) X:</label>
+            <input type="number" [(ngModel)]="moon.moon_initial_x" min="-5000" max="5000" class="form-input">
           </div>
-          
+
           <div class="form-group">
-            <label>Inclination Angle (°):</label>
-            <input type="number" [(ngModel)]="moon.moon_inclination_angle" min="0" max="360" class="form-input">
+            <label>Position (relative to planet) Y:</label>
+            <input type="number" [(ngModel)]="moon.moon_initial_y" min="-5000" max="5000" class="form-input">
           </div>
-          
+
           <div class="form-group">
-            <label>Rotation Period (hours):</label>
-            <input type="number" [(ngModel)]="moon.moon_rotation_period" min="0" class="form-input">
+            <label>Position (relative to planet) Z:</label>
+            <input type="number" [(ngModel)]="moon.moon_initial_z" min="-5000" max="5000" class="form-input">
           </div>
         </div>
       </div>

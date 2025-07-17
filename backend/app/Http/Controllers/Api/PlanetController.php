@@ -10,42 +10,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use App\Http\Traits\ApiResponse;
 
 class PlanetController
 {
-    // Return the list of planets for given SolarSystemId
+    use ApiResponse;
+
     public function index($galaxyId, $solarSystemId)
     {
         try {
             $planets = Planet::where('solar_system_id', $solarSystemId)->get();
-            return response()->json($planets);
+            return $this->success($planets, 'Planets fetched successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while fetching planets'], 500);
+            return $this->error('Error while fetching planets', 500);
         }
     }
 
-    // Return the planet for given planetId
     public function show($galaxyId, $solarSystemId, $planetId)
     {
         try {
             $planet = Planet::findOrFail($planetId);
-            return response()->json($planet);
+            return $this->success($planet, 'Planet fetched successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while fetching planet'], 500);
+            return $this->error('Error while fetching planet', 500);
         }
     }
 
-    // Create a new planet for given solarSystemId
     public function store(Request $request, $galaxyId, $solarSystemId)
     {
         try {
-            // Verify owner own solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
 
             if (!$ownership) {
-                return response()->json(['error' => 'You don\'t own this solar system'], 403);
+                return $this->error('You don\'t own this solar system', 403);
             }
 
             $validated = $request->validate([
@@ -71,53 +70,30 @@ class PlanetController
                 'planet_initial_z' => 'required|integer'
             ]);
 
-            // Checking perigee < apogee
             if ($validated['planet_perigee'] > $validated['planet_apogee']) {
-                return response()->json(['error' => 'Perigee must be less than apogee'], 422);
+                return $this->error('Perigee must be less than apogee', 422);
             }
 
-            $planet = Planet::create([
+            $planet = Planet::create(array_merge($validated, [
                 'solar_system_id' => $solarSystemId,
-                'user_id' => Auth::id(),
-                'planet_name' => $validated['planet_name'],
-                'planet_desc' => $validated['planet_desc'],
-                'planet_type' => $validated['planet_type'],
-                'planet_gravity' => $validated['planet_gravity'],
-                'planet_surface_temp' => $validated['planet_surface_temp'],
-                'planet_orbital_longitude' => $validated['planet_orbital_longitude'],
-                'planet_eccentricity' => $validated['planet_eccentricity'],
-                'planet_apogee' => $validated['planet_apogee'],
-                'planet_perigee' => $validated['planet_perigee'],
-                'planet_orbital_inclination' => $validated['planet_orbital_inclination'],
-                'planet_average_distance' => $validated['planet_average_distance'],
-                'planet_orbital_period' => $validated['planet_orbital_period'],
-                'planet_inclination_angle' => $validated['planet_inclination_angle'],
-                'planet_rotation_period' => $validated['planet_rotation_period'],
-                'planet_mass' => $validated['planet_mass'],
-                'planet_diameter' => $validated['planet_diameter'],
-                'planet_rings' => $validated['planet_rings'],
-                'planet_initial_x' => $validated['planet_initial_x'],
-                'planet_initial_y' => $validated['planet_initial_y'],
-                'planet_initial_z' => $validated['planet_initial_z']
-            ]);
+                'user_id' => Auth::id()
+            ]));
 
-            return response()->json($planet, 201);
+            return $this->success($planet, 'Planet created successfully', 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while creating planet'], 500);
+            return $this->error('Error while creating planet', 500);
         }
     }
 
-    // Update planet for given solarSystemId
     public function update(Request $request, $galaxyId, $solarSystemId, $planetId)
     {
         try {
-            // Verify owner own solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
 
             if (!$ownership) {
-                return response()->json(['error' => 'You don\'t own this solar system'], 403);
+                return $this->error('You don\'t own this solar system', 403);
             }
 
             $planet = Planet::findOrFail($planetId);
@@ -145,70 +121,58 @@ class PlanetController
                 'planet_initial_z' => 'sometimes|integer'
             ]);
 
-            // Check perigee < apogee
-            if (isset($validated['planet_perigee']) && isset($validated['planet_apogee'])) {
-                if ($validated['planet_perigee'] > $validated['planet_apogee']) {
-                    return response()->json(['error' => 'Perigee must be less than apogee'], 422);
-                }
+            if (isset($validated['planet_perigee']) && isset($validated['planet_apogee']) &&
+                $validated['planet_perigee'] > $validated['planet_apogee']) {
+                return $this->error('Perigee must be less than apogee', 422);
             }
 
             $planet->update($validated);
 
-            return response()->json($planet);
+            return $this->success($planet, 'Planet updated successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while updating planet'], 500);
+            return $this->error('Error while updating planet', 500);
         }
     }
 
-    // Delete a planet with planetId
     public function destroy($galaxyId, $solarSystemId, $planetId)
     {
         try {
-            // Check owner own this solarSystem
             $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
                 ->where('user_id', Auth::id())
                 ->first();
 
             if (!$ownership) {
-                return response()->json(['error' => 'You don\'t own this solar system'], 403);
+                return $this->error('You don\'t own this solar system', 403);
             }
 
             $planet = Planet::findOrFail($planetId);
             $planet->delete();
 
-            return response()->json(['message' => 'Planet deleted successfully']);
+            return $this->success(null, 'Planet deleted successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error while deleting planet'], 500);
+            return $this->error('Error while deleting planet', 500);
         }
     }
 
-    // get planet owner
     public function getOwner($galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
-            $planet = Planet::with(['user' => function($query) {
+            $planet = Planet::with(['user' => function ($query) {
                 $query->select('user_id', 'user_login', 'user_email', 'user_role', 'user_date_inscription');
             }])
-            ->where('solar_system_id', $solarSystemId)
-            ->find($planetId);
+                ->where('solar_system_id', $solarSystemId)
+                ->find($planetId);
 
             if (!$planet) {
-                return response()->json([
-                    'error' => 'Planète non trouvée'
-                ], 404);
+                return $this->error('Planet not found', 404);
             }
 
-            return response()->json([
-                'owner' => $planet->user
-            ]);
+            return $this->success(['owner' => $planet->user], 'Planet owner fetched');
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erreur lors de la récupération du propriétaire'
-            ], 500);
+            return $this->error('Error while fetching planet owner', 500);
         }
     }
 
-    //Verify that user own solarSystem
     private function checkPlanetOwnership($solarSystemId)
     {
         $userId = Auth::id();
@@ -216,11 +180,6 @@ class PlanetController
         $ownership = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)
             ->where('user_id', $userId)
             ->first();
-            
-        if (!$ownership) {
-            return false;
-        }
-        
-        return true;
+        return !!$ownership;
     }
 }

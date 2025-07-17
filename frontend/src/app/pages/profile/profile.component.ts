@@ -23,10 +23,14 @@ export class ProfileComponent implements OnInit{
     this.getUser();
   }
 
+  //get current user
   getUser(){
     this.authService.me().subscribe({
       next: (response: any) => {
-        this.user = response.user;
+        this.user = response.data.user;
+      },
+      error: () => {
+        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
       }
     })
   }

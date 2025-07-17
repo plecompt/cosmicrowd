@@ -15,7 +15,7 @@ import { Planet, PlanetType } from '../../interfaces/solar-system/planet.interfa
   selector: 'app-system-edit',
   imports: [SystemAnimationComponent, PlanetEditComponent, FormsModule],
   templateUrl: './system-edit.component.html',
-  styleUrl: './system-edit.component.css'
+  styleUrls: ['./system-edit.component.css', '../../shared/styles/edit.template.css']
 })
 export class SystemEditComponent {
   user!: User;
@@ -29,7 +29,7 @@ export class SystemEditComponent {
 
   constructor(
     private route: ActivatedRoute, 
-    private router: Router, // Add this
+    private router: Router,
     public authService: AuthService, 
     private notificationService: NotificationService, 
     private galaxiesService: GalaxiesService
@@ -45,8 +45,8 @@ export class SystemEditComponent {
   //check user is connected and own this system
   checkOwner() {
     this.galaxiesService.getSolarSystemOwner(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, this.solarSystemId).subscribe({
-      next: (data) => {
-        this.solarSystemOwner = data.owner;
+      next: (systems) => {
+        this.solarSystemOwner = systems.data.owner;
 
         // If user is not logged in or don't own this system
         if (!this.authService.isLoggedIn() || localStorage.getItem('user_login') != this.solarSystemOwner) {
@@ -58,7 +58,7 @@ export class SystemEditComponent {
         }
       },
       error: (error) => {
-        this.notificationService.showError(error.error?.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }
@@ -67,7 +67,10 @@ export class SystemEditComponent {
   getUser(){
     this.authService.me().subscribe({
       next: (response: any) => {
-        this.user = response.user;
+        this.user = response.data.user;
+      },
+      error: () => {
+        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
       }
     })
   }
@@ -76,8 +79,8 @@ export class SystemEditComponent {
     const user_id = parseInt(localStorage.getItem('user_id') || '');
 
     this.galaxiesService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
-      next: (data) => {
-        this.solarSystems = data.solar_systems;
+      next: (solarSystems) => {
+        this.solarSystems = solarSystems.data.solar_systems;
         this.solarSystem = this.solarSystems.find(system => system.solar_system_id == this.solarSystemId);
         console.log(this.solarSystem);
         //in case we didnt find the solarSystem in solarSystems, seem unlikly, might occur if backend die
@@ -86,7 +89,7 @@ export class SystemEditComponent {
         }
       },
       error: (error) => {
-        this.notificationService.showError(error.error?.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }
@@ -123,8 +126,12 @@ export class SystemEditComponent {
     }
   }
 
+  planetShow(planet: any): void {
+    //zoom on planet
+  }
+
   planetEdit(planet: any): void {
-    this.selectedPlanet = { ...planet }; // Copy to avoid direct mutation
+    this.selectedPlanet = { ...planet };
     this.showPlanetEdit = true;
   }
 

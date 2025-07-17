@@ -77,11 +77,7 @@ export class RegisterComponent implements OnInit{
       return;
     }
 
-    this.authService.register(
-      this.registerForm.value.login, 
-      this.registerForm.value.password, 
-      this.registerForm.value.email
-    ).subscribe({
+    this.authService.register(this.registerForm.value.login, this.registerForm.value.password, this.registerForm.value.email).subscribe({
       next: () => {
         this.notificationService.showSuccess('Account created successfully! Welcome to CosmiCrowd !', 3000, '/home');
       },

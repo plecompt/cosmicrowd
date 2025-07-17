@@ -115,10 +115,15 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
   private loadSystems() {
     // Fetch solar systems data from service
-    this.galaxiesService.getSolarSystemsForAnimation(1).subscribe(systems => {
-      this.systemsData = systems || [];
-      // Create sprites for each system
-      this.createSprites();
+    this.galaxiesService.getSolarSystemsForAnimation(1).subscribe({
+      next: (systems) => {
+        this.systemsData = systems.data;
+        // Create sprites for each system
+        this.createSprites();
+      },
+      error: (error: any) => {
+        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later.', 5000, '/home');
+      }
     });
   }
 
@@ -149,7 +154,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private createSkyBox(){
+  private createSkyBox() {
     const loader = new THREE.CubeTextureLoader();
     const skybox = loader.load([
       'skybox/galaxy/right.png',
@@ -227,11 +232,10 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       //we need to load detailed data...
       this.galaxiesService.getSolarSystem(starData['galaxy_id'], starData['solar_system_id']).subscribe({
         next: (systemInformation) => {
-            this.showModal(systemInformation.solar_system);
+          this.showModal(systemInformation.data.solar_system);
         },
-        error: (error) => {
-          const errorMessage = error.error?.message || 'Something went wrong, please try again later.';
-          this.notificationService.showError(errorMessage, 5000, '/home');
+        error: () => {
+          this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
         }
       })
     }
@@ -272,18 +276,15 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
                   this.notificationService.showSuccess(claimResponse.message, 3000, '/systems');
                 },
                 error: (error) => {
-                  const errorMessage = error.error?.message || 'Something went wrong, please try again later.';
-                  this.notificationService.showError(errorMessage, 5000, '/home');
+                  this.notificationService.showError(error.error.message || 'Something went wrong, please try again later.', 5000, '/home');
                 }
               });
             } else {
-              const reason = response.data.reason || 'System cannot be claimed';
-              this.notificationService.showError(reason, 5000, '/home');
+              this.notificationService.showError(response.data.reason || 'System cannot be claimed', 5000, '/home');
             }
           },
           error: (error) => {
-            const errorMessage = error.error?.message || 'Something went wrong, please try again later.';
-            this.notificationService.showError(errorMessage, 5000, '/home');
+            this.notificationService.showError(error.error.message || 'Something went wrong, please try again later.', 5000, '/home');
           }
         });
       },
