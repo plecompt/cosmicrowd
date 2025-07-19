@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PlanetEditComponent } from '../../components/planet-edit/planet-edit.component';
 import { User } from '../../interfaces/user/user.interface';
-import { Planet, PlanetType } from '../../interfaces/solar-system/planet.interface';
+import { SystemValidationService } from '../../services/system-validation/system-validation-service';
 
 @Component({
   selector: 'app-system-edit',
@@ -18,21 +18,25 @@ import { Planet, PlanetType } from '../../interfaces/solar-system/planet.interfa
   styleUrls: ['./system-edit.component.css', '../../shared/styles/edit.template.css']
 })
 export class SystemEditComponent {
+  @ViewChild('editPlanetRef') planetEditComponent!: PlanetEditComponent;
+
+  @Input() refresh: any = null;
+  
   user!: User;
   solarSystemId!: number;
   solarSystemOwner!: string;
   currentGalaxy: number = 1; //actually there is only one galaxy, in the future it might change
   solarSystems!: SolarSystem[];
-  solarSystem!: SolarSystem | undefined;
+  solarSystem!: SolarSystem;
   selectedPlanet: any = null;
-  showPlanetEdit: boolean = false;
 
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private router: Router,
-    public authService: AuthService, 
-    private notificationService: NotificationService, 
-    private galaxiesService: GalaxiesService
+    public authService: AuthService,
+    private notificationService: NotificationService,
+    private galaxiesService: GalaxiesService,
+    private systemValidationService: SystemValidationService,
   ) { }
 
 
@@ -44,7 +48,7 @@ export class SystemEditComponent {
 
   //check user is connected and own this system
   checkOwner() {
-    this.galaxiesService.getSolarSystemOwner(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, this.solarSystemId).subscribe({
+    this.galaxiesService.getSolarSystemOwner(this.currentGalaxy, this.solarSystemId).subscribe({
       next: (systems) => {
         this.solarSystemOwner = systems.data.owner;
 
@@ -64,7 +68,7 @@ export class SystemEditComponent {
   }
 
   //get current user
-  getUser(){
+  getUser() {
     this.authService.me().subscribe({
       next: (response: any) => {
         this.user = response.data.user;
@@ -75,17 +79,20 @@ export class SystemEditComponent {
     })
   }
 
+  //SolarSystem
   getSolarSystems() {
     const user_id = parseInt(localStorage.getItem('user_id') || '');
 
     this.galaxiesService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
       next: (solarSystems) => {
         this.solarSystems = solarSystems.data.solar_systems;
-        this.solarSystem = this.solarSystems.find(system => system.solar_system_id == this.solarSystemId);
-        console.log(this.solarSystem);
+        const result = this.solarSystems.find(system => system.solar_system_id == this.solarSystemId);
         //in case we didnt find the solarSystem in solarSystems, seem unlikly, might occur if backend die
-        if (this.solarSystem == undefined){
+        if (result == undefined) {
           this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+        } else {
+          this.solarSystem = result;
+          console.log(this.solarSystem);
         }
       },
       error: (error) => {
@@ -94,140 +101,32 @@ export class SystemEditComponent {
     });
   }
 
-  // Edit methods
-  updateSystemName(): void {
-    if (this.solarSystem && this.solarSystem.solar_system_name.length <= 50) {
-      console.log('Updating system name:', this.solarSystem.solar_system_name);
+  saveSolarSystem(): void {
+    // Validate system
+    const validation = this.systemValidationService.validateSystem(this.solarSystem);
+
+    if (!validation.isValid) {
+      this.notificationService.showError(validation.errors[0], 2000);
+      return;
     }
+
+    // Updating in db
+    this.galaxiesService.updateSolarSystem(this.currentGalaxy, this.solarSystem.solar_system_id, this.solarSystem).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('You successfully updated your solar system !', 2000);
+      },
+      error: (error) => {
+        this.notificationService.showError(error || 'Something went wrong, please try again later', 5000);
+      }
+    });
+    //in any case, refresh
+    this.getSolarSystems();
   }
 
-  updateSystemDescription(): void {
-    if (this.solarSystem && (!this.solarSystem.solar_system_desc || this.solarSystem.solar_system_desc.length <= 255)) {
-      console.log('Updating system description:', this.solarSystem.solar_system_desc);
-    }
-  }
 
-  updateStarType(): void {
-    if (this.solarSystem) {
-      console.log('Updating star type:', this.solarSystem.solar_system_type);
-    }
-  }
-
-  updateStarProperties(): void {
-    if (this.solarSystem) {
-      // Check constraints
-      if (this.solarSystem.solar_system_gravity < 0) this.solarSystem.solar_system_gravity = 0;
-      if (this.solarSystem.solar_system_surface_temp < 0) this.solarSystem.solar_system_surface_temp = 0;
-      if (this.solarSystem.solar_system_diameter < 0) this.solarSystem.solar_system_diameter = 0;
-      if (this.solarSystem.solar_system_mass < 0) this.solarSystem.solar_system_mass = 0;
-      if (this.solarSystem.solar_system_luminosity < 0) this.solarSystem.solar_system_luminosity = 0;
-      
-      console.log('Updating star properties');
-    }
-  }
-
+  //Planets
   planetShow(planet: any): void {
     //zoom on planet
-  }
-
-  planetEdit(planet: any): void {
-    this.selectedPlanet = { ...planet };
-    this.showPlanetEdit = true;
-  }
-
-  closePlanetEdit(): void {
-    this.showPlanetEdit = false;
-    this.selectedPlanet = null;
-  }
-
-  savePlanet(planet: any): void {
-    // Find and update the planet in the array
-    if (this.solarSystem?.planets){
-      const index = this.solarSystem.planets.findIndex((p: any) => p.planet_id === planet.planet_id);
-      
-      if (index !== -1) {
-        this.solarSystem.planets[index] = planet;
-      }
-
-      console.log('Saving planet:', planet);
-      this.closePlanetEdit();
-
-    } else {
-      this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems')
-    }
-  }
-
-  deletePlanet(planetId: number): void {
-    //NEED TO USE MODAL FORM TO CONFIRM
-    if (confirm('Are you sure you want to delete this planet?')) {
-      if (this.solarSystem?.planets){
-        this.solarSystem.planets = this.solarSystem.planets.filter((p: any) => p.planet_id !== planetId);
-        console.log('Deleting planet:', planetId);
-      } else {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems')
-      }
-    }
-  }
-
-  addPlanet(): void {
-    const newPlanet = {
-      planet_id: -42, // Temporary ID
-      planet_name: 'New awesome planet',
-      planet_desc: '',
-      planet_type: 'terrestrial' as PlanetType,
-      planet_gravity: 1.0,
-      planet_surface_temp: 288,
-      planet_orbital_longitude: 0,
-      planet_eccentricity: 0,
-      planet_apogee: 1000000,
-      planet_perigee: 1000000,
-      planet_orbital_inclination: 0,
-      planet_average_distance: 1000000,
-      planet_orbital_period: 365,
-      planet_inclination_angle: 0,
-      planet_rotation_period: 24,
-      planet_mass: 1,
-      planet_diameter: 12742,
-      planet_rings: 0,
-      planet_initial_x: 0,
-      planet_initial_y: 0,
-      planet_initial_z: 0,
-      galaxy_id: this.currentGalaxy,
-      solar_system_id: this.solarSystem!.solar_system_id,
-      user_id: this.user.user_id,
-      expanded: false,
-      moons: []
-    };
-
-    if (this.solarSystem?.planets){
-      this.solarSystem.planets.push(newPlanet);
-      this.planetEdit(newPlanet);
-    }
-
-  }
-
- editMoon(moon: any): void {
-    console.log('Editing moon:', moon);
-    // TODO: Implement moon editing
-  }
-
-  deleteMoon(moonId: number): void {
-    // NEED TO CONFIRM WITH MODAL
-    if (confirm('Are you sure you want to delete this moon?')) {
-      console.log('Deleting moon:', moonId);
-      // TODO: Implement moon deletion
-    }
-  }
-
-  addMoon(): void {
-    console.log('Adding new moon');
-    // TODO: Implement moon addition
-  }
-
-  saveChanges(): void {
-    console.log('Saving all changes:', this.solarSystem);
-    // TODO: Implement save to backend
-    alert('Changes saved successfully!');
   }
 
   goBack(): void {

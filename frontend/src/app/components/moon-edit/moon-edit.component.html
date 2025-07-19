@@ -35,28 +35,28 @@
           
           <!-- Physical Properties -->
           <div class="form-group">
-            <label>Gravity (m/s²):</label>
-            <input type="number" [(ngModel)]="moon.moon_gravity" min="0" step="0.1" class="form-input">
+            <label>Gravity (m.s²):</label>
+            <input type="number" [(ngModel)]="moon.moon_gravity" min="0" max="25" step="0.1" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Surface Temperature (K):</label>
-            <input type="number" [(ngModel)]="moon.moon_surface_temp" min="0" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_surface_temp" min="0" max="700" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Mass (×10²⁴ kg):</label>
-            <input type="number" [(ngModel)]="moon.moon_mass" min="0" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_mass" min="0" max="1000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Diameter (km):</label>
-            <input type="number" [(ngModel)]="moon.moon_diameter" min="0" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_diameter" min="0" max="10000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Rings:</label>
-            <input type="number" [(ngModel)]="moon.moon_rings" min="0" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_rings" min="0" max="10" class="form-input">
           </div>
           
           <!-- Orbital Properties -->
@@ -72,37 +72,32 @@
           
           <div class="form-group">
             <label>Apogee (km):</label>
-            <input type="number" [(ngModel)]="moon.moon_apogee" min="0" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_apogee" min="0" max="10000000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Perigee (km):</label>
-            <input type="number" [(ngModel)]="moon.moon_perigee" min="0" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_perigee" min="0" max="10000000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Orbital Inclination (°):</label>
             <input type="number" [(ngModel)]="moon.moon_orbital_inclination" min="0" max="360" class="form-input">
           </div>
-          
-          <div class="form-group">
-            <label>Average Distance (km):</label>
-            <input type="number" [(ngModel)]="moon.moon_average_distance" min="0" class="form-input">
-          </div>
-          
+
           <div class="form-group">
             <label>Position (relative to planet) X:</label>
-            <input type="number" [(ngModel)]="moon.moon_initial_x" min="-5000" max="5000" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_initial_x" min="-100" max="100" class="form-input">
           </div>
 
           <div class="form-group">
             <label>Position (relative to planet) Y:</label>
-            <input type="number" [(ngModel)]="moon.moon_initial_y" min="-5000" max="5000" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_initial_y" min="-100" max="100" class="form-input">
           </div>
 
           <div class="form-group">
             <label>Position (relative to planet) Z:</label>
-            <input type="number" [(ngModel)]="moon.moon_initial_z" min="-5000" max="5000" class="form-input">
+            <input type="number" [(ngModel)]="moon.moon_initial_z" min="-100" max="100" class="form-input">
           </div>
         </div>
       </div>

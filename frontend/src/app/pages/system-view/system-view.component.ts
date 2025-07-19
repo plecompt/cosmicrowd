@@ -30,8 +30,8 @@ export class SystemViewComponent implements OnInit {
 
   getSolarSystem() {
     this.galaxiesService.getSolarSystem(this.currentGalaxy, this.solarSystemId).subscribe({
-      next: (data) => {
-        this.solarSystem = data.solar_system;
+      next: (solarSystem) => {
+        this.solarSystem = solarSystem.data.solar_system;
         this.isLoading = false;
 
         if (!this.solarSystem) {

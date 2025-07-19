@@ -248,11 +248,11 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     // Format system information for display
     const formattedMessage = `
       ${starData.solar_system_desc}
-      Type: ${starData.solar_system_type}
-      Diameter: ${starData.solar_system_diameter.toString()} m
-      Mass: ${starData.solar_system_mass} solar masses
+      Type: ${this.getFormattedTypeForSystem(starData)}
+      Diameter: ${starData.solar_system_diameter.toString()} km
+      Mass: ${starData.solar_system_mass} x 10^24 kg
       Surface Temperature: ${starData.solar_system_surface_temp} K
-      Gravity: ${starData.solar_system_gravity} g
+      Gravity: ${starData.solar_system_gravity} m.s²
       Planets: ${this.getPlanetsCountForSystem(starData) || '0'}
       Moons: ${this.getMoonsCountForSystem(starData) || '0'}
       Owner: ${starData.user_login || 'Unclaimed'}
@@ -301,6 +301,43 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
   getPlanetsCountForSystem(system: SolarSystem): number {
     return system.planets.length;
+  }
+
+  getFormattedTypeForSystem(system: SolarSystem): string {
+    switch (system.solar_system_type) {
+      case 'brown_dwarf':
+        return 'Brown Dwarf';
+      case 'red_dwarf':
+        return 'Red Dwarf';
+      case 'yellow_dwarf':
+        return 'Yellow Dwarf';
+      case 'white_dwarf':
+        return 'White Dwarf';
+      case 'red_giant':
+        return 'Red Giant';
+      case 'blue_giant':
+        return 'Blue Giant';
+      case 'red_supergiant':
+        return 'Red Supergiant';
+      case 'blue_supergiant':
+        return 'Blue Supergiant';
+      case 'hypergiant':
+        return 'Hypergiant';
+      case 'neutron_star':
+        return 'Neutron Star';
+      case 'pulsar':
+        return 'Pulsar';
+      case 'variable':
+        return 'Variable';
+      case 'binary':
+        return 'Binary';
+      case 'ternary':
+        return 'Ternary';
+      case 'black_hole':
+        return 'Black Hole';
+      default:
+        return 'Yellow Dwarf';
+    }
   }
 
   setCameraPositionAndOrientation(posX: number, posY: number, posZ: number, yawDeg: number, pitchDeg: number): void {

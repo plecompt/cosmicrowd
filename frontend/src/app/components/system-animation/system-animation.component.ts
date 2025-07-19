@@ -170,7 +170,7 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     this.scene.add(planetMesh);
 
     // Planet orbit
-    this.createOrbit(planetX, planetZ, 0x5555ff, 0.3);
+    this.createOrbit(planetX, planetY, planetZ, 0x5555ff, 0.3);
 
     // Create moons
     if (planet.moons && planet.moons.length > 0) {
@@ -196,46 +196,70 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
 
     // Moon orbit
     const moonOrbitRadius = Math.sqrt(moonX * moonX + moonZ * moonZ);
-    this.createMoonOrbit(planetX, planetY, planetZ, moonOrbitRadius);
+    this.createMoonOrbit(planetX, planetY, planetZ, moonX, moonY, moonZ);
   }
 
-  private createOrbit(x: number, z: number, color: number, opacity: number): void {
-    const orbitRadius = Math.sqrt(x * x + z * z);
-    const orbitGeometry = new THREE.BufferGeometry();
-    const orbitPoints = [];
+private createOrbit(targetX: number, targetY: number, targetZ: number, color: number, opacity: number): void {
+  const planetPos = new THREE.Vector3(targetX, targetY, targetZ);
+  const center = new THREE.Vector3(0, 0, 0); // Soleil
+
+  const direction = planetPos.clone().sub(center).normalize();
+  const radius = planetPos.distanceTo(center);
+
+  // Trouver un vecteur perpendiculaire (any non-parallel)
+  let temp = new THREE.Vector3(0, 1, 0);
+  if (Math.abs(direction.dot(temp)) > 0.99) temp = new THREE.Vector3(1, 0, 0);
+
+  // Créer une base orthonormée dans le plan orbital
+  const u = new THREE.Vector3().crossVectors(direction, temp).normalize(); // 1er vecteur du plan
+  const v = new THREE.Vector3().crossVectors(direction, u).normalize();    // 2e vecteur du plan
+
+  // Points du cercle
+  const segments = 128;
+  const points: THREE.Vector3[] = [];
+  for (let i = 0; i <= segments; i++) {
+    const theta = (i / segments) * Math.PI * 2;
+    const point = new THREE.Vector3()
+      .addScaledVector(u, Math.cos(theta) * radius)
+      .addScaledVector(v, Math.sin(theta) * radius)
+      .add(center); // on translate autour du centre
+    points.push(point);
+  }
+
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+  const orbit = new THREE.LineLoop(geometry, material);
+  this.scene.add(orbit);
+}
+
+  private createMoonOrbit(planetX: number, planetY: number, planetZ: number, moonX: number, moonY: number, moonZ: number): void {
+    const planetPos = new THREE.Vector3(planetX, planetY, planetZ);
+    const moonRel = new THREE.Vector3(moonX, moonY, moonZ);
+    const radius = moonRel.length();
+    const center = planetPos.clone();
+    const orbitNormal = moonRel.clone().normalize();
 
     const segments = 128;
+    const points: THREE.Vector3[] = [];
+
     for (let i = 0; i <= segments; i++) {
       const theta = (i / segments) * Math.PI * 2;
-      orbitPoints.push(new THREE.Vector3(
-        Math.cos(theta) * orbitRadius,
-        0,
-        Math.sin(theta) * orbitRadius
+      points.push(new THREE.Vector3(
+        Math.cos(theta) * radius,
+        Math.sin(theta) * radius,
+        0
       ));
     }
-    orbitGeometry.setFromPoints(orbitPoints);
-    const orbitMaterial = new THREE.LineBasicMaterial({ color, transparent: true, opacity });
-    const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
+
+    //apply rotation & translation
+    const defaultNormal = new THREE.Vector3(0, 0, 1);
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(defaultNormal, orbitNormal);
+    points.forEach(p => p.applyQuaternion(quaternion).add(center));
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2 });
+    const orbit = new THREE.LineLoop(geometry, material);
     this.scene.add(orbit);
-  }
-
-  private createMoonOrbit(planetX: number, planetY: number, planetZ: number, moonOrbitRadius: number): void {
-    const moonOrbitGeometry = new THREE.BufferGeometry();
-    const moonOrbitPoints = [];
-
-    const segments = 128;
-    for (let i = 0; i <= segments; i++) {
-      const theta = (i / segments) * Math.PI * 2;
-      moonOrbitPoints.push(new THREE.Vector3(
-        planetX + Math.cos(theta) * moonOrbitRadius,
-        planetY,
-        planetZ + Math.sin(theta) * moonOrbitRadius
-      ));
-    }
-    moonOrbitGeometry.setFromPoints(moonOrbitPoints);
-    const moonOrbitMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2 });
-    const moonOrbit = new THREE.LineLoop(moonOrbitGeometry, moonOrbitMaterial);
-    this.scene.add(moonOrbit);
   }
 
   private addSkybox(): void {

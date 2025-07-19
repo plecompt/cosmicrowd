@@ -26,12 +26,12 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->references('user_id')->on('user')->onDelete('set null');
         });
 
-        // Adding check constrains
-        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_gravity CHECK (solar_system_gravity >= 0)');
-        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_surface_temp CHECK (solar_system_surface_temp >= 0)');
-        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_diameter CHECK (solar_system_diameter >= 0)');
-        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_mass CHECK (solar_system_mass >= 0)');
-        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_luminosity CHECK (solar_system_luminosity >= 0)');
+        // Adding check constraints based on realistic astronomical limits
+        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_gravity CHECK (solar_system_gravity >= 0 AND solar_system_gravity <= 1000000000000)'); // 1000000000000 m.s² max (theorical limit for gravitation for super massive black hole)
+        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_surface_temp CHECK (solar_system_surface_temp >= 0 AND solar_system_surface_temp <= 200000)'); // 200,000K max (theorical limit for surface temp)
+        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_diameter CHECK (solar_system_diameter >= 0 AND solar_system_diameter <= 600000000000)'); // 600000000000km max (BlackHole Phoenix A = 590,000,000,000km)
+        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_mass CHECK (solar_system_mass >= 0 AND solar_system_mass <= 25000000000)'); // x 10^24kg max (black hole NGC 4889 is 21.000.000.000)
+        DB::statement('ALTER TABLE solar_system ADD CONSTRAINT check_solar_system_luminosity CHECK (solar_system_luminosity >= 0 AND solar_system_luminosity <= 10000000)'); // 10M x solar luminosity max (6300000 = NGC 2363-V1)
     }
 
     public function down(): void

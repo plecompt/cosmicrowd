@@ -6,9 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Traits\ApiResponse;
 
 class RateLimitMiddleware
 {
+    use ApiResponse;
+
     // Limit the number of request to 60 by minute
     public function handle(Request $request, Closure $next, $maxAttempts = 60, $decayMinutes = 1): Response
     {
@@ -17,11 +20,11 @@ class RateLimitMiddleware
         $attempts = Cache::get($key, 0);
         
         if ($attempts >= $maxAttempts) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Too many tentatives. Please try again in ' . $decayMinutes . ' minute(s).',
-                'retry_after' => $decayMinutes * 60
-            ], 429);
+            return $this->error(
+                'Too many tentatives. Please try again in ' . $decayMinutes . ' minute(s).', 
+                429,
+                ['retry_after' => $decayMinutes * 60]
+            );
         }
         
         Cache::put($key, $attempts + 1, now()->addMinutes($decayMinutes));

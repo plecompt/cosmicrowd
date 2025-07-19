@@ -10,15 +10,12 @@ return new class extends Migration
     {
         Schema::create('wallpaper', function (Blueprint $table) {
             $table->id('wallpaper_id');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('galaxy_id');
-            $table->unsignedBigInteger('solar_system_id');
             $table->text('wallpaper_settings');
             $table->timestamp('wallpaper_created_at')->useCurrent();
             
-            $table->foreign('user_id')->references('user_id')->on('user');
-            $table->foreign('galaxy_id')->references('galaxy_id')->on('galaxy');
-            $table->foreign('solar_system_id')->references('solar_system_id')->on('solar_system');
+            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('galaxy_id')->constrained('galaxy', 'galaxy_id');
+            $table->foreignId('solar_system_id')->constrained('solar_system', 'solar_system_id');
         });
     }
 

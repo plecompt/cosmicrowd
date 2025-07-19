@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ClaimController;
+
 use App\Http\Middleware\IsAdmin;
-use App\Http\Middleware\RateLimitMiddleware as RateLimit;
+use App\Http\Middleware\CheckOwnershipMiddleware;
+use App\Http\Middleware\RateLimitMiddleware;
 
 // Routes publiques (pas d'authentification requise)
 Route::prefix('v1')->group(function () {
@@ -67,7 +69,7 @@ Route::prefix('v1')->group(function () {
 });
 
 // Routes protégées (authentification requise)
-Route::prefix('v1')->middleware(['auth:sanctum', RateLimit::class])->group(function () {
+Route::prefix('v1')->middleware(['auth:sanctum', RateLimitMiddleware::class])->group(function () {
     // Auth
     Route::post('auth/logout', [AuthController::class, 'logout']); //deconnexion
     Route::get('auth/me', [AuthController::class, 'me']); //retourn l'utilisateur actuel
@@ -78,17 +80,17 @@ Route::prefix('v1')->middleware(['auth:sanctum', RateLimit::class])->group(funct
     Route::post('users/delete-account', [UserController::class, 'deleteAccount']); //suppression du compte
       
     // Solar Systems (modification) Pour l'instant, pas d'ajout et de suppression des systemes solaires, juste modifications des systems pré-générés, a voir plus tard
-    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update']);
+    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':solar_system');;
     
     // Planets (modification)
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'store']);
-    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'update']);
-    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'destroy']);
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'store'])->middleware(CheckOwnershipMiddleware::class . ':solar_system'); //solar_system car on verifie le parent car planetId n'existe pas
+    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':planet');
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'destroy'])->middleware(CheckOwnershipMiddleware::class . ':planet');
     
     // Moons (modification)
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'store']);
-    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'update']);
-    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'destroy']);
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'store'])->middleware(CheckOwnershipMiddleware::class . ':planet'); //planet car on verifie le parent car moonId n'existe pas
+    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':moon');
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'destroy'])->middleware(CheckOwnershipMiddleware::class . ':moon');
     
     // Like Routes (toutes privées)
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/to-like', [LikeController::class, 'toggleSolarSystem']); //to like ou unlike un systeme solaire
@@ -100,7 +102,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', RateLimit::class])->group(funct
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [ClaimController::class, 'unclaim']); //unclaim le solarSystem
 });
 
-// Routes Admin (authentification + admin requise)
+// Routes Admin (authentification + admin requise) A REVOIR POUR LES MIDDLEWARE: Throttle:api ?
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api', IsAdmin::class])->group(function () {
     // Galaxies
     Route::post('galaxies', [GalaxyController::class, 'store']); //Création

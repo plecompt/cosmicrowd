@@ -61,110 +61,110 @@ class SolarSystemFactory extends Factory
     private function generateMass(string $starType): int
     {
         return match($starType) {
-            'brown_dwarf' => fake()->numberBetween(20000, 159000), // 0.01-0.08 solar masses
-            'red_dwarf' => fake()->numberBetween(159000, 1193000), // 0.08-0.6 solar masses
-            'yellow_dwarf' => fake()->numberBetween(1591000, 2387000), // 0.8-1.2 solar masses
-            'white_dwarf' => fake()->numberBetween(597000, 2784000), // 0.3-1.4 solar masses
-            'red_giant' => fake()->numberBetween(1591000, 15912000), // 0.8-8 solar masses
-            'blue_giant' => fake()->numberBetween(15912000, 49725000), // 8-25 solar masses
-            'red_supergiant' => fake()->numberBetween(15912000, 79560000), // 8-40 solar masses
-            'blue_supergiant' => fake()->numberBetween(29835000, 179010000), // 15-90 solar masses
-            'hypergiant' => fake()->numberBetween(49725000, 626535000), // 25-315 solar masses
-            'neutron_star' => fake()->numberBetween(2188000, 4315000), // 1.1-2.17 solar masses
-            'pulsar' => fake()->numberBetween(2188000, 4315000), // 1.1-2.17 solar masses
-            'variable' => fake()->numberBetween(1591000, 15912000), // 0.8-8 solar masses
-            'binary' => fake()->numberBetween(3182000, 59670000), // 1.6-30 solar masses
-            'ternary' => fake()->numberBetween(1989000, 29835000), // 1-15 solar masses
-            'black_hole' => fake()->numberBetween(5967000, 1989000000), // 3-1000 solar masses
-            default => 1989000, // 1 solar mass
+            'brown_dwarf' => fake()->numberBetween(20000, 159000),
+            'red_dwarf' => fake()->numberBetween(159000, 1193000),
+            'yellow_dwarf' => fake()->numberBetween(1591000, 2387000),
+            'white_dwarf' => fake()->numberBetween(597000, 2784000),
+            'red_giant' => fake()->numberBetween(1591000, 15912000),
+            'blue_giant' => fake()->numberBetween(15912000, 49725000),
+            'red_supergiant' => fake()->numberBetween(15912000, 79560000),
+            'blue_supergiant' => fake()->numberBetween(29835000, 179010000),
+            'hypergiant' => fake()->numberBetween(49725000, 626535000),
+            'neutron_star' => fake()->numberBetween(2188000, 4315000),
+            'pulsar' => fake()->numberBetween(2188000, 4315000),
+            'variable' => fake()->numberBetween(1591000, 15912000),
+            'binary' => fake()->numberBetween(3182000, 59670000),
+            'ternary' => fake()->numberBetween(1989000, 29835000),
+            'black_hole' => fake()->numberBetween(5967000, 25000000000), 
+            default => 1989000,
         };
     }
 
     private function generateDiameter(string $starType): int
     {
         return match($starType) {
-            'brown_dwarf' => fake()->numberBetween(70000000, 210000000), // 0.05-0.15 solar diameters
-            'red_dwarf' => fake()->numberBetween(140000000, 840000000), // 0.1-0.6 solar diameters
-            'yellow_dwarf' => fake()->numberBetween(1120000000, 1680000000), // 0.8-1.2 solar diameters
-            'white_dwarf' => fake()->numberBetween(14000000, 70000000), // 0.01-0.05 solar diameters
-            'red_giant' => fake()->numberBetween(14000000000, 140000000000), // 10-100 solar diameters
-            'blue_giant' => fake()->numberBetween(7000000000, 35000000000), // 5-25 solar diameters
-            'red_supergiant' => fake()->numberBetween(280000000000, 2800000000000), // 200-2000 solar diameters
-            'blue_supergiant' => fake()->numberBetween(28000000000, 70000000000), // 20-50 solar diameters
-            'hypergiant' => fake()->numberBetween(560000000000, 4200000000000), // 400-3000 solar diameters
-            'neutron_star' => fake()->numberBetween(28000000, 56000000), // 20-40 km
-            'pulsar' => fake()->numberBetween(28000000, 56000000), // 20-40 km
-            'variable' => fake()->numberBetween(7000000000, 70000000000), // 5-50 solar diameters
-            'binary' => fake()->numberBetween(2800000000, 14000000000), // 2-10 solar diameters
-            'ternary' => fake()->numberBetween(2100000000, 11200000000), // 1.5-8 solar diameters
-            'black_hole' => fake()->numberBetween(1400000, 14000000), // Event horizon
-            default => 1400000000, // 1 solar diameter
+            'brown_dwarf' => fake()->numberBetween(70000000, 210000000),
+            'red_dwarf' => fake()->numberBetween(140000000, 840000000),
+            'yellow_dwarf' => fake()->numberBetween(1120000000, 1680000000),
+            'white_dwarf' => fake()->numberBetween(14000000, 70000000),
+            'red_giant' => fake()->numberBetween(70000000000, 600000000000),
+            'blue_giant' => fake()->numberBetween(7000000000, 70000000000),
+            'red_supergiant' => fake()->numberBetween(140000000000, 600000000000),
+            'blue_supergiant' => fake()->numberBetween(14000000000, 140000000000),
+            'hypergiant' => fake()->numberBetween(140000000000, 600000000000),
+            'neutron_star' => fake()->numberBetween(20000, 40000),
+            'pulsar' => fake()->numberBetween(20000, 40000),
+            'variable' => fake()->numberBetween(1000000000, 100000000000),
+            'binary' => fake()->numberBetween(1000000000, 100000000000),
+            'ternary' => fake()->numberBetween(1000000000, 50000000000),
+            'black_hole' => fake()->numberBetween(60000, 600000000000),
+            default => fake()->numberBetween(1120000000, 1680000000),
         };
     }
 
-    private function generateGravity(string $starType): float
+     private function generateGravity(string $starType): float
     {
         return match($starType) {
-            'brown_dwarf' => fake()->randomFloat(2, 10, 300),
-            'red_dwarf' => fake()->randomFloat(2, 20, 100),
-            'yellow_dwarf' => fake()->randomFloat(2, 200, 350),
-            'white_dwarf' => fake()->randomFloat(2, 100000, 10000000),
-            'red_giant' => fake()->randomFloat(2, 0.1, 10),
-            'blue_giant' => fake()->randomFloat(2, 50, 200),
-            'red_supergiant' => fake()->randomFloat(2, 0.01, 1),
-            'blue_supergiant' => fake()->randomFloat(2, 1, 50),
-            'hypergiant' => fake()->randomFloat(2, 0.01, 10),
-            'neutron_star' => fake()->randomFloat(2, 100000000000, 1000000000000),
-            'pulsar' => fake()->randomFloat(2, 100000000000, 1000000000000),
-            'variable' => fake()->randomFloat(2, 0.1, 300),
-            'binary' => fake()->randomFloat(2, 10, 500),
-            'ternary' => fake()->randomFloat(2, 5, 400),
-            'black_hole' => PHP_FLOAT_MAX,
-            default => 274.0,
+            'brown_dwarf' => fake()->randomFloat(2, 0, 50),
+            'red_dwarf' => fake()->randomFloat(2, 10, 200),
+            'yellow_dwarf' => fake()->randomFloat(2, 200, 400),
+            'white_dwarf' => fake()->randomFloat(2, 50000, 500000),
+            'red_giant' => fake()->randomFloat(2, 5, 100),
+            'blue_giant' => fake()->randomFloat(2, 100, 1000),
+            'red_supergiant' => fake()->randomFloat(2, 1, 50),
+            'blue_supergiant' => fake()->randomFloat(2, 50, 500),
+            'hypergiant' => fake()->randomFloat(2, 1, 100),
+            'neutron_star' => fake()->randomFloat(2, 100000000, 1000000000000),
+            'pulsar' => fake()->randomFloat(2, 100000000, 1000000000000),
+            'variable' => fake()->randomFloat(2, 10, 400),
+            'binary' => fake()->randomFloat(2, 50, 800),
+            'ternary' => fake()->randomFloat(2, 100, 600),
+            'black_hole' => fake()->randomFloat(2, 1000000000, 1000000000000),
+            default => fake()->randomFloat(2, 200, 400),
         };
     }
 
-    private function generateSurfaceTemp(string $starType): int
+    private function generateSurfaceTemp(string $starType): float
     {
         return match($starType) {
-            'brown_dwarf' => fake()->numberBetween(500, 2500),
-            'red_dwarf' => fake()->numberBetween(2300, 3800),
-            'yellow_dwarf' => fake()->numberBetween(5200, 6000),
-            'white_dwarf' => fake()->numberBetween(4000, 150000),
-            'red_giant' => fake()->numberBetween(2500, 4500),
-            'blue_giant' => fake()->numberBetween(10000, 30000),
-            'red_supergiant' => fake()->numberBetween(2500, 4500),
-            'blue_supergiant' => fake()->numberBetween(20000, 50000),
-            'hypergiant' => fake()->numberBetween(3000, 50000),
-            'neutron_star' => fake()->numberBetween(100000, 10000000),
-            'pulsar' => fake()->numberBetween(100000, 10000000),
-            'variable' => fake()->numberBetween(2500, 30000),
-            'binary' => fake()->numberBetween(3000, 25000),
-            'ternary' => fake()->numberBetween(3000, 20000),
-            'black_hole' => 0,
-            default => 5778,
+            'brown_dwarf' => fake()->randomFloat(2, 800, 2500),
+            'red_dwarf' => fake()->randomFloat(2, 2500, 4000),
+            'yellow_dwarf' => fake()->randomFloat(2, 5000, 6000),
+            'white_dwarf' => fake()->randomFloat(2, 8000, 40000),
+            'red_giant' => fake()->randomFloat(2, 3000, 5000),
+            'blue_giant' => fake()->randomFloat(2, 20000, 50000),
+            'red_supergiant' => fake()->randomFloat(2, 3000, 4500),
+            'blue_supergiant' => fake()->randomFloat(2, 30000, 50000),
+            'hypergiant' => fake()->randomFloat(2, 3000, 50000),
+            'neutron_star' => fake()->randomFloat(2, 100000, 200000),
+            'pulsar' => fake()->randomFloat(2, 100000, 200000),
+            'variable' => fake()->randomFloat(2, 3000, 10000),
+            'binary' => fake()->randomFloat(2, 3000, 30000),
+            'ternary' => fake()->randomFloat(2, 3000, 20000),
+            'black_hole' => fake()->randomFloat(2, 0, 100000),
+            default => fake()->randomFloat(2, 5000, 6000),
         };
     }
 
     private function generateLuminosity(string $starType): int
     {
         return match($starType) {
-            'brown_dwarf' => fake()->numberBetween(1, 100),
-            'red_dwarf' => fake()->numberBetween(100, 100000),
-            'yellow_dwarf' => fake()->numberBetween(500000, 1500000),
-            'white_dwarf' => fake()->numberBetween(100, 100000),
-            'red_giant' => fake()->numberBetween(10000000, 5000000000),
-            'blue_giant' => fake()->numberBetween(1000000000, 100000000000),
-            'red_supergiant' => fake()->numberBetween(1000000000, 1000000000000),
-            'blue_supergiant' => fake()->numberBetween(10000000000, 2000000000000),
-            'hypergiant' => fake()->numberBetween(50000000000, 2147483647), // Max int
-            'neutron_star' => fake()->numberBetween(1000, 10000000),
-            'pulsar' => fake()->numberBetween(1000, 10000000),
-            'variable' => fake()->numberBetween(1000000, 1000000000),
-            'binary' => fake()->numberBetween(2000000, 5000000000),
-            'ternary' => fake()->numberBetween(1000000, 2000000000),
-            'black_hole' => 0,
-            default => 1000000,
+            'brown_dwarf' => fake()->numberBetween(1, 10),
+            'red_dwarf' => fake()->numberBetween(1, 1000),
+            'yellow_dwarf' => fake()->numberBetween(800, 1200),
+            'white_dwarf' => fake()->numberBetween(1, 100),
+            'red_giant' => fake()->numberBetween(100, 10000),
+            'blue_giant' => fake()->numberBetween(10000, 1000000),
+            'red_supergiant' => fake()->numberBetween(10000, 500000),
+            'blue_supergiant' => fake()->numberBetween(100000, 1000000),
+            'hypergiant' => fake()->numberBetween(500000, 10000000),
+            'neutron_star' => fake()->numberBetween(1, 1000),
+            'pulsar' => fake()->numberBetween(1000, 100000),
+            'variable' => fake()->numberBetween(100, 100000),
+            'binary' => fake()->numberBetween(1000, 2000000),
+            'ternary' => fake()->numberBetween(1500, 3000000),
+            'black_hole' => fake()->numberBetween(1, 1000),
+            default => 1000,
         };
     }
 

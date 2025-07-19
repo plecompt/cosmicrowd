@@ -39,32 +39,24 @@ class PlanetController
     public function store(Request $request, $galaxyId, $solarSystemId)
     {
         try {
-            $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
-                ->where('user_id', Auth::id())
-                ->first();
-
-            if (!$ownership) {
-                return $this->error('You don\'t own this solar system', 403);
-            }
-
             $validated = $request->validate([
                 'planet_name' => 'required|string|max:50',
                 'planet_desc' => 'nullable|string|max:255',
                 'planet_type' => 'required|in:terrestrial,gas,ice,super_earth,sub_neptune,dwarf,lava,carbon,ocean',
-                'planet_gravity' => 'required|numeric|min:0',
-                'planet_surface_temp' => 'required|numeric|min:0',
+                'planet_gravity' => 'required|numeric|min:0|max:1000',
+                'planet_surface_temp' => 'required|numeric|min:0|max:5000',
                 'planet_orbital_longitude' => 'required|numeric|min:0|max:360',
                 'planet_eccentricity' => 'required|numeric|min:0|max:1',
-                'planet_apogee' => 'required|integer|min:0',
-                'planet_perigee' => 'required|integer|min:0',
+                'planet_apogee' => 'required|integer|min:0|max:15000000000',
+                'planet_perigee' => 'required|integer|min:0|max:15000000000',
                 'planet_orbital_inclination' => 'required|integer|min:0|max:360',
                 'planet_average_distance' => 'required|integer|min:0',
-                'planet_orbital_period' => 'required|integer|min:0',
+                'planet_orbital_period' => 'required|integer|min:0|max:365000',
                 'planet_inclination_angle' => 'required|integer|min:0|max:360',
-                'planet_rotation_period' => 'required|integer|min:0',
-                'planet_mass' => 'required|integer|min:0',
-                'planet_diameter' => 'required|integer|min:0',
-                'planet_rings' => 'required|integer|min:0',
+                'planet_rotation_period' => 'required|integer|min:1|max:24000',
+                'planet_mass' => 'required|integer|min:0|max:100000',
+                'planet_diameter' => 'required|integer|min:0|max:200000',
+                'planet_rings' => 'required|integer|min:0|max:10',
                 'planet_initial_x' => 'required|integer',
                 'planet_initial_y' => 'required|integer',
                 'planet_initial_z' => 'required|integer'
@@ -88,37 +80,29 @@ class PlanetController
     public function update(Request $request, $galaxyId, $solarSystemId, $planetId)
     {
         try {
-            $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
-                ->where('user_id', Auth::id())
-                ->first();
-
-            if (!$ownership) {
-                return $this->error('You don\'t own this solar system', 403);
-            }
-
             $planet = Planet::findOrFail($planetId);
 
             $validated = $request->validate([
-                'planet_name' => 'sometimes|string|max:50',
+                'planet_name' => 'required|string|max:50',
                 'planet_desc' => 'nullable|string|max:255',
-                'planet_type' => 'sometimes|in:terrestrial,gas,ice,super_earth,sub_neptune,dwarf,lava,carbon,ocean',
-                'planet_gravity' => 'sometimes|numeric|min:0',
-                'planet_surface_temp' => 'sometimes|numeric|min:0',
-                'planet_orbital_longitude' => 'sometimes|numeric|min:0|max:360',
-                'planet_eccentricity' => 'sometimes|numeric|min:0|max:1',
-                'planet_apogee' => 'sometimes|integer|min:0',
-                'planet_perigee' => 'sometimes|integer|min:0',
-                'planet_orbital_inclination' => 'sometimes|integer|min:0|max:360',
-                'planet_average_distance' => 'sometimes|integer|min:0',
-                'planet_orbital_period' => 'sometimes|integer|min:0',
-                'planet_inclination_angle' => 'sometimes|integer|min:0|max:360',
-                'planet_rotation_period' => 'sometimes|integer|min:0',
-                'planet_mass' => 'sometimes|integer|min:0',
-                'planet_diameter' => 'sometimes|integer|min:0',
-                'planet_rings' => 'sometimes|integer|min:0',
-                'planet_initial_x' => 'sometimes|integer',
-                'planet_initial_y' => 'sometimes|integer',
-                'planet_initial_z' => 'sometimes|integer'
+                'planet_type' => 'required|in:terrestrial,gas,ice,super_earth,sub_neptune,dwarf,lava,carbon,ocean',
+                'planet_gravity' => 'required|numeric|min:0|max:1000',
+                'planet_surface_temp' => 'required|numeric|min:0|max:5000',
+                'planet_orbital_longitude' => 'required|numeric|min:0|max:360',
+                'planet_eccentricity' => 'required|numeric|min:0|max:1',
+                'planet_apogee' => 'required|integer|min:0|max:15000000000',
+                'planet_perigee' => 'required|integer|min:0|max:15000000000',
+                'planet_orbital_inclination' => 'required|integer|min:0|max:360',
+                'planet_average_distance' => 'required|integer|min:0',
+                'planet_orbital_period' => 'required|integer|min:0|max:365000',
+                'planet_inclination_angle' => 'required|integer|min:0|max:360',
+                'planet_rotation_period' => 'required|integer|min:1|max:24000',
+                'planet_mass' => 'required|integer|min:0|max:100000',
+                'planet_diameter' => 'required|integer|min:0|max:200000',
+                'planet_rings' => 'required|integer|min:0|max:10',
+                'planet_initial_x' => 'required|integer',
+                'planet_initial_y' => 'required|integer',
+                'planet_initial_z' => 'required|integer'
             ]);
 
             if (isset($validated['planet_perigee']) && isset($validated['planet_apogee']) &&
@@ -136,25 +120,19 @@ class PlanetController
 
     public function destroy($galaxyId, $solarSystemId, $planetId)
     {
-        try {
-            $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
-                ->where('user_id', Auth::id())
-                ->first();
-
-            if (!$ownership) {
-                return $this->error('You don\'t own this solar system', 403);
-            }
-
-            $planet = Planet::findOrFail($planetId);
-            $planet->delete();
-
-            return $this->success(null, 'Planet deleted successfully');
-        } catch (\Exception $e) {
-            return $this->error('Error while deleting planet', 500);
+        $planet = Planet::find($planetId);
+        
+        if (!$planet) {
+            return $this->error('Planet not found', 404);
         }
+        
+        $planet->moons()->delete();
+        $planet->delete();
+        
+        return $this->success(null, 'Planet and its moons deleted successfully');
     }
 
-    public function getOwner($galaxyId, $solarSystemId, $planetId): JsonResponse
+    public function getOwner($galaxyId, $solarSystemId, $planetId)
     {
         try {
             $planet = Planet::with(['user' => function ($query) {
@@ -171,15 +149,5 @@ class PlanetController
         } catch (\Exception $e) {
             return $this->error('Error while fetching planet owner', 500);
         }
-    }
-
-    private function checkPlanetOwnership($solarSystemId)
-    {
-        $userId = Auth::id();
-
-        $ownership = UserSolarSystemOwnership::where('solar_system_id', $solarSystemId)
-            ->where('user_id', $userId)
-            ->first();
-        return !!$ownership;
     }
 }

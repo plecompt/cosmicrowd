@@ -13,6 +13,7 @@ class SearchController
 {
     use ApiResponse;
 
+    // WIP
     public function globalSearch(Request $request)
     {
         $query = $request->get('q', '');
@@ -49,6 +50,7 @@ class SearchController
         ]);
     }
 
+    // WIP
     public function searchSolarSystems(Request $request)
     {
         $query = $request->get('q', '');
@@ -88,6 +90,7 @@ class SearchController
         ]);
     }
 
+    // WIP
     public function searchPlanets(Request $request)
     {
         $query = $request->get('q', '');
@@ -133,6 +136,7 @@ class SearchController
         ]);
     }
 
+    // WIP    
     public function searchMoons(Request $request)
     {
         $query = $request->get('q', '');
@@ -178,6 +182,7 @@ class SearchController
         ]);
     }
 
+    // WIP
     public function searchUsers(Request $request)
     {
         $query = $request->get('q', '');

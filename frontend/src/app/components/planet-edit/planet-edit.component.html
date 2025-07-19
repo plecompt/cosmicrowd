@@ -22,41 +22,42 @@
           <div class="form-group">
             <label>Type:</label>
             <select [(ngModel)]="planet.planet_type" class="form-select">
-              <option value="rocky">Rocky</option>
-              <option value="icy">Ice</option>
-              <option value="mixed">Mixed</option>
-              <option value="primivite">Primitive</option>
-              <option value="regular">Regular</option>
-              <option value="irregular">Irregular</option>
-              <option value="trojan">Trojan</option>
-              <option value="coorbital">Coorbital</option>
+              <option value="terrestrial">Terrestrial</option>
+              <option value="gas">Gas</option>
+              <option value="ice">Ice</option>
+              <option value="super_earth">Super Earth</option>
+              <option value="sub_neptune">Sub Neptunian</option>
+              <option value="dwarf">Dwarf</option>
+              <option value="lava">Lava</option>
+              <option value="carbon">Carbon</option>
+              <option value="ocean">Ocean</option>
             </select>
           </div>
 
           <!-- Physical Properties -->
           <div class="form-group">
-            <label>Gravity (m/s²):</label>
-            <input type="number" [(ngModel)]="planet.planet_gravity" min="0" step="0.1" class="form-input">
+            <label>Gravity (m.s²):</label>
+            <input type="number" [(ngModel)]="planet.planet_gravity" min="0" max="1000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Surface Temperature (K):</label>
-            <input type="number" [(ngModel)]="planet.planet_surface_temp" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_surface_temp" min="0" max="5000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Mass (×10²⁴ kg):</label>
-            <input type="number" [(ngModel)]="planet.planet_mass" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_mass" min="0" max="100000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Diameter (km):</label>
-            <input type="number" [(ngModel)]="planet.planet_diameter" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_diameter" min="0" max="200000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Rings:</label>
-            <input type="number" [(ngModel)]="planet.planet_rings" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_rings" min="0" max="10" class="form-input">
           </div>
           
           <!-- Orbital Properties -->
@@ -72,12 +73,12 @@
           
           <div class="form-group">
             <label>Apogee (km):</label>
-            <input type="number" [(ngModel)]="planet.planet_apogee" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_apogee" min="0" max="15000000000" class="form-input">
           </div>
           
           <div class="form-group">
             <label>Perigee (km):</label>
-            <input type="number" [(ngModel)]="planet.planet_perigee" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_perigee" min="0" max="15000000000" class="form-input">
           </div>
           
           <div class="form-group">
@@ -86,13 +87,8 @@
           </div>
           
           <div class="form-group">
-            <label>Average Distance (km):</label>
-            <input type="number" [(ngModel)]="planet.planet_average_distance" min="0" class="form-input">
-          </div>
-          
-          <div class="form-group">
             <label>Orbital Period (days):</label>
-            <input type="number" [(ngModel)]="planet.planet_orbital_period" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_orbital_period" min="0" max="365000" class="form-input">
           </div>
           
           <div class="form-group">
@@ -102,7 +98,7 @@
           
           <div class="form-group">
             <label>Rotation Period (hours):</label>
-            <input type="number" [(ngModel)]="planet.planet_rotation_period" min="0" class="form-input">
+            <input type="number" [(ngModel)]="planet.planet_rotation_period" min="0" max="24000" class="form-input">
           </div>
 
           <div class="form-group">
@@ -125,10 +121,16 @@
         <div class="moons-list">
           <div class="section-header">
             <h4>Moons ({{ planet.moons.length }})</h4>
-            <button type="button" (click)="addMoon()" class="btn btn-add">Add Moon</button>
+            @if (showAddMoons){
+              <button type="button" (click)="moonEditComponent.addMoon(planet)" class="btn btn-add">Add Moon</button>
+            }
           </div>
           
-          @if (planet.moons.length === 0) {
+          @if (!showAddMoons){
+            <div class="empty-state">
+              <p>To add moons, you first need to create the planet !</p>
+            </div>
+          } @else if (planet.moons.length === 0) {
             <div class="empty-state">
               <p>No moons yet. Click "Add Moon" to create one!</p>
             </div>
@@ -141,8 +143,8 @@
                     <p>{{ moon.moon_type | titlecase }} - {{ moon.moon_diameter }}km</p>
                   </div>
                   <div class="moon-actions flex">
-                    <button type="button" (click)="editMoon(moon)" class="btn btn-edit">Edit</button>
-                    <button type="button" (click)="deleteMoon(moon.moon_id)" class="btn btn-delete">Delete</button>
+                    <button type="button" (click)="moonEditComponent.editMoon(planet, moon)" class="btn btn-edit">Edit</button>
+                    <button type="button" (click)="moonEditComponent.deleteMoon(planet, moon.moon_id)" class="btn btn-delete">Delete</button>
                   </div>
                 </div>
               }
@@ -160,4 +162,4 @@
 }
 
 <!-- Moon Edit -->
-<app-moon-edit [moon]="selectedMoon" [isVisible]="isMoonEditVisible" (save)="onMoonSaved($event)" (close)="closeMoonModal()"></app-moon-edit>
+<app-moon-edit #editMoonRef (refresh)="emitRefresh()" (closeParentModal)="closeModal()"></app-moon-edit>

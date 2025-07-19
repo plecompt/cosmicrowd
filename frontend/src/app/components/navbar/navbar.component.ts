@@ -104,10 +104,8 @@ export class NavigationBarComponent {
       content: formattedMessage,
       showCancel: true,
       onConfirm: () => {
-        console.log('modal confirmed');
       },
       onCancel: () => {
-        console.log('modal cancelled');
       }
     });
   }

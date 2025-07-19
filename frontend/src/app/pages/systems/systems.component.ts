@@ -6,6 +6,7 @@ import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { Planet } from '../../interfaces/solar-system/planet.interface';
 import { Router } from '@angular/router';
+import { ModalService } from '../../services/modal/modal.service';
 
 @Component({
   selector: 'app-systems',
@@ -19,7 +20,7 @@ export class SystemsComponent implements OnInit {
   isLoaded: boolean = false;
   expandedPlanetId: number | null = null;
 
-  constructor(private router: Router, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService) { }
+  constructor(private router: Router, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private modalService: ModalService) { }
 
   ngOnInit(): void {
     // If user is not logged in
@@ -138,23 +139,35 @@ export class SystemsComponent implements OnInit {
     return system.planets.length;
   }
 
-  unclaimSystem(solarSystemId: number){
-    this.galaxiesService.unclaimSolarSystem(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, solarSystemId).subscribe({
-      next: () => {
-        this.getSystems();
-        this.notificationService.showSuccess('You successfully unclaimed this system', 2500, '/systems');
+  unclaimSystem(solarSystemId: number): void {
+    this.modalService.show({
+      title: 'Unclaim Solar System',
+      content: 'This action cannot be undone. Your claimed solar system will become available for other explorers.',
+      showCancel: true,
+      showConfirm: true,
+      onConfirm: () => {
+        this.galaxiesService.unclaimSolarSystem(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, solarSystemId).subscribe({
+          next: () => {
+            this.getSystems();
+            this.notificationService.showSuccess('You successfully unclaimed this system', 2500, '/systems');
+          },
+          error: (error) => {
+            this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/systems');
+          }
+        });
       },
-      error: (error) => {
-        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
+      onCancel: () => {
+        return;
       }
-    });
+    })
   }
 
-  editSystem(solarSystemId: number){
+
+  editSystem(solarSystemId: number) {
     this.router.navigate(['/edit-system', solarSystemId]);
   }
 
-  noSystemNotification(){
+  noSystemNotification() {
     this.notificationService.showError('You can claim up to 3 solar systems', 2500, '/home');
   }
 }

@@ -39,32 +39,24 @@ class MoonController
     public function store(Request $request, $galaxyId, $solarSystemId, $planetId): JsonResponse
     {
         try {
-            $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
-                ->where('user_id', Auth::id())
-                ->first();
-
-            if (!$ownership) {
-                return $this->error("You don't own this solar system", 403);
-            }
-
             $validated = $request->validate([
                 'moon_name' => 'required|string|max:50',
                 'moon_desc' => 'nullable|string|max:255',
                 'moon_type' => 'required|in:rocky,icy,mixed,primitive,regular,irregular,trojan,coorbital',
-                'moon_gravity' => 'required|numeric|min:0',
-                'moon_surface_temp' => 'required|numeric|min:0',
+                'moon_gravity' => 'required|numeric|min:0|max:25',
+                'moon_surface_temp' => 'required|numeric|min:0|max:700',
                 'moon_orbital_longitude' => 'required|numeric|min:0|max:360',
                 'moon_eccentricity' => 'required|numeric|min:0|max:1',
-                'moon_apogee' => 'required|integer|min:0',
-                'moon_perigee' => 'required|integer|min:0',
+                'moon_apogee' => 'required|integer|min:100|max:10000000',
+                'moon_perigee' => 'required|integer|min:100|max:10000000',
                 'moon_orbital_inclination' => 'required|integer|min:0|max:360',
                 'moon_average_distance' => 'required|integer|min:0',
-                'moon_orbital_period' => 'required|integer|min:0',
+                'moon_orbital_period' => 'required|integer|min:1|max:10000',
                 'moon_inclination_angle' => 'required|integer|min:0|max:360',
-                'moon_rotation_period' => 'required|integer|min:0',
-                'moon_mass' => 'required|integer|min:0',
-                'moon_diameter' => 'required|integer|min:0',
-                'moon_rings' => 'required|integer|min:0',
+                'moon_rotation_period' => 'required|integer|min:1|max:2000',
+                'moon_mass' => 'required|integer|min:0|max:1000',
+                'moon_diameter' => 'required|integer|min:0|max:10000',
+                'moon_rings' => 'required|integer|min:0|max:10',
                 'moon_initial_x' => 'required|integer',
                 'moon_initial_y' => 'required|integer',
                 'moon_initial_z' => 'required|integer'
@@ -89,37 +81,29 @@ class MoonController
     public function update(Request $request, $galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
-            $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
-                ->where('user_id', Auth::id())
-                ->first();
-
-            if (!$ownership) {
-                return $this->error("You don't own this solar system", 403);
-            }
-
             $moon = Moon::findOrFail($moonId);
 
             $validated = $request->validate([
-                'moon_name' => 'sometimes|string|max:50',
+                'moon_name' => 'required|string|max:50',
                 'moon_desc' => 'nullable|string|max:255',
-                'moon_type' => 'sometimes|in:rocky,icy,mixed,primitive,regular,irregular,trojan,coorbital',
-                'moon_gravity' => 'sometimes|numeric|min:0',
-                'moon_surface_temp' => 'sometimes|numeric|min:0',
-                'moon_orbital_longitude' => 'sometimes|numeric|min:0|max:360',
-                'moon_eccentricity' => 'sometimes|numeric|min:0|max:1',
-                'moon_apogee' => 'sometimes|integer|min:0',
-                'moon_perigee' => 'sometimes|integer|min:0',
-                'moon_orbital_inclination' => 'sometimes|integer|min:0|max:360',
-                'moon_average_distance' => 'sometimes|integer|min:0',
-                'moon_orbital_period' => 'sometimes|integer|min:0',
-                'moon_inclination_angle' => 'sometimes|integer|min:0|max:360',
-                'moon_rotation_period' => 'sometimes|integer|min:0',
-                'moon_mass' => 'sometimes|integer|min:0',
-                'moon_diameter' => 'sometimes|integer|min:0',
-                'moon_rings' => 'sometimes|integer|min:0',
-                'moon_initial_x' => 'sometimes|integer',
-                'moon_initial_y' => 'sometimes|integer',
-                'moon_initial_z' => 'sometimes|integer'
+                'moon_type' => 'required|in:rocky,icy,mixed,primitive,regular,irregular,trojan,coorbital',
+                'moon_gravity' => 'required|numeric|min:0|max:25',
+                'moon_surface_temp' => 'required|numeric|min:0|max:700',
+                'moon_orbital_longitude' => 'required|numeric|min:0|max:360',
+                'moon_eccentricity' => 'required|numeric|min:0|max:1',
+                'moon_apogee' => 'required|integer|min:100|max:10000000',
+                'moon_perigee' => 'required|integer|min:100|max:10000000',
+                'moon_orbital_inclination' => 'required|integer|min:0|max:360',
+                'moon_average_distance' => 'required|integer|min:0',
+                'moon_orbital_period' => 'required|integer|min:1|max:10000',
+                'moon_inclination_angle' => 'required|integer|min:0|max:360',
+                'moon_rotation_period' => 'required|integer|min:1|max:2000',
+                'moon_mass' => 'required|integer|min:0|max:1000',
+                'moon_diameter' => 'required|integer|min:0|max:10000',
+                'moon_rings' => 'required|integer|min:0|max:10',
+                'moon_initial_x' => 'required|integer',
+                'moon_initial_y' => 'required|integer',
+                'moon_initial_z' => 'required|integer'
             ]);
 
             if (isset($validated['moon_perigee'], $validated['moon_apogee']) &&
@@ -139,14 +123,6 @@ class MoonController
     public function destroy($galaxyId, $solarSystemId, $planetId, $moonId): JsonResponse
     {
         try {
-            $ownership = UserSystemOwnership::where('solar_system_id', $solarSystemId)
-                ->where('user_id', Auth::id())
-                ->first();
-
-            if (!$ownership) {
-                return $this->error("You don't own this solar system", 403);
-            }
-
             $moon = Moon::findOrFail($moonId);
             $moon->delete();
 

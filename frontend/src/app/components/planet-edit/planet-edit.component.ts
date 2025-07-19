@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Moon, MoonType } from '../../interfaces/solar-system/moon.interface';
 import { User } from '../../interfaces/user/user.interface';
@@ -6,6 +6,11 @@ import { NotificationService } from '../../services/notifications/notification.s
 import { AuthService } from '../../services/auth/auth.service';
 import { MoonEditComponent } from '../moon-edit/moon-edit.component';
 import { TitleCasePipe } from '@angular/common';
+import { PlanetValidationService } from '../../services/planet-validation/planet-validation-service';
+import { PlanetType } from '../../interfaces/solar-system/planet.interface';
+import { GalaxiesService } from '../../services/galaxies/galaxies.service';
+import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
+import { ModalService } from '../../services/modal/modal.service';
 
 @Component({
   selector: 'app-planet-edit',
@@ -15,27 +20,24 @@ import { TitleCasePipe } from '@angular/common';
   styleUrls: ['./planet-edit.component.css', '../../shared/styles/edit.template.css']
 })
 export class PlanetEditComponent implements OnInit {
+  @ViewChild('editMoonRef') moonEditComponent!: MoonEditComponent;
   @Input() planet: any = null;
-  @Input() isVisible: boolean = false;
-  @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<any>();
-  @Output() editMoonEvent = new EventEmitter<any>();
-  @Output() deleteMoonEvent = new EventEmitter<number>();
-  @Output() addMoonEvent = new EventEmitter<void>();
+  @Input() solarSystem!: SolarSystem;
+  @Output() refresh = new EventEmitter<void>();
 
   user!: User;
   currentGalaxy: number = 1; //actually there is only one galaxy, in the future it might change
-  selectedMoon: Moon | null = null;
-  isMoonEditVisible: boolean = false;
+  isVisible: boolean = false;
+  showAddMoons: boolean = false;
 
-  constructor(private authService: AuthService, private notificationService: NotificationService){}
+  constructor(private authService: AuthService, private notificationService: NotificationService, private planetValidationService: PlanetValidationService, private galaxiesService: GalaxiesService, private modalService: ModalService) { }
 
   ngOnInit(): void {
     this.getUser();
   }
 
   //get current user
-  getUser(){
+  getUser() {
     this.authService.me().subscribe({
       next: (response: any) => {
         this.user = response.data.user;
@@ -46,101 +48,120 @@ export class PlanetEditComponent implements OnInit {
     })
   }
 
+  emitRefresh(): void{
+    this.refresh.emit();
+  }
+
   closeModal(): void {
-    this.close.emit();
+    this.isVisible = false;
+  }
+
+  openModal(): void {
+    this.isVisible = true;
+  }
+
+  editPlanet(planet: any): void {
+    this.planet = planet;
+    this.showAddMoons = true;
+    this.openModal();
+  }
+
+  addPlanet(): void {
+    const newPlanet = {
+      planet_id: -42, // Temporary ID
+      planet_name: 'New awesome planet',
+      planet_desc: '',
+      planet_type: 'terrestrial' as PlanetType,
+      planet_gravity: 1.0,
+      planet_surface_temp: 288,
+      planet_orbital_longitude: 0,
+      planet_eccentricity: 0,
+      planet_apogee: 1000000,
+      planet_perigee: 1000000,
+      planet_orbital_inclination: 0,
+      planet_average_distance: -42, // Temporary distance
+      planet_orbital_period: 365,
+      planet_inclination_angle: 0,
+      planet_rotation_period: 24,
+      planet_mass: 1000,
+      planet_diameter: 42000,
+      planet_rings: 2,
+      planet_initial_x: 0,
+      planet_initial_y: 0,
+      planet_initial_z: 0,
+      galaxy_id: this.currentGalaxy,
+      solar_system_id: this.solarSystem!.solar_system_id,
+      user_id: this.user.user_id,
+      expanded: false,
+      moons: []
+    };
+
+    if (this.solarSystem?.planets && this.solarSystem.planets.length < 8) {
+      this.planet = newPlanet;
+      this.isVisible = true;
+      this.showAddMoons = false; //because we need to create planet before creating moons
+    } else {
+      this.notificationService.showError('You can\'t have more than 8 planets', 2500);
+    }
   }
 
   savePlanet(): void {
-    // Validate constraints
-    if (this.planet.planet_perigee > this.planet.planet_apogee) {
-      alert('Perigee must be less than or equal to Apogee');
+    const validation = this.planetValidationService.validatePlanet(this.planet);
+
+    if (!validation.isValid) {
+      this.notificationService.showError(validation.errors[0], 2000);
       return;
     }
-    
-    // Validate ranges
-    if (this.planet.planet_orbital_longitude < 0 || this.planet.planet_orbital_longitude > 360) {
-      alert('Orbital longitude must be between 0 and 360 degrees');
-      return;
+
+    //calculating average distance based of perigee and apogee
+    this.planet.planet_average_distance = (this.planet.planet_apogee + this.planet.planet_perigee) / 2;
+
+    //if planet_id is -42, it's a new planet we need to insert in db else, we're modifying an allready existing planet
+    if (this.planet.planet_id == -42) {
+      this.galaxiesService.addPlanet(this.currentGalaxy, this.planet.solar_system_id, this.planet).subscribe({
+        next: () => {
+          this.emitRefresh();
+          this.notificationService.showSuccess('You successfully added a new planet to your solar system !', 2000);
+        },
+        error: (error) => {
+          this.notificationService.showError(error || 'Something went wrong, please try again later', 5000);
+        }
+      })
+    } else {
+      this.galaxiesService.updatePlanet(this.currentGalaxy, this.planet.solar_system_id, this.planet.planet_id, this.planet).subscribe({
+        next: () => {
+          this.emitRefresh();
+          this.notificationService.showSuccess('You successfully updated your planet', 2000);
+        },
+        error: (error) => {
+          this.notificationService.showError(error || 'Something went wrong, please try again later', 5000);
+        }
+      })
     }
-    
-    if (this.planet.planet_eccentricity < 0 || this.planet.planet_eccentricity > 1) {
-      alert('Eccentricity must be between 0 and 1');
-      return;
-    }
-    
-    if (this.planet.planet_orbital_inclination < 0 || this.planet.planet_orbital_inclination > 360) {
-      alert('Orbital inclination must be between 0 and 360 degrees');
-      return;
-    }
-    
-    if (this.planet.planet_inclination_angle < 0 || this.planet.planet_inclination_angle > 360) {
-      alert('Inclination angle must be between 0 and 360 degrees');
-      return;
-    }
-    
-    this.save.emit(this.planet);
+
+    this.closeModal();
   }
 
-
-  addMoon(): void {
-    if (!this.planet) return;
-
-    // Initialize moons array if it doesn't exist
-    if (!this.planet.moons) {
-      this.planet.moons = [];
-    }
-
-    const newMoon: Moon = {
-      moon_id: -42, // Temporary ID
-      moon_name: 'New Moon',
-      moon_desc: '',
-      moon_type: 'rocky' as MoonType,
-      moon_gravity: 1.6,
-      moon_surface_temp: 250,
-      moon_orbital_longitude: 0,
-      moon_eccentricity: 0,
-      moon_apogee: 405000,
-      moon_perigee: 363000,
-      moon_orbital_inclination: 0,
-      moon_average_distance: 384400,
-      moon_orbital_period: 27,
-      moon_inclination_angle: 0,
-      moon_rotation_period: 708,
-      moon_mass: 73,
-      moon_diameter: 3474,
-      moon_rings: 0,
-      moon_initial_x: 0,
-      moon_initial_y: 0,
-      moon_initial_z: 0,
-      planet_id: this.planet.planet_id,
-      galaxy_id: this.currentGalaxy,
-      user_id: this.user.user_id,
-    };
-
-    this.planet.moons.push(newMoon);
-    this.editMoon(newMoon);
-  }
-
-  editMoon(moon: Moon): void {
-    this.selectedMoon = moon;
-    this.isMoonEditVisible = true;
-  }
-
-  deleteMoon(moonId: number): void {
-    if (!this.planet) return;
-    
-    if (confirm('Are you sure you want to delete this moon?')) {
-      this.planet.moons = this.planet.moons.filter((moon: Moon) => moon.moon_id !== moonId);
-    }
-  }
-
-  onMoonSaved(moon: Moon): void {
-    this.closeMoonModal();
-    console.log('Moon saved:', moon);
-  }
-
-  closeMoonModal(): void {
-    this.selectedMoon = null;
-    this.isMoonEditVisible = false;
+  deletePlanet(planetId: number): void {
+    this.modalService.show({
+      title: 'Delete Planet ?',
+      content: 'Are you sure you want to delete your planet ?',
+      showCancel: true,
+      showConfirm: true,
+      onConfirm: () => {
+        this.galaxiesService.deletePlanet(this.currentGalaxy, this.solarSystem.solar_system_id, planetId).subscribe({
+          next: () => {
+            this.emitRefresh();
+            this.notificationService.showSuccess('Planet successfully deleted !', 2500);
+          },
+          error: (error) => {
+            this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/systems');
+          }
+        });
+      },
+      onCancel: () => {
+        return;
+      }
+    })
   }
 }
