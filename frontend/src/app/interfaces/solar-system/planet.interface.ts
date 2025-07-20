@@ -22,6 +22,7 @@ export interface Planet {
   planet_initial_x: number;
   planet_initial_y: number;
   planet_initial_z: number;
+  
   moons: Moon[];
   solar_system_id: number;
   galaxy_id: number;

@@ -2,43 +2,40 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export enum LikeableType {
+  SOLAR_SYSTEM = 'solar_system',
+  PLANET = 'planet',
+  MOON = 'moon',
+  WALLPAPER = 'wallpaper'
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class LikesService {
   private apiUrl = 'http://localhost:8000/api/v1';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-
-  // Get solarSystem likes count
-  getSolarSystemLikesCount(galaxyId: number, solarSystemId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/likes`);
+  like(type: LikeableType, galaxyId: number, solarSystemId?: number, planetId?: number, moonId?: number, wallpaperId?: number): Observable<any> {
+    const url = this.buildLikeUrl(type, galaxyId, solarSystemId, planetId, moonId, wallpaperId);
+    
+    return this.http.post(url, {});
   }
 
-  // Get planet likes count
-  getPlanetLikesCount(galaxyId: number, solarSystemId: number, planetId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/likes`);
-  }
+  private buildLikeUrl(type: LikeableType, galaxyId?: number, solarSystemId?: number, planetId?: number, moonId?: number, wallpaperId?: number): string {
+    switch (type) {
+      case LikeableType.SOLAR_SYSTEM:
+        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/to-like`;
 
-  // Get moon likes count
-  getMoonLikesCount(galaxyId: number, solarSystemId: number, planetId: number, moonId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/moons/${moonId}/likes`);
-  }
+      case LikeableType.PLANET:
+        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/to-like`;
 
+      case LikeableType.MOON:
+        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/moons/${moonId}/to-like`;
 
-  // Méthode principale pour l'accueil
-  getGalaxies(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxy`);
-  }
-
-  // Récupérer les statistiques
-  getStats(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxy/stats`);
-  }
-
-  // Unclaim solarSystem for current user
-  unclaimSolarSystem(userId: number, galaxyId: number, solarSystemId: number){
-    return this.http.post(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/unclaim`, { user_id: userId });
+      case LikeableType.WALLPAPER:
+        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpaper/${wallpaperId}/to-like`;
+    }
   }
 }

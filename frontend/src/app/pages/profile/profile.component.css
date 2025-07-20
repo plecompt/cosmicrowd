@@ -1,27 +1,186 @@
-/* Temporary CSS */
-
 .profile-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    background: rgba(20, 20, 40, 0.8);
-    padding: 40px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    width: 90%;
-    height: 80%;
-    text-align: center;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20, 20, 40, 0.8);
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  width: 90%;
+  height: 80%;
+  overflow-y: auto;
 }
 
-.change-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
+.profile-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  flex-shrink: 0;
+}
+
+.profile-header h1 {
+  margin-bottom: 0.5rem;
+  font-weight: 300;
+  color: white;
+}
+
+.join-date {
+  color: #888;
+}
+
+.systems-section {
+  flex: 1;
+  min-height: 0;
+}
+
+.systems-section h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+  color: white;
+  flex-shrink: 0;
+}
+
+.systems-list {
+  flex: 1;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.system-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 15px;
+}
+
+.system-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: white;
+  font-weight: 300;
+}
+
+.system-stats {
+  gap: 1rem;
+  div {
+    gap: 1rem;
+    color: #ccc;
+    font-size: 0.9rem;
+  }
+}
+
+.system-actions {
+  gap: 0.5rem;
+}
+
+/* Top liked section */
+.top-liked-section {
+  height: 40%;
+  margin-top: 2rem;
+}
+
+.top-liked-section h2 {
+  margin-bottom: 1rem;
+  font-weight: 300;
+  color: white;
+  flex-shrink: 0;
+}
+
+.top-liked-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.top-liked-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.top-liked-item h3 {
+  color: #667eea;
+}
+
+.liked-content {
+  flex: 1;
+  justify-content: center;
+  justify-content: space-around;
+  gap: 0.25rem;
+}
+
+.liked-content .name {
+  color: white;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.liked-content .likes {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.no-data, .no-systems, .loading {
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}
+
+.btn-like-top-liked {
+  align-self: center;
+  width: auto;
+}
+
+.liked {
+  color: black;
+  background-color: rgb(227, 195, 195);
+}
+
+.not-liked {
+  color: black;
+  background-color: rgb(121, 166, 177);
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    position: static;
+    transform: none; 
+    margin: 25vh auto;
+  }
+
+  .system-item {
+    flex-direction: column;
+    gap: 25px;
+
+    .system-info{
+      h3 {
+        text-align: center;
+      }
+    }
+    .system-stats {
+      flex-direction: column;
+    }
+  }
+
+  .system-actions {
+    width: 100%;
+    gap: 10px;
+    flex-direction: column;
+  }
+  
+  .profile-container, .systems-section, .top-liked-section {
+    height: auto;
+  }
+
+  .top-liked-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

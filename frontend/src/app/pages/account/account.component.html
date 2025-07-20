@@ -1,0 +1,42 @@
+@if (this.authService.isLoggedIn()){
+    <app-background-stars [numberOfStars]="30"></app-background-stars>
+
+    <div class="account-container">
+        <div class="account-header">
+            <h1>Account Settings</h1>
+            <p>Manage your account preferences and security</p>
+        </div>
+
+        <div class="account-sections">
+            <div class="account-section">
+            <h3>Email & Password</h3>
+            <div class="section-actions">
+                <button class="btn-secondary" (click)="this.navigationService.navigateTo('change-email')">
+                Change Email
+                </button>
+                <button class="btn-secondary" (click)="this.navigationService.navigateTo('change-password')">
+                Change Password
+                </button>
+            </div>
+            </div>
+
+            <div class="account-section">
+            <h3>Support</h3>
+            <div class="section-actions">
+                <button class="btn-secondary" (click)="this.navigationService.navigateTo('contact')">
+                Contact Support
+                </button>
+            </div>
+            </div>
+
+            <div class="account-section danger-section">
+            <h3>Danger Zone</h3>
+            <div class="section-actions">
+                <button class="btn-danger" (click)="this.navigationService.navigateTo('delete-account')">
+                Delete Account
+                </button>
+            </div>
+            </div>
+        </div>
+    </div>
+}

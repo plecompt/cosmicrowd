@@ -8,6 +8,7 @@ import { NotificationService } from '../../services/notifications/notification.s
 import { User } from '../../models/user/user.model';
 import { TitleCasePipe } from '@angular/common';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'app-login',
@@ -29,6 +30,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     public formValidator: FormValidatorService,
     private notificationService: NotificationService,
     private customFormValidator: CustomValidatorsService,
+    public navigationService: NavigationService
   ) { }
 
   ngOnDestroy(): void {}

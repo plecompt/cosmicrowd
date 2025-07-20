@@ -6,10 +6,10 @@ import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { SystemAnimationComponent } from '../../components/system-animation/system-animation.component';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { PlanetEditComponent } from '../../components/planet-edit/planet-edit.component';
 import { User } from '../../interfaces/user/user.interface';
 import { SystemValidationService } from '../../services/system-validation/system-validation-service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'app-system-edit',
@@ -32,7 +32,7 @@ export class SystemEditComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
+    private navigationService: NavigationService,
     public authService: AuthService,
     private notificationService: NotificationService,
     private galaxiesService: GalaxiesService,
@@ -62,7 +62,7 @@ export class SystemEditComponent {
         }
       },
       error: (error) => {
-        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }
@@ -96,7 +96,7 @@ export class SystemEditComponent {
         }
       },
       error: (error) => {
-        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }
@@ -130,7 +130,7 @@ export class SystemEditComponent {
   }
 
   goBack(): void {
-    this.router.navigate(['/system', this.solarSystemId]);
+    this.navigationService.navigateTo(`/system${this.solarSystemId}`);
   }
 
 }

@@ -155,7 +155,7 @@ export class PlanetEditComponent implements OnInit {
             this.notificationService.showSuccess('Planet successfully deleted !', 2500);
           },
           error: (error) => {
-            this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/systems');
+            this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/systems');
           }
         });
       },

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\SolarSystem;
+use App\Models\LikeWallpaper;
 use App\Models\LikeSolarSystem;
 use App\Models\LikePlanet;
 use App\Models\LikeMoon;
@@ -71,5 +72,10 @@ class User extends Authenticatable
     public function moonLikes()
     {
         return $this->hasMany(LikeMoon::class, 'user_id', 'user_id');
+    }
+
+    public function wallpaperLikes()
+    {
+        return $this->hasMany(LikeWallpaper::class, 'user_id', 'user_id');
     }
 }

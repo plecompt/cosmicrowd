@@ -8,7 +8,7 @@ import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { ModalService } from '../../services/modal/modal.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { NotificationService } from '../../services/notifications/notification.service';
-import { Router } from '@angular/router';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 type StarType = keyof ReturnType<GalaxyAnimationComponent['getStarColorMap']>;
 
@@ -43,7 +43,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   private systemsData: SolarSystem[] = [];
   private scaleFactor = 1;
 
-  constructor(private galaxiesService: GalaxiesService, private modalService: ModalService, private notificationService: NotificationService, private router: Router) { }
+  constructor(private galaxiesService: GalaxiesService, private modalService: ModalService, private notificationService: NotificationService, private navigationService: NavigationService) { }
 
   ngAfterViewInit(): void {
     // Initialize Three.js scene
@@ -122,7 +122,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
         this.createSprites();
       },
       error: (error: any) => {
-        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later.', 5000, '/home');
+        this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
       }
     });
   }
@@ -276,7 +276,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
                   this.notificationService.showSuccess(claimResponse.message, 3000, '/systems');
                 },
                 error: (error) => {
-                  this.notificationService.showError(error.error.message || 'Something went wrong, please try again later.', 5000, '/home');
+                  this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
                 }
               });
             } else {
@@ -284,13 +284,13 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
             }
           },
           error: (error) => {
-            this.notificationService.showError(error.error.message || 'Something went wrong, please try again later.', 5000, '/home');
+            this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
           }
         });
       },
       onView: () => {
         //user clicked on view, sending him to view-system
-        this.router.navigate(['/view-system', starData.solar_system_id]);
+        this.navigationService.navigateTo(`/view-system/${starData.solar_system_id}`);
       }
     });
   }

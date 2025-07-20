@@ -1,4 +1,5 @@
 import { Planet } from "./planet.interface";
+import { Wallpaper } from "./wallpaper.interface";
 
 export interface SolarSystem {
   solar_system_id: number;
@@ -13,9 +14,13 @@ export interface SolarSystem {
   solar_system_initial_x: number;
   solar_system_initial_y: number;
   solar_system_initial_z: number;
+  
+  user_id?: number | null;
+  wallpaper?: Wallpaper;
   planets: Planet[];
   galaxy_id: number;
   likes_count?: number;
+  is_liked?: number;
   planetsCount?: number;
   moonsCount?: number;
 }

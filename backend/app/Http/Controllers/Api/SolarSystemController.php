@@ -71,7 +71,7 @@ class SolarSystemController
         }
     }
 
-    // Get all solar systems for given user with likes for each body
+    // Get all solar systems for given user with likes and with wallpapers for each body 
     public function getSolarSystemsByUser($galaxyId): JsonResponse
     {
         try {
@@ -85,6 +85,15 @@ class SolarSystemController
             // Add likes count to each element
             foreach ($solarSystems as $system) {
                 $system->likes_count = LikeSolarSystem::where('solar_system_id', $system->solar_system_id)->count();
+                
+                // Get wallpaper for this system if exists
+                $wallpaper = Wallpaper::where('solar_system_id', $system->solar_system_id)->first();
+                if ($wallpaper) {
+                    $wallpaper->likes_count = LikeWallpaper::where('wallpaper_id', $wallpaper->wallpaper_id)->count();
+                    $system->wallpaper = $wallpaper;
+                } else {
+                    $system->wallpaper = null;
+                }
                 
                 foreach ($system->planets as $planet) {
                     $planet->likes_count = LikePlanet::where('planet_id', $planet->planet_id)->count();

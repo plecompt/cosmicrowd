@@ -39,11 +39,9 @@ class UserController
     }
 
     // Return a user
-    public function view(Request $request): JsonResponse
+    public function view(Request $request, $userId): JsonResponse
     {
         try {
-            $userId = $request->input('userId');
-            
             if (!$userId) {
                 return $this->error('Need a userId', 400);
             }

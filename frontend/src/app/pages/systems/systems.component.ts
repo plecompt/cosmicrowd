@@ -7,6 +7,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 import { Planet } from '../../interfaces/solar-system/planet.interface';
 import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal/modal.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'app-systems',
@@ -20,7 +21,7 @@ export class SystemsComponent implements OnInit {
   isLoaded: boolean = false;
   expandedPlanetId: number | null = null;
 
-  constructor(private router: Router, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private modalService: ModalService) { }
+  constructor(private navigationService: NavigationService, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private modalService: ModalService) { }
 
   ngOnInit(): void {
     // If user is not logged in
@@ -40,7 +41,7 @@ export class SystemsComponent implements OnInit {
         this.isLoaded = true;
       },
       error: (error) => {
-        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }
@@ -152,7 +153,7 @@ export class SystemsComponent implements OnInit {
             this.notificationService.showSuccess('You successfully unclaimed this system', 2500, '/systems');
           },
           error: (error) => {
-            this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/systems');
+            this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/systems');
           }
         });
       },
@@ -164,7 +165,7 @@ export class SystemsComponent implements OnInit {
 
 
   editSystem(solarSystemId: number) {
-    this.router.navigate(['/edit-system', solarSystemId]);
+    this.navigationService.navigateTo(`/edit-system/${solarSystemId}`);
   }
 
   noSystemNotification() {

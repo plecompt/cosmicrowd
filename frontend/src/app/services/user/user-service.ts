@@ -1,32 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs'; 
-import { tap, shareReplay, finalize } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class UserService {
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
-  private setSession(authResult: any) {
-    localStorage.setItem('token', authResult.data.access_token);
-    localStorage.setItem('user_id', authResult.data.user.user_id.toString());
-    localStorage.setItem('user_login', authResult.data.user.user_login.toString());
-  }
-
-  public isLoggedIn(){
-    return localStorage.getItem('user_id') && localStorage.getItem('token') ? true : false;
-  }
-
-  isLoggedOut(){
-    return !this.isLoggedIn();
-  }
-
-  public clearSession(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_id');
+  getUserById(userId: number){
+    return this.http.get(`http://localhost:8000/api/v1/users/${userId}`);
   }
 
   //register
@@ -37,24 +21,6 @@ export class AuthService {
   //delete
   deleteAccount(current_password: string){
     return this.http.post('http://localhost:8000/api/v1/users/delete-account', {current_password});
-  }
-
-  //login
-  login(user_email: string, user_password: string): any{
-    return this.http.post('http://localhost:8000/api/v1/auth/login', {user_email, user_password}).pipe(
-      tap(res=> this.setSession(res)),
-      shareReplay(1)
-    );
-  }
-
-  //logout
-  logout(): Observable<any> {
-     return this.http.post<any>('http://localhost:8000/api/v1/auth/logout', {}).pipe(
-      finalize(() => {
-        this.clearSession();
-      }),
-      shareReplay(1)
-    );
   }
 
   //user send an email

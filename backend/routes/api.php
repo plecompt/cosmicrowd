@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ClaimController;
+use App\Http\Controllers\Api\WallpaperController;
 
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\CheckOwnershipMiddleware;
@@ -30,7 +31,7 @@ Route::prefix('v1')->group(function () {
     Route::post('users/check-login', [UserController::class, 'checkLoginAvailability']); //verifie si un login est disponible en bdd
     Route::post('users/check-email', [UserController::class, 'checkEmailAvailability']); //verifie si un mdp est disponible en bdd
     Route::post('users/contact', [UserController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utiliateur
-    Route::get('/user/{userId}', [UserController::class, 'view']);//retourne un user
+    Route::get('/users/{userId}', [UserController::class, 'view']);//retourne un user
 
     // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
@@ -47,6 +48,12 @@ Route::prefix('v1')->group(function () {
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes', [LikeController::class, 'countSolarSystemLikes']); //nombre de likes pour ce systeme solaire
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes-stats', [LikeController::class, 'getSolarSystemLikesStats']); //stats des likes (infos plus completes) pour ce systeme solaire
     
+    // Wallpaper d'un systeme solaire
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper', [WallpaperController::class, 'show']); //retourne le wallpaper associé à ce solarSystem
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/exists', [WallpaperController::class, 'exists']); //existe-t'il un wallpaper pour ce solarSystem?
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/likes', [LikeController::class, 'countWallpaperLikes']); //nombres de likes pour le wallpaper de ce solarSystem
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/likes-stats', [LikeController::class, 'getWallpaperLikesStats']); //stats des likes pour le wallpaper de ce solarSystem (infos plus complètes)
+        
     // PLANETES d'un systeme solaire
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'index']); //liste des planetes pour ce systeme solaire
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'show']); //une planète avec ses stats
@@ -66,6 +73,7 @@ Route::prefix('v1')->group(function () {
     
     // ClaimController, check if the system is claimable for given user id
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [ClaimController::class, 'isClaimable']); //retourne si le system est 'claimable' pour l'utilisateur donné
+
 });
 
 // Routes protégées (authentification requise)
@@ -94,8 +102,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', RateLimitMiddleware::class])->g
     
     // Like Routes (toutes privées)
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/to-like', [LikeController::class, 'toggleSolarSystem']); //to like ou unlike un systeme solaire
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/{wallpaperId}/to-like', [LikeController::class, 'toggleWallpaper']); //to like ou unlike un wallpaper
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/to-like', [LikeController::class, 'togglePlanet']); //to like ou unlike une planete
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon']); //to like ou unlike une lune
+    Route::get('/user-likes', [LikeController::class, 'checkUserLikes']); //return if given id are liked or not by user
     
     // Routes pour les claims de systèmes solaires
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [ClaimController::class, 'claim']); //claim le solarSystem

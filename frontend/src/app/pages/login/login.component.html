@@ -22,8 +22,8 @@
       <button type="submit">Sign In</button>
 
       <div class="forgot-register-actions flex-column">
-        <a (click)="this.authService.navigateTo('register')">No account ? Join the Galaxy !</a>
-        <a (click)="this.authService.navigateTo('forgot-password')">Forgot password ?</a>
+        <a (click)="this.navigationService.navigateTo('register')">No account ? Join the Galaxy !</a>
+        <a (click)="this.navigationService.navigateTo('forgot-password')">Forgot password ?</a>
       </div>
     </form>
 

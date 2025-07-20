@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { FormsModule } from '@angular/forms';
 import { ModalService } from '../../services/modal/modal.service';
 import { NotificationService } from '../../services/notifications/notification.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,8 +17,9 @@ export class NavigationBarComponent {
   isMenuOpen = false;
   searchQuery: string = '';
   searchResults: any[] = [];
+  currentUserId: string | null = localStorage.getItem('user_id');
 
-  constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService, private modalService: ModalService, private notificationService: NotificationService){}
+  constructor(private galaxiesService: GalaxiesService, private router: Router, public authService: AuthService, private modalService: ModalService, private notificationService: NotificationService, private navigationService: NavigationService){}
 
   onSearch(): void {
     this.isMenuOpen = false; //closing dropdown menu
@@ -29,7 +31,7 @@ export class NavigationBarComponent {
           this.showModal(this.searchResults);
         },
         error: (error) => {
-          this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
         }
       });
     }
@@ -42,13 +44,13 @@ export class NavigationBarComponent {
 
    navigateTo(url: string){
     this.isMenuOpen = false; //closing dropdown menu
-    this.router.navigateByUrl(url)
+    this.navigationService.navigateTo(url)
    }
 
    logout(){
     this.isMenuOpen = false; //closing dropdown menu
     this.authService.logout().subscribe();
-    this.authService.navigateTo('/home');
+    this.navigationService.navigateTo('/home');
    }
 
    toggleMenu(){

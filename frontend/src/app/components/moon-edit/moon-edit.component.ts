@@ -158,7 +158,7 @@ export class MoonEditComponent {
             this.notificationService.showSuccess('Moon successfully deleted !', 2500);
           },
           error: (error) => {
-            this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/systems');
+            this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/systems');
           }
         });
       },

@@ -108,4 +108,11 @@ export class GalaxiesService {
   searchStars(query: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/search?q=${encodeURIComponent(query)}`);
   }
+
+
+  //Wallpapers
+  // Get if there is a wallpaper associated to given solarSystemId
+  ifExistWallpaperForSystem(galaxyId: number, solarSystemId: number): Observable<any>{
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpaper/exists`);
+  }
 }

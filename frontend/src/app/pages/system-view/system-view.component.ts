@@ -41,7 +41,7 @@ export class SystemViewComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.notificationService.showError(error.error.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
       }
     });
   }

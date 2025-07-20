@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
@@ -19,7 +18,6 @@ export class RegisterComponent implements OnInit{
   registrationError: string = "";
 
   constructor(
-    private router: Router, 
     public authService: AuthService, 
     private fb: FormBuilder, 
     public formValidator: FormValidatorService, 
@@ -87,7 +85,4 @@ export class RegisterComponent implements OnInit{
     });
   }
 
-  navigateTo(url: string) {
-    this.router.navigateByUrl(url);
-  }
 }

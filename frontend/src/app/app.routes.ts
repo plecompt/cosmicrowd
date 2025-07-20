@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { AccountComponent } from './pages/account/account.component';
 import { SystemsComponent } from './pages/systems/systems.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ChangePasswordComponent } from './pages/change-password/change-password.component';
@@ -25,7 +26,8 @@ export const routes: Routes = [
     { path: 'change-email', component: ChangeEmailComponent, title: 'CosmiCrowd - Change Email' },
     { path: 'contact', component: ContactComponent, title: 'CosmiCrowd - Contact' },
     { path: 'reset-password', component: ResetPasswordComponent, title: 'CosmiCrowd - Reset Password' },
-    { path: 'profile', component: ProfileComponent, title: 'CosmiCrowd - Profile' },
+    { path: 'profile/:id', component: ProfileComponent, title: 'CosmiCrowd - Profile' },
+    { path: 'account', component: AccountComponent, title: 'CosmiCrowd - Account' },
     { path: 'systems', component: SystemsComponent, title: 'CosmiCrowd - Systems' },
     { path: 'view-system/:id', component: SystemViewComponent, title: 'CosmiCrowd - View System' },
     { path: 'edit-system/:id', component: SystemEditComponent, title: 'CosmiCrowd - Edit System' },
