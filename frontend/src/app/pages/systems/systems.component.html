@@ -1,20 +1,20 @@
 <app-background-stars [numberOfStars]="30"></app-background-stars>
 
 @if (authService.isLoggedIn() && this.solarSystems && this.solarSystems.length > 0 && this.isLoaded) {
-<div class="systems-container">
+<div class="systems-container flex">
     @for (solarSystem of this.solarSystems; track solarSystem.solar_system_id;) {
     <div class="system-container flex-column">
 
+        <div class="star-title">
+            <h3>{{solarSystem.solar_system_name}}</h3>
+        </div>
         <!-- Image -->
         <div class="wallpaper-container">
             <img src="https://threesolar.netlify.app/images/social.png" alt="{{solarSystem.solar_system_name}}">
         </div>
 
         <!-- Star informations -->
-        <div class="star-container">
-            <div class="star-title">
-                <h3>{{solarSystem.solar_system_name}}</h3>
-            </div>
+        <div class="star-container flex">
             <div class="star-content flex-column">
                 <div class="info-item flex"><span>Type: </span><span>{{getFormattedTypeForSystem(solarSystem)}}</span>
                 </div>
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Planets and moons-->
-        <div class="planets-and-moons-container">
+        <div class="planets-and-moons-container flex">
             <p class="planet-count"><strong>{{getPlanetsCountForSystem(solarSystem)}} Planets,
                     {{getMoonsCountForSystem(solarSystem)}} Moons</strong></p>
 
@@ -61,11 +61,11 @@
                     <div class="planet-card-bottom flex">
                         <!-- Name of the planet and moons count -->
                         @if (!isPlanetExpanded(planet)){
-                        <span class="planet-name truncate">
+                        <span class="planet-name">
                             {{planet.planet_name}}
-                            @if (planet.moons.length > 0) {
+                            <!-- @if (planet.moons.length > 0) {
                             <span class="moons-count"> ({{planet.moons.length}} moons)</span>
-                            }
+                            } -->
                         </span>
                         } @else {
                         <div class="left flex-column">

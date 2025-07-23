@@ -8,8 +8,8 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  width: 90%;
-  height: 80%;
+  width: auto;
+  height: auto;
   overflow-y: auto;
 }
 
@@ -30,8 +30,7 @@
 }
 
 .systems-section {
-  flex: 1;
-  min-height: 0;
+  height: auto;
 }
 
 .systems-section h2 {
@@ -79,7 +78,7 @@
 
 /* Top liked section */
 .top-liked-section {
-  height: 40%;
+  height: auto;
   margin-top: 2rem;
 }
 
@@ -153,7 +152,7 @@
   .profile-container {
     position: static;
     transform: none; 
-    margin: 25vh auto;
+    margin: 25vh 15px;
   }
 
   .system-item {
@@ -181,6 +180,6 @@
   }
 
   .top-liked-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
   }
 }

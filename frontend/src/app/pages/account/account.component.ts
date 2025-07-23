@@ -13,28 +13,4 @@ export class AccountComponent {
 
   constructor(public navigationService: NavigationService, public authService: AuthService) {}
 
-  changeEmail() {
-    // TODO: Implement email change functionality
-    console.log('Change email clicked');
-  }
-
-  changePassword() {
-    // TODO: Implement password change functionality
-    console.log('Change password clicked');
-  }
-
-  contactSupport() {
-    // TODO: Implement contact support functionality
-    console.log('Contact support clicked');
-  }
-
-  deleteAccount() {
-    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      // TODO: Implement account deletion
-      console.log('Delete account confirmed');
-    }
-  }
-
-  goBack() {
-  }
 }

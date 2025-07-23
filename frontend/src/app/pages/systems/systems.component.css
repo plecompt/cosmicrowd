@@ -1,32 +1,45 @@
 .systems-container {
-  width: 90%;
-  height: 80%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
+  height: auto;
   justify-content: space-evenly;
   gap: 20px;
+  margin-top: 100px;
 }
 
 .system-container {
-  height: 100%;
+  height: 1100px;
   width: 30%;
+  max-width: 600px;
   border: 1px solid gray;
   border-radius: 15px;
-  padding: 10px;
+  padding: 15px;
   background: rgb(20, 20, 40);
-  display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 30px;
+}
+
+.star-title {
+  text-align: center;
 }
 
 .wallpaper-container,
-.star-container,
+.star-container {
+  height: 20%;
+}
+
+.star-container {
+  flex-direction: column;
+  justify-content: center;
+  gap: 30px;
+
+  .star-content {
+    gap: 5px;
+  }
+}
+
 .planets-and-moons-container {
-  width: 100%;
-  height: 30%;
+  flex-direction: column;
+  gap: 10px;
+  height: 50%;
 }
 
 .wallpaper-container img {
@@ -35,75 +48,73 @@
   object-fit: cover;
   border-radius: 10px;
   transition: transform 0.3s ease;
-}
 
-.wallpaper-container img:hover {
-  transform: scale(1.02);
-}
-
-.star-container {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-top: 0px;
-  gap: 40px;
-
-  .star-title {
-    text-align: center;
-  }
-
-  .star-content {
-    gap: 5px;
+  &:hover {
+    transform: scale(1.02);
   }
 }
 
 .info-item {
   gap: 10px;
-  width: 100%;
-  overflow-y: scroll;
-  text-overflow: ellipsis;
-  display: inline-block;
-  white-space: nowrap;
-  justify-content: space-between;
   padding: 0 5px;
-}
-
-.planets-and-moons-container {
-  height: 30%;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  justify-content: space-between;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .planet-count {
   font-size: 0.9rem;
   margin: 0;
   padding-left: 4px;
+  text-align: center;
 }
 
 .planets-grid {
-  flex-grow: 1;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 10px;
-  height: 90%;
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
 }
 
 .planet-card {
-  position: relative;
-  background: rgba(40, 40, 60, 0.9);
+  position: absolute;
+  background: rgba(40, 40, 60, 0);
   border-radius: 10px;
   padding: 8px;
-  justify-content: center;
-  align-items: center;
   cursor: pointer;
-  overflow: hidden;
-  height: 100%;
-  width: 100%;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease;
   gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+  width: 90px;
+  height: 90px;
+
+  &.expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40vw;
+    height: auto;
+    padding: 30px;
+    background: rgba(40, 40, 60, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    z-index: 1000;
+  }
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .planet-card-bottom,
@@ -115,44 +126,10 @@
 
 .left,
 .right {
-  width: auto;
-  height: 100%;
   gap: 5px;
 }
 
-.planet-card.expanded {
-  position: fixed;
-  padding: 30px;
-  width: 40vw;
-  height: auto;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(40, 40, 60, 0.95);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.planet-card.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.planet-card img {
-  object-fit: contain;
-  max-width: auto;
-  height: 100%;
-}
-
-.truncate {
-  display: inline-block;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .actions-and-likes-container {
-  display: flex;
   justify-content: space-between;
   padding-top: 10px;
 }
@@ -160,35 +137,35 @@
 #planet-likes {
   position: absolute;
   left: 5px;
-  top: 0px;
+  top: 0;
 }
 
 #moon-likes {
   gap: 10px;
 }
 
-.likes, .like {
+.likes,
+.like {
   align-items: center;
 }
 
 .no-systems {
-  width: 90%;
-  height: 80%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 90%;
+  height: 80%;
   justify-content: center;
   align-items: center;
-  
+
   span {
     font-size: 20px;
   }
 }
 
-@media (width < 1100px) or (height < 900px) {
+@media (max-width: 1100px) {
   .systems-container {
-    display: flex;
     flex-direction: column;
     height: 75%;
   }
@@ -202,19 +179,16 @@
   .wallpaper-container,
   .star-container,
   .planets-and-moons-container {
-    width: 100%;
     height: auto;
   }
 
   .planet-card.expanded {
     width: 90vw;
-    height: auto;
   }
 
   .planet-card-top,
   .planet-card-bottom {
     height: auto;
-    width: 100%;
     gap: 20px;
   }
 
@@ -223,8 +197,6 @@
   }
 
   .planet-card img {
-    object-fit: contain;
-    height: 100%;
     width: 100%;
   }
 }

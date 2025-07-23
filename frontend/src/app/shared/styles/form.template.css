@@ -4,11 +4,10 @@ form {
     left: 50%;
     transform: translate(-50%, -50%);
 
-    background: rgba(20, 20, 40, 0.8);
-    padding: 40px;
+    background: rgba(20, 20, 40);
+    padding: 30px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
     width: 100%;
     max-width: 340px;
     text-align: center;
