@@ -54,6 +54,18 @@ class Moon extends Model
         return $this->belongsTo(Planet::class, 'planet_id', 'planet_id');
     }
 
+    public function solarSystem()
+    {
+        return $this->hasOneThrough(
+            SolarSystem::class,
+            Planet::class,
+            'planet_id',
+            'solar_system_id',
+            'planet_id', 
+            'solar_system_id'
+        );
+    }
+
     public function likes()
     {
         return $this->hasMany(LikeMoon::class, 'moon_id', 'moon_id');

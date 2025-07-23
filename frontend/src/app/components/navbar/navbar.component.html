@@ -1,25 +1,55 @@
-<nav class="floating-navbar">
+<nav class="floating-navbar" [class.navbar-hidden]="!isNavbarVisible">
   
     <div class="left-part">
       <h1 class="logo" (click)="navigateTo('home')">CosmiCrowd</h1>
-      <div class="search-container" (pointerdown)="this.isMenuOpen = false">
-        <!-- Since event pass through parent div and cause the input to be unfocusable, we need to stop propagation -->
+      <div class="search-container" #searchContainer>
         <label for="search-input" class="screen-reader-only">Search Bar</label>
-        <input type="text" placeholder="Search solar systems..." class="search-input" id="search-input" (pointerdown)="$event.stopPropagation()" [(ngModel)]="searchQuery">
+        <input 
+          type="text" 
+          placeholder="Search solar systems..." 
+          class="search-input" 
+          id="search-input" 
+          [(ngModel)]="searchQuery"
+          (keydown.enter)="onSearch()"
+          #searchInput
+        >
+        <button class="filter-btn" (click)="toggleFilters()">🔧</button>
         <button class="search-btn" (click)="onSearch()">🔍</button>
+        
+        @if (isFiltersOpen) {
+          <div class="dropdown-filters" #filtersDropdown>
+            <p>Filters</p>
+            <div class="filter-item">
+              <input type="checkbox" id="users-filter" [(ngModel)]="filters.users">
+              <label for="users-filter">Users</label>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="systems-filter" [(ngModel)]="filters.systems">
+              <label for="systems-filter">Systems</label>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="planets-filter" [(ngModel)]="filters.planets">
+              <label for="planets-filter">Planets</label>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="moons-filter" [(ngModel)]="filters.moons">
+              <label for="moons-filter">Moons</label>
+            </div>
+          </div>
+        }
       </div>
     </div>
 
-    <div class="right-part">
+    <div class="right-part" #rightPart>
       <button class="menu-btn" (click)="toggleMenu()">☰</button>
       
       @if (isMenuOpen){
-        <div class="dropdown">
+        <div class="dropdown-menu" #userDropdown>
           <button class="create-btn" (click)="navigateTo('/')">Home</button>
           <button class="create-btn" (click)="navigateTo('/contact')">Contact</button>
         @if(this.authService.isLoggedIn()){
           <button class="create-btn" (click)="navigateTo('/systems')">Systems</button>
-          <button class="profile-btn" (click)="navigateTo('/profile/' + currentUserId)">Profile</button>
+          <button class="profile-btn" (click)="navigateToProfile()">Profile</button>
           <button class="account-btn" (click)="navigateTo('/account')">Account</button>
           <button class="login-btn" (click)="logout()">Disconnect</button>
         } @else {
@@ -28,5 +58,4 @@
         </div>
       }
     </div>
-
 </nav>

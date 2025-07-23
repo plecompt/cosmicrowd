@@ -13,195 +13,69 @@ class SearchController
 {
     use ApiResponse;
 
-    // WIP
+    // Global search in names or login
     public function globalSearch(Request $request)
     {
         $query = $request->get('q', '');
         $limit = $request->get('limit', 10);
+        $filters = $request->get('filters', []);
 
         if (empty($query)) {
             return $this->error('Empty query', 400);
         }
 
-        $solarSystems = SolarSystem::where('solar_system_name', 'LIKE', '%' . $query . '%')
+        $results = [];
+        $totalResults = 0;
+
+        // Check if users filter is enabled
+        if (isset($filters['users']) && $filters['users']) {
+            $users = User::where('user_login', 'LIKE', '%' . $query . '%')
                         ->limit($limit)
                         ->get();
+            $results['users'] = $users;
+            $totalResults += $users->count();
+        }
 
-        $planets = Planet::where('planet_name', 'LIKE', '%' . $query . '%')
+        // Check if systems filter is enabled
+        if (isset($filters['systems']) && $filters['systems']) {
+            $solarSystems = SolarSystem::where('solar_system_name', 'LIKE', '%' . $query . '%')
+                            ->limit($limit)
+                            ->get();
+            $results['solar_systems'] = $solarSystems;
+            $totalResults += $solarSystems->count();
+        }
+
+        // Check if planets filter is enabled
+        if (isset($filters['planets']) && $filters['planets']) {
+            $planets = Planet::with('solarSystem')
+                            ->where('planet_name', 'LIKE', '%' . $query . '%')
+                            ->limit($limit)
+                            ->get()
+                            ->map(function ($planet) {
+                                $planet->solar_system_id = $planet->solarSystem->solar_system_id ?? null;
+                                return $planet;
+                            });
+            $results['planets'] = $planets;
+            $totalResults += $planets->count();
+        }
+
+        // Check if moons filter is enabled
+        if (isset($filters['moons']) && $filters['moons']) {
+            $moons = Moon::with('solarSystem')
+                        ->where('moon_name', 'LIKE', '%' . $query . '%')
                         ->limit($limit)
-                        ->get();
-
-        $moons = Moon::where('moon_name', 'LIKE', '%' . $query . '%')
-                    ->limit($limit)
-                    ->get();
-
-        $users = User::where('user_login', 'LIKE', '%' . $query . '%')
-                    ->limit($limit)
-                    ->get();
+                        ->get()
+                        ->map(function ($moon) {
+                            $moon->solar_system_id = $moon->solarSystem->solar_system_id ?? null;
+                            return $moon;
+                        });
+            $results['moons'] = $moons;
+            $totalResults += $moons->count();
+        }
 
         return $this->success([
-            'results' => [
-                'solar_systems' => $solarSystems,
-                'planets' => $planets,
-                'moons' => $moons,
-                'users' => $users
-            ],
-            'total_results' => $solarSystems->count() + $planets->count() + $moons->count() + $users->count()
-        ]);
-    }
-
-    // WIP
-    public function searchSolarSystems(Request $request)
-    {
-        $query = $request->get('q', '');
-        $typeFilter = $request->get('type');
-        $gravityMin = $request->get('gravity_min');
-        $gravityMax = $request->get('gravity_max');
-        $luminosityMin = $request->get('luminosity_min');
-        $luminosityMax = $request->get('luminosity_max');
-        $limit = $request->get('limit', 15);
-
-        $solarSystemsQuery = SolarSystem::with(['user', 'planets', 'likes']);
-
-        if (!empty($query)) {
-            $solarSystemsQuery->where('solar_system_name', 'LIKE', '%' . $query . '%');
-        }
-        if ($typeFilter) {
-            $solarSystemsQuery->where('solar_system_type', $typeFilter);
-        }
-        if ($gravityMin) {
-            $solarSystemsQuery->where('solar_system_gravity', '>=', $gravityMin);
-        }
-        if ($gravityMax) {
-            $solarSystemsQuery->where('solar_system_gravity', '<=', $gravityMax);
-        }
-        if ($luminosityMin) {
-            $solarSystemsQuery->where('solar_system_luminosity', '>=', $luminosityMin);
-        }
-        if ($luminosityMax) {
-            $solarSystemsQuery->where('solar_system_luminosity', '<=', $luminosityMax);
-        }
-
-        $solarSystems = $solarSystemsQuery->orderBy('solar_system_id', 'desc')
-                                        ->paginate($limit);
-
-        return $this->success([
-            'solar_systems' => $solarSystems
-        ]);
-    }
-
-    // WIP
-    public function searchPlanets(Request $request)
-    {
-        $query = $request->get('q', '');
-        $typeFilter = $request->get('type');
-        $gravityMin = $request->get('gravity_min');
-        $gravityMax = $request->get('gravity_max');
-        $luminosityMin = $request->get('luminosity_min');
-        $luminosityMax = $request->get('luminosity_max');
-        $limit = $request->get('limit', 15);
-
-        $planetsQuery = Planet::with(['user', 'solarSystem', 'moons', 'likes']);
-
-        if (!empty($query)) {
-            $planetsQuery->where('planet_name', 'LIKE', '%' . $query . '%');
-        }
-        if ($typeFilter) {
-            $planetsQuery->where('planet_type', $typeFilter);
-        }
-        if ($gravityMin) {
-            $planetsQuery->where('planet_gravity', '>=', $gravityMin);
-        }
-        if ($gravityMax) {
-            $planetsQuery->where('planet_gravity', '<=', $gravityMax);
-        }
-        if ($diameterMin) {
-            $planetsQuery->where('planet_diameter', '>=', $diameterMin);
-        }
-        if ($diameterMax) {
-            $planetsQuery->where('planet_diameter', '<=', $diameterMax);
-        }
-        if ($massMin) {
-            $planetsQuery->where('planet_mass', '>=', $massMin);
-        }
-        if ($massMax) {
-            $planetsQuery->where('planet_mass', '<=', $massMax);
-        }
-
-        $planets = $planetsQuery->orderBy('planet_id', 'desc')
-                            ->paginate($limit);
-
-        return $this->success([
-            'planets' => $planets
-        ]);
-    }
-
-    // WIP    
-    public function searchMoons(Request $request)
-    {
-        $query = $request->get('q', '');
-        $typeFilter = $request->get('type');
-        $gravityMin = $request->get('gravity_min');
-        $gravityMax = $request->get('gravity_max');
-        $luminosityMin = $request->get('luminosity_min');
-        $luminosityMax = $request->get('luminosity_max');
-        $limit = $request->get('limit', 15);
-
-        $moonsQuery = Moon::with(['user', 'planet', 'likes']);
-
-        if (!empty($query)) {
-            $moonsQuery->where('moon_name', 'LIKE', '%' . $query . '%');
-        }
-        if ($typeFilter) {
-            $moonsQuery->where('moon_type', $typeFilter);
-        }
-        if ($gravityMin) {
-            $moonsQuery->where('moon_gravity', '>=', $gravityMin);
-        }
-        if ($gravityMax) {
-            $moonsQuery->where('moon_gravity', '<=', $gravityMax);
-        }
-        if ($diameterMin) {
-            $moonsQuery->where('moon_diameter', '>=', $diameterMin);
-        }
-        if ($diameterMax) {
-            $moonsQuery->where('moon_diameter', '<=', $diameterMax);
-        }
-        if ($massMin) {
-            $moonsQuery->where('moon_mass', '>=', $massMin);
-        }
-        if ($massMax) {
-            $moonsQuery->where('moon_mass', '<=', $massMax);
-        }
-
-        $moons = $moonsQuery->orderBy('moon_id', 'desc')
-                        ->paginate($limit);
-
-        return $this->success([
-            'moons' => $moons
-        ]);
-    }
-
-    // WIP
-    public function searchUsers(Request $request)
-    {
-        $query = $request->get('q', '');
-        $limit = $request->get('limit', 15);
-
-        $usersQuery = User::with(['solarSystems', 'planets', 'moons']);
-
-        if (!empty($query)) {
-            $usersQuery->where(function($q) use ($query) {
-                $q->where('name', 'LIKE', '%' . $query . '%')
-                  ->orWhere('email', 'LIKE', '%' . $query . '%');
-            });
-        }
-
-        $users = $usersQuery->orderBy('id', 'desc')
-                        ->paginate($limit);
-
-        return $this->success([
-            'users' => $users
+            'results' => $results,
+            'total_results' => $totalResults
         ]);
     }
 }

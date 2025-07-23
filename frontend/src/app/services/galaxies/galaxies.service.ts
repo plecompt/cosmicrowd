@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { Planet } from '../../interfaces/solar-system/planet.interface';
@@ -104,10 +104,19 @@ export class GalaxiesService {
 
 
   //Search
-  // WIP Search
-  searchStars(query: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/search?q=${encodeURIComponent(query)}`);
+  searchStars(query: string, filters: any): Observable<any> {
+    let params = new HttpParams()
+      .set('q', query);
+
+    // Add filters to params
+    if (filters.users) params = params.set('filters[users]', 'true');
+    if (filters.systems) params = params.set('filters[systems]', 'true');
+    if (filters.planets) params = params.set('filters[planets]', 'true');
+    if (filters.moons) params = params.set('filters[moons]', 'true');
+
+    return this.http.get(`${this.apiUrl}/search`, { params });
   }
+
 
 
   //Wallpapers
