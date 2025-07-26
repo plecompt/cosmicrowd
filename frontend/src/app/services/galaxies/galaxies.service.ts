@@ -41,6 +41,16 @@ export class GalaxiesService {
     return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/owner`);
   }
 
+  // Get 10 most recent solarSystems in given galaxy
+  getMostRecentSolarSystems(galaxyId: number, limit: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/most-recent?limit=${limit}`);
+  }
+
+  // Get 10 most liked solarSystems in given galaxy
+  getMostLikedSolarSystems(galaxyId: number, limit: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/most-liked?limit=${limit}`);
+  }
+
 
   //Planets
   // Add planet for given galaxyId && solarSystemId
@@ -117,11 +127,20 @@ export class GalaxiesService {
     return this.http.get(`${this.apiUrl}/search`, { params });
   }
 
-
-
   //Wallpapers
   // Get if there is a wallpaper associated to given solarSystemId
   ifExistWallpaperForSystem(galaxyId: number, solarSystemId: number): Observable<any>{
     return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpaper/exists`);
   }
+
+  // Get most recent wallpapers in a given galaxy
+  getMostRecentWallpapers(galaxyId: number, limit: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/wallpapers/most-recent?limit=${limit}`);
+  }
+
+  // Get most liked wallpapers in a given galaxy
+  getMostLikedWallpapers(galaxyId: number, limit: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/wallpapers/most-liked?limit=${limit}`);
+  }
+
 }

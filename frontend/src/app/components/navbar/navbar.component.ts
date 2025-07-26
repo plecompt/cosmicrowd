@@ -59,8 +59,8 @@ export class NavigationBarComponent implements OnInit, OnDestroy {
           this.searchResults = response.data.results || [];
           this.showModal(this.searchResults);
         },
-        error: (error) => {
-          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
+        error: () => {
+          this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
         }
       });
     }
@@ -69,20 +69,14 @@ export class NavigationBarComponent implements OnInit, OnDestroy {
   private onScroll(): void {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-    if (scrollTop <= 50) {
-      // At top of page, always show navbar
+    if (scrollTop <= 0) {
       this.isNavbarVisible = true;
-    } else if (scrollTop > this.lastScrollTop) {
-      // Scrolling down, hide navbar
-      this.isNavbarVisible = false;
     } else {
-      // Scrolling up, show navbar
-      this.isNavbarVisible = true;
+      this.isNavbarVisible = false;
     }
 
     this.lastScrollTop = scrollTop;
   }
-
 
   private onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
@@ -115,12 +109,12 @@ export class NavigationBarComponent implements OnInit, OnDestroy {
   }
 
   navigateTo(url: string) {
-    this.isMenuOpen = false; //closing dropdown menu
+    this.isMenuOpen = false;
     this.navigationService.navigateTo(url)
   }
 
   logout() {
-    this.isMenuOpen = false; //closing dropdown menu
+    this.isMenuOpen = false;
     this.authService.logout().subscribe();
     this.navigationService.navigateTo('/home');
   }
@@ -141,13 +135,13 @@ export class NavigationBarComponent implements OnInit, OnDestroy {
     const createSection = (items: any[], title: string, routePrefix: string, nameField: string, descField: string) => {
       if (!items || items.length === 0) return '';
 
-      let section = `<div style="margin: 10px;"><h3 style="text-align: center; margin-bottom: 10px !important;">${title}</h3><ul>`;
+      let section = `<div style="margin: 10px;"><h3 style="text-align: center; margin: 20px !important;">${title}</h3><ul>`;
 
       for (const item of items) {
         const route = routePrefix + item[routePrefix === 'profile/' ? 'user_id' : 'solar_system_id'];
         section += `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-          <li style="width: 90%;">
+          <li style="width: 85%;">
             <a style="text-decoration: none;" data-route="${route}">${item[nameField]}</a>${descField ? ': ' + item[descField] : ''}
           </li>
           <button style="width: 10%; text-align: center; padding: 5px;" data-route="${route}">🔍</button>

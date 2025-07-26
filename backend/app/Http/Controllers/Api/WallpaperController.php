@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use App\Http\Traits\ApiResponse;
 use App\Models\SolarSystem;
 use App\Models\Wallpaper;
-use Illuminate\Http\JsonResponse;
+use App\Models\Galaxy;
 
 class WallpaperController
 {
@@ -33,5 +35,39 @@ class WallpaperController
             ->exists();
         
         return $this->success(['exists' => $exists], 'Wallpaper existence checked');
+    }
+
+    // Return the most liked wallpapers, 10 by default
+    public function getMostLikedWallpapers(Request $request, $galaxyId): JsonResponse
+    {
+        $limit = (int) $request->query('limit', 10);
+
+        $galaxy = Galaxy::findOrFail($galaxyId);
+
+        $wallpapers = Wallpaper::with(['user:user_id,user_login', 'solarSystem:solar_system_id,solar_system_name'])
+            ->withCount('likes')
+            ->where('galaxy_id', $galaxyId)
+            ->orderByDesc('likes_count')
+            ->limit($limit)
+            ->get();
+
+        return $this->success($wallpapers, 'Most liked wallpapers retrieved');
+    }
+
+    // Return the most recent wallpapers, 10 by default
+    public function getMostRecentWallpapers(Request $request, $galaxyId): JsonResponse
+    {
+        $limit = (int) $request->query('limit', 10);
+
+        $galaxy = Galaxy::findOrFail($galaxyId);
+
+        $wallpapers = Wallpaper::with(['user:user_id,user_login', 'solarSystem:solar_system_id,solar_system_name'])
+            ->withCount('likes')
+            ->where('galaxy_id', $galaxyId)
+            ->orderByDesc('wallpaper_created_at')
+            ->limit($limit)
+            ->get();
+
+        return $this->success($wallpapers, 'Most recent wallpapers retrieved');
     }
 }

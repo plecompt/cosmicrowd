@@ -1,6 +1,81 @@
 <div class="system-view-container">
   @if (!isLoading && solarSystem) {
     <app-system-animation [solarSystem]="solarSystem" [viewMode]="'view'"></app-system-animation>
+    
+    <!-- Overlay UI -->
+    <div class="system-overlay">
+      <!-- User Profile Section (if claimed) -->
+      @if (solarSystem.user_id != null) {
+        <div class="user-profile">
+          <div class="profile-header">
+            <div class="user-info">
+              <h3>{{ solarSystem.user_id }}</h3>
+              <!-- <span class="claim-date">Claimed {{ solarSystem.claim_date | date }}</span> -->
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Orbit Controls -->
+      <div class="orbit-controls">
+        <label class="toggle-switch">
+          <!-- <input type="checkbox" [(ngModel)]="showOrbits" (change)="toggleOrbits()"> -->
+          <span class="slider">Show Orbits</span>
+        </label>
+      </div>
+
+      <!-- Bodies List -->
+      <div class="bodies-list">
+        <h4>System Bodies</h4>
+        
+        <!-- Star -->
+        <div class="body-item star">
+          <span class="body-name">{{ solarSystem.solar_system_name }} (Star)</span>
+          <div class="body-actions">
+            <button class="btn-view" (click)="viewBody('star')">View</button>
+            <button class="btn-follow" 
+                    [class.active]="followingTarget === 'star'"
+                    (click)="toggleFollow('star')">
+              {{ followingTarget === 'star' ? 'Stop' : 'Follow' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Planets -->
+        @for (planet of solarSystem.planets; track planet.planet_id) {
+          <div class="body-item planet">
+            <span class="body-name">{{ planet.planet_name }}</span>
+            <div class="body-actions">
+              <button class="btn-view" (click)="viewBody('planet', planet)">View</button>
+              <button class="btn-follow" 
+                      [class.active]="followingTarget === 'planet_' + planet.planet_id"
+                      (click)="toggleFollow('planet', planet)">
+                {{ followingTarget === 'planet_' + planet.planet_id ? 'Stop' : 'Follow' }}
+              </button>
+            </div>
+
+            <!-- Moons -->
+            @if (planet.moons.length > 0) {
+              <div class="moons-list">
+                @for (moon of planet.moons; track moon.moon_id) {
+                  <div class="body-item moon">
+                    <span class="body-name">{{ moon.moon_name }}</span>
+                    <div class="body-actions">
+                      <button class="btn-view" (click)="viewBody('moon', planet, moon)">View</button>
+                      <button class="btn-follow" 
+                              [class.active]="followingTarget === 'moon_' + moon.moon_id"
+                              (click)="toggleFollow('moon', planet, moon)">
+                        {{ followingTarget === 'moon_' + moon.moon_id ? 'Stop' : 'Follow' }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
   }
   
   @if (isLoading) {

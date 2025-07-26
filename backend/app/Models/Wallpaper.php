@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\LikeWallpaper;
 
 class Wallpaper extends Model
 {
@@ -15,7 +16,7 @@ class Wallpaper extends Model
     protected $fillable = [
         'user_id',
         'galaxy_id', 
-        'system_id',
+        'solar_system_id',
         'wallpaper_settings'
     ];
 
@@ -29,8 +30,13 @@ class Wallpaper extends Model
         return $this->belongsTo(Galaxy::class, 'galaxy_id', 'galaxy_id');
     }
 
-    public function system(): BelongsTo
+    public function solarSystem(): BelongsTo
     {
-        return $this->belongsTo(System::class, 'system_id', 'system_id');
+        return $this->belongsTo(SolarSystem::class, 'solar_system_id', 'solar_system_id');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(LikeWallpaper::class, 'wallpaper_id', 'wallpaper_id');
     }
 }

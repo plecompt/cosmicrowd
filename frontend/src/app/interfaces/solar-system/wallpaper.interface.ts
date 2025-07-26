@@ -1,3 +1,6 @@
+import { User } from "../user/user.interface";
+import { SolarSystem } from "./solar-system.interface";
+
 export interface Wallpaper {
   wallpaper_id: number;
   wallpaper_settings: string;
@@ -6,5 +9,8 @@ export interface Wallpaper {
   user_id: number;
   galaxy_id: number;
   solar_system_id: number;
+  
   likes_count?: number;
+  user?: User;
+  solar_system?: SolarSystem;
 }

@@ -21,7 +21,6 @@ import { LikeableType, LikesService } from '../../services/likes/likes.service';
 export class ProfileComponent implements OnInit {
   currentGalaxy: number = 1;
   user!: User;
-  canLike: boolean = false;
   profileUserId!: number;
   solarSystems!: SolarSystem[];
   topLikedSystem: any = null;
@@ -29,7 +28,7 @@ export class ProfileComponent implements OnInit {
   topLikedMoon: any = null;
   topLikedWallpaper: any = null;
 
-  LikeableType = LikeableType;
+  // LikeableType = LikeableType;
 
   constructor(
     public authService: AuthService,
@@ -64,7 +63,6 @@ export class ProfileComponent implements OnInit {
         this.solarSystems = responses.solarSystems.data.solar_systems;
         
         this.calculateTopLiked();
-        this.isViewerOwner();
       },
       error: () => {
         this.notificationService.showError('Failed to load user data', 5000, '/home');
@@ -72,7 +70,7 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  getTotalMoons(solarSystem: any): number {
+  getTotalMoons(solarSystem: SolarSystem): number {
     return solarSystem.planets.reduce((total: number, planet: any) => {
       return total + (planet.moons ? planet.moons.length : 0);
     }, 0);
@@ -120,21 +118,17 @@ export class ProfileComponent implements OnInit {
       : null;
   }
 
-  toggleLike(type: LikeableType, object: any): void {
-    this.likesService.like(type, this.currentGalaxy, object.solar_system_id, object.planet_id, object.moon_id, object.wallpaper_id)
-      .subscribe(() => {
-        object.is_liked = !object.is_liked;
-        object.likes_count += object.is_liked ? 1 : -1;
-      });
-  }
+  // toggleLike(type: LikeableType, object: any): void {
+  //   this.likesService.like(type, this.currentGalaxy, object.solar_system_id, object.planet_id, object.moon_id, object.wallpaper_id)
+  //     .subscribe(() => {
+  //       object.is_liked = !object.is_liked;
+  //       object.likes_count += object.is_liked ? 1 : -1;
+  //     });
+  // }
 
   getSystemNameByWallpaperId(wallpaperId: number): string | null {
     const system = this.solarSystems.find(system => system.wallpaper?.wallpaper_id === wallpaperId);
     return system ? system.solar_system_name : null;
-  }
-
-  isViewerOwner() {
-    this.canLike = (localStorage.getItem('user_id') != this.solarSystems[0].user_id) && this.authService.isLoggedIn();
   }
 
   viewSystem(solarSystemId: number): void {

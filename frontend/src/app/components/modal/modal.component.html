@@ -21,6 +21,9 @@
         @if (modalData.showCancel) {
           <button class="btn btn-secondary" (click)="onCancel()">Cancel</button>
         }
+        @if (modalData.showLike) {
+          <button class="btn btn-secondary" (click)="onLike()">Like</button>
+        }
       </div>
     </div>
   </div>

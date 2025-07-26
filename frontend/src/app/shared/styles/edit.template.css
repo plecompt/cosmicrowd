@@ -9,7 +9,7 @@
 
 .edit-overlay {
   position: absolute;
-  top: 5%;
+  top: 10%;
   left: 0;
   width: 100%;
   height: 100%;
@@ -250,6 +250,22 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+
+  .planet-item {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+
+    .planet-info {
+      width: 50%;
+    }
+
+    .planet-actions {
+      flex-wrap: wrap;
+      width: 50%;
+      justify-content: right;
+    }
   }
 
   .moon-actions {

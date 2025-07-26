@@ -61,8 +61,8 @@ export class SystemEditComponent {
           this.getSolarSystems();
         }
       },
-      error: (error) => {
-        this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
+      error: () => {
+        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
       }
     });
   }
@@ -95,8 +95,8 @@ export class SystemEditComponent {
           console.log(this.solarSystem);
         }
       },
-      error: (error) => {
-        this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
+      error: () => {
+        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
       }
     });
   }

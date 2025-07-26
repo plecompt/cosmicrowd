@@ -5,16 +5,16 @@
     @for (solarSystem of this.solarSystems; track solarSystem.solar_system_id;) {
     <div class="system-container flex-column">
 
-        <div class="star-title">
-            <h3>{{solarSystem.solar_system_name}}</h3>
-        </div>
         <!-- Image -->
         <div class="wallpaper-container">
             <img src="https://threesolar.netlify.app/images/social.png" alt="{{solarSystem.solar_system_name}}">
         </div>
 
         <!-- Star informations -->
-        <div class="star-container flex">
+        <div class="star-container flex-column">
+            <div class="star-title">
+                <h3>{{solarSystem.solar_system_name}}</h3>
+            </div>
             <div class="star-content flex-column">
                 <div class="info-item flex"><span>Type: </span><span>{{getFormattedTypeForSystem(solarSystem)}}</span>
                 </div>
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Planets and moons-->
-        <div class="planets-and-moons-container flex">
+        <div class="planets-and-moons-container flex-column">
             <p class="planet-count"><strong>{{getPlanetsCountForSystem(solarSystem)}} Planets,
                     {{getMoonsCountForSystem(solarSystem)}} Moons</strong></p>
 
@@ -50,7 +50,7 @@
 
                     <!-- Likes of this planet -->
                     <div id="planet-likes" class="likes flex">
-                        <span>{{solarSystem.likes_count}}</span>
+                        <span>{{planet.likes_count}}</span>
                         <img id="like-icon" src="/icons/like.png" alt="">
                     </div>
 
@@ -61,11 +61,11 @@
                     <div class="planet-card-bottom flex">
                         <!-- Name of the planet and moons count -->
                         @if (!isPlanetExpanded(planet)){
-                        <span class="planet-name">
+                        <span class="planet-name truncate">
                             {{planet.planet_name}}
-                            <!-- @if (planet.moons.length > 0) {
+                            @if (planet.moons.length > 0) {
                             <span class="moons-count"> ({{planet.moons.length}} moons)</span>
-                            } -->
+                            }
                         </span>
                         } @else {
                         <div class="left flex-column">
@@ -94,7 +94,7 @@
                             <div class="likes flex" id="moon-likes">
                                 <span class="moon-item">{{moon.moon_name}}</span>
                                 <div class="like flex">
-                                    <span>{{solarSystem.likes_count}}</span>
+                                    <span>{{moon.likes_count}}</span>
                                     <img id="like-icon" src="/icons/like.png" alt="">
                                 </div>
                             </div>

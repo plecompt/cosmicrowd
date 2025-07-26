@@ -9,6 +9,7 @@ import { ModalService } from '../../services/modal/modal.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import { firstValueFrom } from 'rxjs';
 
 type StarType = keyof ReturnType<GalaxyAnimationComponent['getStarColorMap']>;
 
@@ -121,8 +122,8 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
         // Create sprites for each system
         this.createSprites();
       },
-      error: (error: any) => {
-        this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
+      error: () => {
+        this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
       }
     });
   }
@@ -232,6 +233,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       //we need to load detailed data...
       this.galaxiesService.getSolarSystem(starData['galaxy_id'], starData['solar_system_id']).subscribe({
         next: (systemInformation) => {
+          console.log(systemInformation.data.solar_system);
           this.showModal(systemInformation.data.solar_system);
         },
         error: () => {
@@ -241,22 +243,58 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     }
   };
 
-  private async showModal(starData: any): Promise<void> {
-    // Extract star name and owner, if system is allready claimed
-    const name = starData.solar_system_name;
+private async showModal(starData: any): Promise<void> {
+  // Extract star name and owner, if system is already claimed
+  const name = starData.solar_system_name;
+  let owner = "";
 
-    // Format system information for display
-    const formattedMessage = `
-      ${starData.solar_system_desc}
-      Type: ${this.getFormattedTypeForSystem(starData)}
-      Diameter: ${starData.solar_system_diameter.toString()} km
-      Mass: ${starData.solar_system_mass} x 10^24 kg
-      Surface Temperature: ${starData.solar_system_surface_temp} K
-      Gravity: ${starData.solar_system_gravity} m.s²
-      Planets: ${this.getPlanetsCountForSystem(starData) || '0'}
-      Moons: ${this.getMoonsCountForSystem(starData) || '0'}
-      Owner: ${starData.user_login || 'Unclaimed'}
-    `;
+  // Wait for the owner to be fetched if system is claimed
+  if (starData.user_id != null) {
+    try {
+      const response = await firstValueFrom(
+        this.galaxiesService.getSolarSystemOwner(1, starData.solar_system_id)
+      );
+      owner = response.data.owner;
+    } catch (error) {
+      this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+      return;
+    }
+  }
+
+  // Format system information for display as HTML
+  const formattedMessage = `
+      <div class="info-grid" style="margin-top: 15px;">
+        <div class="info-item">
+          <strong>Description:</strong> ${starData.solar_system_desc}
+        </div>
+        <div class="info-item">
+          <strong>Type:</strong> ${this.getFormattedTypeForSystem(starData)}
+        </div>
+        <div class="info-item">
+          <strong>Diameter:</strong> ${starData.solar_system_diameter.toString()} km
+        </div>
+        <div class="info-item">
+          <strong>Mass:</strong> ${starData.solar_system_mass} x 10^24 kg
+        </div>
+        <div class="info-item">
+          <strong>Surface Temperature:</strong> ${starData.solar_system_surface_temp} K
+        </div>
+        <div class="info-item">
+          <strong>Gravity:</strong> ${starData.solar_system_gravity} m.s²
+        </div>
+        <div class="info-item">
+          <strong>Planets:</strong> ${this.getPlanetsCountForSystem(starData) || '0'}
+        </div>
+        <div class="info-item">
+          <strong>Moons:</strong> ${this.getMoonsCountForSystem(starData) || '0'}
+        </div>
+        <div class="info-item owner">
+          <strong>Owner:</strong> ${owner || 'Unclaimed'}
+        </div>
+      </div>
+    </div>
+  `;
+
     // Open modal with system information
     this.modalService.show({
       title: name,
@@ -266,8 +304,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       onClaim: () => {
         // Check if user can claim this system
         this.galaxiesService.isSolarSystemClaimable(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
-          next: (response: any) => {
-            if (response.data.claimable) {
+          next: () => {
               // User can claim, proceed with claim
               this.galaxiesService.claimSolarSystem(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
                 next: (claimResponse: any) => {
@@ -277,11 +314,9 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
                 },
                 error: (error) => {
                   this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
+                  return ;
                 }
               });
-            } else {
-              this.notificationService.showError(response.data.reason || 'System cannot be claimed', 5000, '/home');
-            }
           },
           error: (error) => {
             this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
@@ -289,11 +324,12 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
         });
       },
       onView: () => {
-        //user clicked on view, sending him to view-system
+        // User clicked on view, sending him to view-system
         this.navigationService.navigateTo(`/view-system/${starData.solar_system_id}`);
       }
     });
   }
+
 
   getMoonsCountForSystem(system: SolarSystem): number {
     return system.planets.reduce((acc, planet) => acc + planet.moons.length, 0);

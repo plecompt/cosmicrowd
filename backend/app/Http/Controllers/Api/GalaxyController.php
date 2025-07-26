@@ -38,25 +38,36 @@ class GalaxyController
     }
 
     // Return the most liked solarSystems
-    public function getMostLikedSolarSystems($id): JsonResponse
+    public function getMostLikedSolarSystems(Request $request, $id): JsonResponse
     {
+        $limit = (int) $request->query('limit', 10);
+
         $galaxy = Galaxy::findOrFail($id);
+
         $solarSystems = $galaxy->solarSystems()
+            ->with('planets')
             ->withCount('likes')
-            ->orderBy('likes_count', 'desc')
-            ->take(10)
+            ->orderByDesc('likes_count')
+            ->limit($limit)
             ->get();
+
         return $this->success($solarSystems, 'Most liked solar systems retrieved');
     }
 
     // Return the most recent solarSystems
-    public function getRecentSolarSystems($id): JsonResponse
+    public function getMostRecentSolarSystems(Request $request, $id): JsonResponse
     {
+        $limit = (int) $request->query('limit', 10);
+
         $galaxy = Galaxy::findOrFail($id);
+
         $solarSystems = $galaxy->solarSystems()
-            ->orderBy('created_at', 'desc')
-            ->take(10)
+            ->with('planets')
+            ->withCount('likes')
+            ->orderByDesc('solar_system_id') //using id to orderby
+            ->limit($limit)
             ->get();
+
         return $this->success($solarSystems, 'Most recent solar systems retrieved');
     }
 }

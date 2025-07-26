@@ -16,6 +16,9 @@ export class SystemViewComponent implements OnInit {
   solarSystemId!: number;
   solarSystem!: SolarSystem;
   isLoading: boolean = true;
+  showOrbits = true;
+  followingTarget: string | null = null;
+  private systemAnimationRef?: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -41,8 +44,41 @@ export class SystemViewComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
       }
     });
+  }
+
+  toggleOrbits(): void {
+    // Send event to child component
+    if (this.systemAnimationRef) {
+      this.systemAnimationRef.toggleOrbits(this.showOrbits);
+    }
+  }
+
+  viewBody(type: string, planet?: any, moon?: any): void {
+    if (this.systemAnimationRef) {
+      this.systemAnimationRef.viewBody(type, planet, moon);
+    }
+  }
+
+  toggleFollow(type: string, planet?: any, moon?: any): void {
+    const targetId = type === 'star' ? 'star' : `${type}_${type === 'planet' ? planet.planet_id : moon.moon_id}`;
+    
+    if (this.followingTarget === targetId) {
+      this.followingTarget = null;
+      if (this.systemAnimationRef) {
+        this.systemAnimationRef.stopFollowing();
+      }
+    } else {
+      this.followingTarget = targetId;
+      if (this.systemAnimationRef) {
+        this.systemAnimationRef.startFollowing(type, planet, moon);
+      }
+    }
+  }
+
+  onSystemAnimationReady(ref: any): void {
+    this.systemAnimationRef = ref;
   }
 }

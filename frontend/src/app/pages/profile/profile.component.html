@@ -36,14 +36,6 @@
           <button (click)="viewWallpaper(solarSystem.solar_system_id)">View Wallpaper</button>
           }
           <button (click)="viewSystem(solarSystem.solar_system_id)">View System</button>
-          @if (canLike) {
-          <button 
-            (click)="toggleLike(LikeableType.SOLAR_SYSTEM, solarSystem)"
-            [class.liked]="solarSystem.is_liked"
-            [class.not-liked]="!solarSystem.is_liked">
-            {{ solarSystem.is_liked ? 'Unlike' : 'Like' }}
-          </button>
-          }
         </div>
       </div>
       }
@@ -70,16 +62,6 @@
             <span class="name">{{ topLikedSystem.solar_system_name }}</span>
             <span class="likes">{{ topLikedSystem.likes_count }} likes</span>
           </div>
-          @if (canLike) {
-          <div class="bottom">
-            <button 
-              (click)="toggleLike(LikeableType.SOLAR_SYSTEM, topLikedSystem)"
-              [class.liked]="topLikedSystem.is_liked"
-              [class.not-liked]="!topLikedSystem.is_liked">
-              {{ topLikedSystem.is_liked ? 'Unlike' : 'Like' }}
-            </button>
-          </div>
-          }
         </div>
         } @else {
         <span class="no-data flex">No system</span>
@@ -96,16 +78,6 @@
             <span class="name">{{ topLikedPlanet.planet_name }}</span>
             <span class="likes">{{ topLikedPlanet.likes_count }} likes</span>
           </div>
-          @if (canLike) {
-          <div class="bottom">
-            <button 
-              (click)="toggleLike(LikeableType.PLANET, topLikedPlanet)"
-              [class.liked]="topLikedPlanet.is_liked"
-              [class.not-liked]="!topLikedPlanet.is_liked">
-              {{ topLikedPlanet.is_liked ? 'Unlike' : 'Like' }}
-            </button>
-          </div>
-          }
         </div>
         } @else {
         <span class="no-data flex">No planet</span>
@@ -122,16 +94,6 @@
             <span class="name">{{ topLikedMoon.moon_name }}</span>
             <span class="likes">{{ topLikedMoon.likes_count }} likes</span>
           </div>
-          @if (canLike) {
-          <div class="bottom">
-            <button 
-              (click)="toggleLike(LikeableType.MOON, topLikedMoon)"
-              [class.liked]="topLikedMoon.is_liked"
-              [class.not-liked]="!topLikedMoon.is_liked">
-              {{ topLikedMoon.is_liked ? 'Unlike' : 'Like' }}
-            </button>
-          </div>
-          }
         </div>
         } @else {
         <span class="no-data flex">No moon</span>
@@ -148,16 +110,6 @@
             <span class="name">{{ getSystemNameByWallpaperId(topLikedWallpaper.wallpaper_id) }}</span>
             <span class="likes">{{ topLikedWallpaper.likes_count }} likes</span>
           </div>
-          @if (canLike) {
-          <div class="bottom">
-            <button 
-              (click)="toggleLike(LikeableType.WALLPAPER, topLikedWallpaper)"
-              [class.liked]="topLikedWallpaper.is_liked"
-              [class.not-liked]="!topLikedWallpaper.is_liked">
-              {{ topLikedWallpaper.is_liked ? 'Unlike' : 'Like' }}
-            </button>
-          </div>
-          }
         </div>
         } @else {
         <span class="no-data flex">No wallpaper</span>

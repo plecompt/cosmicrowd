@@ -1,0 +1,147 @@
+.new-popular-container {
+  display: flex;
+  margin: 100px 20px 100px 20px;
+  gap: 20px;
+  padding: 40px;
+  background: rgba(20, 20, 40, 0.8);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+  width: auto;
+  height: auto;
+}
+
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.column h2 {
+  font-weight: 300;
+  color: white;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.systems-list, .wallpapers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.system-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.system-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: white;
+  font-weight: 300;
+}
+
+.system-stats {
+  display: flex;
+  gap: 1rem;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.system-actions {
+  display: flex;
+  justify-content: right;
+  gap: 0.5rem;
+}
+
+.wallpaper-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.wallpaper-item img {
+  max-width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  height: 120px;
+  width: 100%;
+}
+
+.wallpaper-name {
+  color: white;
+  font-weight: 500;
+}
+
+.likes {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.no-systems, .no-wallpapers {
+  color: #888;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.liked {
+  color: black;
+  background-color: rgb(227, 195, 195);
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.not-liked {
+  color: black;
+  background-color: rgb(121, 166, 177);
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 1300px) {
+  .new-popular-container {
+    flex-direction: column;
+    padding: 20px 10px 20px 10px;
+
+    h2 {
+      text-align: center;
+    }
+  }
+
+  .column {
+    max-height: none;
+  }
+
+  .system-item {
+    .system-info {
+      width: 40%;
+    }
+    .system-actions {
+      width: 60%;
+    }
+  }
+}

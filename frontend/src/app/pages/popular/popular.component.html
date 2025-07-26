@@ -1,0 +1,106 @@
+<app-background-stars [numberOfStars]="30"></app-background-stars>
+
+@if (mostLikedSolarSystems && mostLikedWallpapers && mostRecentSolarSystems && mostRecentWallpapers){
+  <div class="new-popular-container flex-row">
+
+  <!-- Left Column: Top 10 Systems Most Liked -->
+  <div class="column systems-most-liked flex-column">
+    <h2>Most Liked Systems</h2>
+    @if (mostLikedSolarSystems.length > 0) {
+      <div class="systems-list flex-column">
+        @for (system of mostLikedSolarSystems; track system.solar_system_id) {
+          <div class="system-item flex">
+            <div class="system-info">
+              <h3><strong>{{ system.solar_system_name }}</strong></h3>
+              <div class="system-stats flex">
+                <div class="flex">
+                  <span>{{ system.planets.length }} Planets</span>
+                </div>
+                <div class="flex">
+                  <span>{{ system.likes_count }} Likes</span>
+                </div>
+              </div>
+            </div>
+            <div class="system-actions flex">
+              <button (click)="viewSystem(system.solar_system_id)">View System</button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="no-systems">No systems found.</p>
+    }
+  </div>
+
+  <!-- Left Column: Top 10 Systems Most Recent -->
+  <div class="column systems-most-recent flex-column">
+    <h2>Most Recent Systems</h2>
+    @if (mostRecentSolarSystems.length > 0) {
+      <div class="systems-list flex-column">
+        @for (system of mostRecentSolarSystems; track system.solar_system_id) {
+          <div class="system-item flex">
+            <div class="system-info">
+              <h3><strong>{{ system.solar_system_name }}</strong></h3>
+              <div class="system-stats flex">
+                <div class="flex">
+                  <span>{{ system.planets.length }} Planets</span>
+                </div>
+                <div class="flex">
+                  <span>{{ system.likes_count }} Likes</span>
+                </div>
+              </div>
+            </div>
+            <div class="system-actions flex">
+              <button (click)="viewSystem(system.solar_system_id)">View System</button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="no-systems">No systems found.</p>
+    }
+  </div>
+
+  <!-- Right Column: Top 10 Wallpapers Most Liked -->
+  <div class="column wallpapers-most-liked flex-column">
+    <h2>Most Liked Wallpapers</h2>
+    @if (mostLikedWallpapers.length > 0) {
+      <div class="wallpapers-list flex-column">
+        @for (wallpaper of mostLikedWallpapers; track wallpaper.wallpaper_id) {
+          <div class="wallpaper-item flex-column">
+            <img [src]="" alt="Wallpaper for {{wallpaper.solar_system?.solar_system_name}}"/>
+            <span class="wallpaper-name">{{ wallpaper.solar_system?.solar_system_name}}</span>
+            <span class="likes">{{ wallpaper.likes_count }} likes</span>
+            <span class="date">created {{ wallpaper.wallpaper_created_at | date:'short' }}</span>
+            <button (click)="viewWallpaper(wallpaper.solar_system_id)">View Wallpaper</button>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="no-wallpapers">No wallpapers found.</p>
+    }
+  </div>
+
+  <!-- Right Column: Top 10 Wallpapers Most Recent -->
+  <div class="column wallpapers-most-recent flex-column">
+    <h2>Most Recent Wallpapers</h2>
+    @if (mostRecentWallpapers.length > 0) {
+      <div class="wallpapers-list flex-column">
+        @for (wallpaper of mostRecentWallpapers; track wallpaper.wallpaper_id) {
+          <div class="wallpaper-item flex-column">
+            <img [src]="" alt="Wallpaper for {{wallpaper.solar_system?.solar_system_name}}"/>
+            <span class="wallpaper-name">{{ wallpaper.solar_system?.solar_system_name }}</span>
+            <span class="likes">{{ wallpaper.likes_count }} likes</span>
+            <span class="date">created {{ wallpaper.wallpaper_created_at | date:'short' }}</span>
+            <button (click)="viewWallpaper(wallpaper.solar_system_id)">View Wallpaper</button>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="no-wallpapers">No wallpapers found.</p>
+    }
+  </div>
+
+</div>
+
+}

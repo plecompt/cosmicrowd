@@ -51,6 +51,11 @@ body, html {
   font-size: 12px;
 }
 
+/* set alt color to white just in case */
+img {
+  color: white;
+}
+
 input {
   border: 2px solid #ddd;
   padding: 12px;

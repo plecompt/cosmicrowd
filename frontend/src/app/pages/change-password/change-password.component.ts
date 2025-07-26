@@ -24,7 +24,7 @@ export class ChangePasswordComponent {
   ngOnInit(): void {
     // If user is not logged in
     if (!this.authService.isLoggedIn()) {
-        this.notificationService.showError('You can\'t access this page', 3000, '/home');
+        this.notificationService.showError('You can\'t access this page.', 3000, '/home');
         return;
     }
     this.initPasswordForm();
@@ -50,7 +50,7 @@ export class ChangePasswordComponent {
           this.authService.logout().subscribe();
         },
         error: () => {
-          this.changePasswordErrorMessage = "Something went wrong, please try again later";
+          this.changePasswordErrorMessage = "Something went wrong, please try again later.";
         }
       })
     } else {

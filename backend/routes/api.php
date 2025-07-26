@@ -31,14 +31,18 @@ Route::prefix('v1')->group(function () {
     Route::post('users/check-login', [UserController::class, 'checkLoginAvailability']); //verifie si un login est disponible en bdd
     Route::post('users/check-email', [UserController::class, 'checkEmailAvailability']); //verifie si un mdp est disponible en bdd
     Route::post('users/contact', [UserController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utiliateur
-    Route::get('/users/{userId}', [UserController::class, 'view']);//retourne un user
+    Route::get('users/{userId}', [UserController::class, 'view']);//retourne un user
+
+    // Wallpapers
+    Route::get('galaxies/{id}/wallpapers/most-liked', [WallpaperController::class, 'getMostLikedWallpapers']); //les x wallpapers les plus aimés
+    Route::get('galaxies/{id}/wallpapers/most-recent', [WallpaperController::class, 'getMostRecentWallpapers']); //les x wallpapers les plus récents
 
     // GALAXIES et leurs systèmes solaires
     Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
     Route::get('galaxies/{id}', [GalaxyController::class, 'show']); //une galaxie avec ses stats
     Route::get('galaxies/{id}/animation', [GalaxyController::class, 'getSolarSystemsForAnimation']); //liste des systemes solaires pour l'animation
     Route::get('galaxies/{id}/most-liked', [GalaxyController::class, 'getMostLikedSolarSystems']); //les x systemes solaires les plus aimés
-    Route::get('galaxies/{id}/recent', [GalaxyController::class, 'getRecentSolarSystems']); //les x systemes solaires les plus récents
+    Route::get('galaxies/{id}/most-recent', [GalaxyController::class, 'getMostRecentSolarSystems']); //les x systemes solaires les plus récents
     
     // SOLAR SYSTEMS d'une galaxie
     Route::get('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'index']); //liste des systemes solaire pour cette galaxie
@@ -105,7 +109,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', RateLimitMiddleware::class])->g
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/{wallpaperId}/to-like', [LikeController::class, 'toggleWallpaper']); //to like ou unlike un wallpaper
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/to-like', [LikeController::class, 'togglePlanet']); //to like ou unlike une planete
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon']); //to like ou unlike une lune
-    Route::get('/user-likes', [LikeController::class, 'checkUserLikes']); //return if given id are liked or not by user
+    Route::get('user-likes', [LikeController::class, 'checkUserLikes']); //return if given id are liked or not by user
     
     // Routes pour les claims de systèmes solaires
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [ClaimController::class, 'claim']); //claim le solarSystem
@@ -124,6 +128,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api', IsAdmin::class]
     Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'destroy']); //suppression d'un systeme solaire
     
     // User
-    Route::post('/user/{userId}', [AdminController::class, 'add']); //ajout d'un user
-    Route::delete('/user/{userId}', [AdminController::class, 'delete']); //suppression d'un user
+    Route::post('user/{userId}', [AdminController::class, 'add']); //ajout d'un user
+    Route::delete('user/{userId}', [AdminController::class, 'delete']); //suppression d'un user
 });
