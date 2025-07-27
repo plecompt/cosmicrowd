@@ -92,7 +92,7 @@ export class SystemEditComponent {
           this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
         } else {
           this.solarSystem = result;
-          console.log(this.solarSystem);
+          //console.log(this.solarSystem);
         }
       },
       error: () => {

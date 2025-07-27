@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
@@ -6,9 +6,6 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { PlanetType } from '../../interfaces/solar-system/planet.interface';
-import { ModalService } from '../../services/modal/modal.service';
-import { LikeableType, LikesService } from '../../services/likes/likes.service';
-import { NotificationService } from '../../services/notifications/notification.service';
 
 @Component({
   selector: 'app-system-animation',
@@ -20,7 +17,8 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
   @Input() solarSystem!: SolarSystem;
   @Input() viewMode: 'view' | 'edit' = 'view';
   @Input() renderConfig: any = {};
-
+  @Output() objectClicked = new EventEmitter<{type: string, data: any}>();
+  
   scene!: THREE.Scene;
   camera!: THREE.PerspectiveCamera;
   renderer!: THREE.WebGLRenderer;
@@ -33,11 +31,7 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
   moonEllipses: THREE.LineLoop[] = [];
   moonDistanceScale: number = 0;
 
-  constructor(
-    private modalService: ModalService,
-    private likesService: LikesService,
-    private notificationService: NotificationService
-  ) {}
+  constructor() {}
 
   ngOnInit(): void {
     if (this.solarSystem) this.initThreeJS();
@@ -139,117 +133,12 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     const intersects = this.raycaster.intersectObjects(this.clickableObjects);
 
     if (intersects.length > 0) {
-      this.showModal(intersects[0].object.userData);
+      const intersectedObject = intersects[0].object as THREE.Mesh;
+      this.objectClicked.emit({
+        type: intersectedObject.userData['type'],
+        data: intersectedObject.userData['data']
+      });
     }
-  }
-
-  private async showModal(objectData: any): Promise<void> {
-    const modalData = this.getModalData(objectData);
-    if (!modalData) return;
-
-    this.modalService.show({
-      title: modalData.name,
-      content: modalData.content,
-      showLike: true,
-      onLike: () => this.handleLike(modalData)
-    });
-  }
-
-  private getModalData(objectData: any): any {
-    const dataMap: {[key: string]: any} = {
-      star: {
-        name: this.solarSystem.solar_system_name,
-        content: this.getStarModalContent(),
-        likeableType: LikeableType.SOLAR_SYSTEM,
-        systemId: this.solarSystem.solar_system_id
-      },
-      planet: {
-        name: objectData.data.planet_name,
-        content: this.getPlanetModalContent(objectData.data),
-        likeableType: LikeableType.PLANET,
-        systemId: this.solarSystem.solar_system_id,
-        planetId: objectData.data.planet_id
-      },
-      moon: {
-        name: objectData.data.moon_name,
-        content: this.getMoonModalContent(objectData.data),
-        likeableType: LikeableType.MOON,
-        systemId: this.solarSystem.solar_system_id,
-        planetId: objectData.data.planet_id,
-        moonId: objectData.data.moon_id
-      }
-    };
-    return dataMap[objectData.type];
-  }
-
-  private handleLike(modalData: any): void {
-    this.likesService.like(
-      modalData.likeableType,
-      1,
-      modalData.systemId,
-      modalData.planetId,
-      modalData.moonId
-    ).subscribe({
-      next: (success) => this.notificationService.showSuccess(success.message, 2000),
-      error: () => this.notificationService.showError('Something went wrong, please try again later.', 2500)
-    });
-  }
-
-  private createInfoGrid(items: Array<{label: string, value: any}>): string {
-    const infoItems = items
-      .filter(item => item.value !== undefined && item.value !== null)
-      .map(item => `<div class="info-item"><strong>${item.label}:</strong> ${item.value}</div>`)
-      .join('');
-    return `<div class="info-grid" style="margin-top: 15px;">${infoItems}</div>`;
-  }
-
-  private getStarModalContent(): string {
-    const planetsCount = this.solarSystem.planets?.length || 0;
-    const moonsCount = this.solarSystem.planets?.reduce((total, planet) => 
-      total + (planet.moons?.length || 0), 0) || 0;
-
-    return this.createInfoGrid([
-      { label: 'Description', value: this.solarSystem.solar_system_desc || 'No description' },
-      { label: 'Type', value: this.solarSystem.solar_system_type?.replace('_', ' ') || 'Unknown' },
-      { label: 'Diameter', value: `${this.solarSystem.solar_system_diameter?.toLocaleString()} km` },
-      { label: 'Mass', value: `${this.solarSystem.solar_system_mass?.toLocaleString()} x 10^24 kg` },
-      { label: 'Surface Temperature', value: `${this.solarSystem.solar_system_surface_temp} K` },
-      { label: 'Gravity', value: `${this.solarSystem.solar_system_gravity} m/s²` },
-      { label: 'Luminosity', value: `${this.solarSystem.solar_system_luminosity?.toLocaleString()} L` },
-      { label: 'Planets', value: planetsCount },
-      { label: 'Moons', value: moonsCount }
-    ]);
-  }
-
-  private getPlanetModalContent(planet: any): string {
-    return this.createInfoGrid([
-      { label: 'Description', value: planet.planet_desc || 'No description' },
-      { label: 'Type', value: planet.planet_type },
-      { label: 'Diameter', value: `${planet.planet_diameter?.toLocaleString()} km` },
-      { label: 'Mass', value: `${planet.planet_mass?.toLocaleString()} x 10^24 kg` },
-      { label: 'Surface Temperature', value: `${planet.planet_surface_temp} K` },
-      { label: 'Gravity', value: `${planet.planet_gravity} m/s²` },
-      { label: 'Average Distance from Star', value: `${planet.planet_average_distance?.toLocaleString()} km` },
-      { label: 'Orbital Period', value: `${planet.planet_orbital_period?.toLocaleString()} days` },
-      { label: 'Rotation Period', value: `${planet.planet_rotation_period} hours` },
-      { label: 'Rings', value: planet.planet_rings || 0 },
-      { label: 'Moons', value: planet.moons?.length || 0 }
-    ]);
-  }
-
-  private getMoonModalContent(moon: any): string {
-    return this.createInfoGrid([
-      { label: 'Description', value: moon.moon_desc || 'No description' },
-      { label: 'Type', value: moon.moon_type },
-      { label: 'Diameter', value: `${moon.moon_diameter?.toLocaleString()} km` },
-      { label: 'Mass', value: `${moon.moon_mass?.toLocaleString()} x 10^24 kg` },
-      { label: 'Surface Temperature', value: `${moon.moon_surface_temp} K` },
-      { label: 'Gravity', value: `${moon.moon_gravity} m/s²` },
-      { label: 'Average Distance from Planet', value: `${moon.moon_average_distance?.toLocaleString()} km` },
-      { label: 'Orbital Period', value: `${moon.moon_orbital_period} days` },
-      { label: 'Rotation Period', value: `${moon.moon_rotation_period} hours` },
-      { label: 'Rings', value: moon.moon_rings || 0 }
-    ]);
   }
 
   private clearScene(): void {
