@@ -38,4 +38,11 @@ export class LikesService {
         return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpaper/${wallpaperId}/to-like`;
     }
   }
+
+  // Check likes on given objects for given user
+  getUserLikes(ids: string, type: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/user-likes`, {
+      params: { ids: ids, type: type }
+    });
+  }
 }

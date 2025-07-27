@@ -1,12 +1,210 @@
-<div class="system-view-container">
-  @if (!isLoading && solarSystem) {
-    <app-system-animation 
-  [solarSystem]="solarSystem" 
-  (objectClicked)="onObjectClicked($event)">
-</app-system-animation>
+@if (solarSystem) {
+  <div class="system-container">
+  <!-- Toggle Button -->
+   <div class="panel-toggle" 
+       [class.collapsed]="isPanelCollapsed"
+       (click)="togglePanel()">
+    <div class="toggle-icon">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
 
-  }
-  @if (isLoading) {
-    <div class="loading">Loading...</div>
-  }
+  <!-- Animation 3D -->
+  <app-system-animation 
+    [solarSystem]="solarSystem"
+    [followedObject]="followedObject" 
+    [renderOptions]="renderOptions"
+    (objectClicked)="onObjectClicked($event)"
+    (renderReady)="onRenderReady($event)">
+  </app-system-animation>
+
+  <!-- Side Panel -->
+  <div class="edit-overlay" [class.panel-hidden]="isPanelCollapsed">
+    <div class="edit-panel">
+      <!-- Panel Header -->
+      <div class="panel-header">
+        <h2>System Explorer</h2>
+      </div>
+
+      <!-- Panel Content -->
+      <div class="panel-content">
+        <!-- Wallpaper Creator -->
+        <div class="wallpaper-section">
+          <h3>Wallpaper Creator</h3>
+          
+          <!-- Animation Controls -->
+          <div class="form-group">
+            <button class="btn btn-secondary" 
+                    (click)="toggleOrbitalAnimation()">
+              {{ renderOptions.orbitsPaused ? 'Resume Orbits' : 'Pause Orbits' }}
+            </button>
+          </div>
+
+          <!-- Visual Options -->
+          <div class="form-group">
+            <label class="flex">
+              <input type="checkbox" 
+                    [checked]="renderOptions.showOrbits"
+                    (change)="toggleOrbitVisibility()"> 
+              &nbsp;Show Orbits
+            </label>
+          </div>
+
+          <!-- Scale Controls -->
+          <div class="form-group">
+            <label for="starScale">Star Size: {{ renderOptions.scale.star }}x</label>
+            <input type="range" 
+                   id="starScale"
+                   min="0.1" max="3.0" step="0.1" 
+                   [value]="renderOptions.scale.star"
+                   (input)="onStarScaleChange($event)">
+          </div>
+
+          <div class="form-group">
+            <label for="planetsScale">Planets Size: {{ renderOptions.scale.planets }}x</label>
+            <input type="range" 
+                   id="planetsScale"
+                   min="0.1" max="3.0" step="0.1" 
+                   [value]="renderOptions.scale.planets"
+                   (input)="onPlanetsScaleChange($event)">
+          </div>
+
+          <div class="form-group">
+            <label for="moonsScale">Moons Size: {{ renderOptions.scale.moons }}x</label>
+            <input type="range" 
+                   id="moonsScale"
+                   min="0.1" max="3.0" step="0.1" 
+                   [value]="renderOptions.scale.moons"
+                   (input)="onMoonsScaleChange($event)">
+          </div>
+
+          <div class="form-group">
+            <label for="orbitScale">Orbit Distance: {{ renderOptions.scale.orbits }}x</label>
+            <input type="range" 
+                   id="orbitScale"
+                   min="0.5" max="2.0" step="0.1" 
+                   [value]="renderOptions.scale.orbits"
+                   (input)="onOrbitScaleChange($event)">
+          </div>
+
+          <!-- Render Effects -->
+          <div class="form-group">
+            <label for="brightness">Brightness: {{ renderOptions.brightness }}</label>
+            <input type="range" 
+                   id="brightness"
+                   min="0" max="2" step="0.1" 
+                   [value]="renderOptions.brightness"
+                   (input)="onBrightnessChange($event)">
+          </div>
+
+          <div class="form-group">
+            <label for="contrast">Contrast: {{ renderOptions.contrast }}</label>
+            <input type="range" 
+                   id="contrast"
+                   min="0" max="2" step="0.1" 
+                   [value]="renderOptions.contrast"
+                   (input)="onContrastChange($event)">
+          </div>
+
+          <div class="form-group">
+            <label for="saturation">Saturation: {{ renderOptions.saturation }}</label>
+            <input type="range" 
+                   id="saturation"
+                   min="0" max="2" step="0.1" 
+                   [value]="renderOptions.saturation"
+                   (input)="onSaturationChange($event)">
+          </div>
+
+          <!-- Export Options -->
+          <div class="form-group">
+            <label for="resolution">Export Resolution</label>
+            <select class="form-select" 
+                    id="resolution"
+                    [value]="renderOptions.resolution"
+                    (change)="onResolutionChange($event)">
+              <option value="1920x1080">1920x1080</option>
+              <option value="2560x1440">2560x1440</option>
+              <option value="3840x2160">3840x2160</option>
+            </select>
+          </div>
+
+          <button class="btn btn-wallpaper" (click)="exportWallpaper()">
+            Create Wallpaper
+          </button>
+        </div>
+
+        <!-- Objects List -->
+        <div class="planet-and-moon-list">
+          <h3>System Objects</h3>
+          
+          <!-- Star -->
+          <div class="planet-item star" >
+            <div class="planet-info">
+              <div class="planet-name">{{ solarSystem.solar_system_name }}</div>
+              <div class="planet-type">Star</div>
+            </div>
+            <div class="planet-actions flex">
+              <button class="btn btn-view" (click)="viewObject(solarSystem, 'solar_system')">View</button>
+              <button class="btn btn-follow" 
+                      [class.following]="followedObject?.id === solarSystem.solar_system_id && followedObject?.type === 'solar_system'"
+                      (click)="followObject(solarSystem, 'solar_system')">
+                {{ (followedObject?.id === solarSystem.solar_system_id && followedObject?.type === 'solar_system') ? 'Stop' : 'Follow' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Planets -->
+          @if (solarSystem.planets.length) {
+            <div class="planets-list">
+              @for (planet of solarSystem.planets; track planet.planet_id) {
+                <div class="planet-item">
+                  <div class="planet-info">
+                    <div class="planet-name">{{ planet.planet_name }}</div>
+                    <div class="planet-type">Planet</div>
+                    @if (planet.moons.length) {
+                      <div class="moon-count">{{ planet.moons.length }} moon(s)</div>
+                    }
+                  </div>
+                  <div class="planet-actions flex">
+                    <button class="btn btn-view" (click)="viewObject(planet, 'planet')">View</button>
+                    <button class="btn btn-follow" 
+                            [class.following]="followedObject?.id === planet.planet_id && followedObject?.type === 'planet'"
+                            (click)="followObject(planet, 'planet')">
+                      {{ (followedObject?.id === planet.planet_id && followedObject?.type === 'planet') ? 'Stop' : 'Follow' }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Moons for this planet -->
+                @if (planet.moons.length) {
+                  <div class="moons-list">
+                    @for (moon of planet.moons; track moon.moon_id) {
+                      <div class="moon-item">
+                        <div class="moon-info">
+                          <h5>{{ moon.moon_name }}</h5>
+                          <p>Moon of {{ planet.planet_name }}</p>
+                        </div>
+                        <div class="moon-actions flex">
+                          <button class="btn btn-view" (click)="viewObject(moon, 'moon')">View</button>
+                          <button class="btn btn-follow" 
+                                  [class.following]="followedObject?.id === moon.moon_id && followedObject?.type === 'moon'"
+                                  (click)="followObject(moon, 'moon')">
+                            {{ (followedObject?.id === moon.moon_id && followedObject?.type === 'moon') ? 'Stop' : 'Follow' }}
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+}

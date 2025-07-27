@@ -9,11 +9,13 @@ export interface ModalData {
   showClaim?: boolean;
   showConfirm?: boolean;
   showLike?: boolean;
+  showUnlike?: boolean;
   onView?: () => void;
   onCancel?: () => void;
   onClaim?: () => void;
   onConfirm?: () => void;
   onLike?: () => void;
+  onUnlike?: () => void;
 }
 
 @Injectable({

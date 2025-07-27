@@ -1,4 +1,4 @@
-/* Main container (edit-system) */
+/* Main container */
 .edit-container {
   position: relative;
   width: 100vw;
@@ -9,20 +9,19 @@
 
 .edit-overlay {
   position: absolute;
-  top: 10%;
-  left: 0;
+  top: 100px;
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: flex-start;
-  padding: 20px;
+  padding: 20px 10px 20px 10px;
   pointer-events: none;
 }
 
 .edit-panel {
-  width: 420px;
-  max-height: calc(90vh - 40px);
+  width: 430px;
+  max-height: calc(90vh - 50px);
   background: rgba(20, 20, 40, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -78,16 +77,16 @@
   flex-grow: 1;
 }
 
-.star-informations, .star-properties, .planet-and-moon-list, .moons-list {
+.star-informations, .star-properties, .planet-and-moon-list, .moons-list, .wallpaper-section{
   margin-bottom: 30px;
+}
 
-  h3, h4 {
-    font-size: 1.2rem;
-    font-weight: 400;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 8px;
-    margin-bottom: 15px;
-  }
+h3, h4 {
+  font-size: 1.2rem;
+  font-weight: 400;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
 }
 
 /* form */
@@ -134,8 +133,15 @@
   display: flex;
   gap: 15px;
 }
+
 .form-row .form-group {
   flex: 1;
+}
+
+/* Star */
+
+.star {
+  margin-bottom: 40px;
 }
 
 /* Planet and Moon */
@@ -181,7 +187,7 @@
 }
 
 /* Buttons */
-.btn, .btn-edit, .btn-delete, .btn-add, .btn-save, .btn-cancel, .btn-primary, .btn-secondary, .btn-view {
+.btn, .btn-edit, .btn-delete, .btn-add, .btn-save, .btn-cancel, .btn-wallpaper, .btn-follow, .btn-view {
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
@@ -196,7 +202,7 @@
 }
 
 .actions {
-  display: flex;
+  justify-content: center;
   gap: 15px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -235,25 +241,75 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* toggle button */
+
+.panel-toggle {
+  position: fixed;
+  bottom: 5px;
+  left: 10px;
+  z-index: 1001;
+  width: 50px;
+  height: 50px;
+  background: rgba(20, 20, 40, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-icon span {
+  width: 20px;
+  height: 2px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+/* Animation hamburger to cross */
+.panel-toggle:not(.collapsed) .toggle-icon span:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.panel-toggle:not(.collapsed) .toggle-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.panel-toggle:not(.collapsed) .toggle-icon span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.edit-overlay.panel-hidden {
+  transform: translateX(-100%);
+}
+
+
 /* Responsive */
 @media (max-width: 768px) {
+  .edit-overlay {
+    top: 65px;
+  }
+
+  .edit-panel {
+    max-height: calc(90vh - 80px);
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
 
   .modal-content {
     width: 95%;
-    max-height: 90vh;
+    max-height: calc(90vh - 80px);
   }
 
-  .moon-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .planet-item {
-    display: flex;
+  .planet-item, .moon-item {
     gap: 20px;
     justify-content: space-between;
 
@@ -261,14 +317,20 @@
       width: 50%;
     }
 
-    .planet-actions {
+    .planet-actions, .moon-actions {
       flex-wrap: wrap;
       width: 50%;
       justify-content: right;
     }
   }
 
-  .moon-actions {
-    align-self: flex-end;
+  .btn, .btn-edit, .btn-delete, .btn-add, .btn-save, .btn-cancel, .btn-wallpaper, .btn-follow, .btn-view {
+    width: 100px;
   }
+
+  .btn-add, .btn-save, .btn-cancel {
+    width: 130px;
+    height: 40px;
+  }
+
 }

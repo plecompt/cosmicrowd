@@ -55,4 +55,9 @@ export class ModalComponent implements OnInit {
     this.modalData?.onLike?.();
     this.modalService.close();
   }
+
+  onUnlike(): void {
+    this.modalData?.onUnlike?.();
+    this.modalService.close();
+  }
 }

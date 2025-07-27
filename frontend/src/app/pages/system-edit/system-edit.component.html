@@ -1,12 +1,26 @@
 <div class="edit-container">
   @if (authService.isLoggedIn() && solarSystem) {
-    <app-system-animation [solarSystem]="solarSystem" [viewMode]="'edit'"></app-system-animation>
-    
-    <div class="edit-overlay">
+<!-- Toogle Button -->
+   <div class="panel-toggle" 
+       [class.collapsed]="isPanelCollapsed"
+       (click)="togglePanel()">
+    <div class="toggle-icon">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+    <!-- <app-system-animation [solarSystem]="solarSystem" [viewMode]="'edit'"></app-system-animation> -->
+    <app-system-animation 
+    [solarSystem]="solarSystem"
+    [followedObject]="followedObject" 
+    [viewMode]="'edit'"></app-system-animation>
+
+    <div class="edit-overlay" [class.panel-hidden]="isPanelCollapsed">
       <div class="edit-panel">
         <div class="panel-header">
           <h2>Edit Solar System</h2>
-          <button class="close-btn" (click)="goBack()">×</button>
         </div>
         
         <div class="panel-content">
@@ -126,7 +140,12 @@
                     <span class="moon-count">{{ planet.moons.length || 0 }} moons</span>
                   </div>
                   <div class="planet-actions flex">
-                    <button class="btn-view" (click)="planetShow(planet)">View</button>
+                    <button class="btn btn-view" (click)="viewObject(planet, 'planet')">View</button>
+                    <button class="btn btn-follow" 
+                            [class.following]="followedObject?.id === planet.planet_id && followedObject?.type === 'planet'"
+                            (click)="followObject(planet, 'planet')">
+                      {{ (followedObject?.id === planet.planet_id && followedObject?.type === 'planet') ? 'Stop' : 'Follow' }}
+                    </button>
                     <button class="btn-edit" (click)="planetEditComponent.editPlanet(planet)">Edit</button>
                     <button class="btn-delete" (click)="planetEditComponent.deletePlanet(planet.planet_id)">Delete</button>
                   </div>
@@ -137,9 +156,8 @@
           </div>
 
           <!-- Actions -->
-          <div class="section actions">
+          <div class="section actions flex">
             <button class="btn-save" (click)="saveSolarSystem()">Save Changes</button>
-            <button class="btn-cancel" (click)="goBack()">Cancel</button>
           </div>
         </div>
       </div>

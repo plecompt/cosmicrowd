@@ -163,6 +163,10 @@ export class SystemsComponent implements OnInit {
     })
   }
 
+  viewSystem(solarSystemId: number) {
+    this.navigationService.navigateTo(`/view-system/${solarSystemId}`);
+  }
+
   editSystem(solarSystemId: number) {
     this.navigationService.navigateTo(`/edit-system/${solarSystemId}`);
   }

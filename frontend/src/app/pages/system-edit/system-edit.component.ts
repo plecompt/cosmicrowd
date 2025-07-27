@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { PlanetEditComponent } from '../../components/planet-edit/planet-edit.component';
 import { User } from '../../interfaces/user/user.interface';
 import { SystemValidationService } from '../../services/system-validation/system-validation-service';
-import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'app-system-edit',
@@ -19,9 +18,14 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 })
 export class SystemEditComponent {
   @ViewChild('editPlanetRef') planetEditComponent!: PlanetEditComponent;
+  @ViewChild(SystemAnimationComponent) systemAnimationComponent!: SystemAnimationComponent;
 
   @Input() refresh: any = null;
   
+  // Follow system
+  followedObject: any = null;
+  isFollowing = false;
+
   user!: User;
   solarSystemId!: number;
   solarSystemOwner!: string;
@@ -29,10 +33,10 @@ export class SystemEditComponent {
   solarSystems!: SolarSystem[];
   solarSystem!: SolarSystem;
   selectedPlanet: any = null;
+  isPanelCollapsed: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
-    private navigationService: NavigationService,
     public authService: AuthService,
     private notificationService: NotificationService,
     private galaxiesService: GalaxiesService,
@@ -124,13 +128,37 @@ export class SystemEditComponent {
   }
 
 
-  //Planets
-  planetShow(planet: any): void {
-    //zoom on planet
+  togglePanel(): void {
+    this.isPanelCollapsed = !this.isPanelCollapsed;
   }
 
-  goBack(): void {
-    this.navigationService.navigateTo(`/system${this.solarSystemId}`);
+  viewObject(obj: any, type: string): void {
+    // Stop following if currently following
+    if (this.isFollowing) {
+      this.followedObject = null;
+      this.isFollowing = false;
+      if (this.systemAnimationComponent) {
+        this.systemAnimationComponent.stopFollowing();
+      }
+    }
+
+    if (this.systemAnimationComponent) {
+      this.systemAnimationComponent.viewObject(obj, type);
+    }
   }
 
+  followObject(obj: any, type: string): void {
+    if (this.isFollowing && this.followedObject?.id === obj[`${type}_id`] && this.followedObject?.type === type) {
+      // Stop following
+      this.followedObject = null;
+      this.isFollowing = false;
+      if (this.systemAnimationComponent) {
+        this.systemAnimationComponent.stopFollowing();
+      }
+    } else {
+      // Start following
+      this.followedObject = { id: obj[`${type}_id`], type: type, data: obj };
+      this.isFollowing = true;
+    }
+  }
 }
