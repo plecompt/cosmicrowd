@@ -130,7 +130,7 @@ export class GalaxiesService {
   //Wallpapers
   // Get if there is a wallpaper associated to given solarSystemId
   ifExistWallpaperForSystem(galaxyId: number, solarSystemId: number): Observable<any>{
-    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpaper/exists`);
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpapers/exists`);
   }
 
   // Get most recent wallpapers in a given galaxy

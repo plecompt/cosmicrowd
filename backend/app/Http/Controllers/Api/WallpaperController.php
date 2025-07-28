@@ -37,6 +37,60 @@ class WallpaperController
         return $this->success(['exists' => $exists], 'Wallpaper existence checked');
     }
 
+    // Store given wallpaper for given solarSystemId
+    public function store(Request $request, $galaxyId, $solarSystemId): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return $this->error('Unauthorized', 401);
+        }
+
+        $request->validate([
+            'wallpaper_settings' => 'required|string'
+        ]);
+
+        $galaxy = Galaxy::findOrFail($galaxyId);
+        $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)->findOrFail($solarSystemId);
+
+        $existingWallpaper = Wallpaper::where('solar_system_id', $solarSystemId)->first();
+
+        if ($existingWallpaper) {
+            $existingWallpaper->update([
+                'wallpaper_settings' => $request->wallpaper_settings,
+                'wallpaper_created_at' => now()
+            ]);
+            return $this->success($existingWallpaper, 'Wallpaper updated successfully');
+        } else {
+            $wallpaper = Wallpaper::create([
+                'wallpaper_settings' => $request->wallpaper_settings,
+                'user_id' => $user->user_id,
+                'galaxy_id' => $galaxyId,
+                'solar_system_id' => $solarSystemId
+            ]);
+            return $this->success($wallpaper, 'Wallpaper created successfully');
+        }
+    }
+
+    // Destroy wallpaper for given solarSystemId
+    public function destroy(Request $request, $galaxyId, $solarSystemId): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return $this->error('Unauthorized', 401);
+        }
+
+        $galaxy = Galaxy::findOrFail($galaxyId);
+        $solarSystem = SolarSystem::where('galaxy_id', $galaxyId)->findOrFail($solarSystemId);
+
+        $wallpaper = Wallpaper::where('solar_system_id', $solarSystemId)->first();
+        if (!$wallpaper) {
+            return $this->error('Wallpaper not found', 404);
+        }
+
+        $wallpaper->delete();
+        return $this->success(null, 'Wallpaper deleted successfully');
+    }
+
     // Return the most liked wallpapers, 10 by default
     public function getMostLikedWallpapers(Request $request, $galaxyId): JsonResponse
     {

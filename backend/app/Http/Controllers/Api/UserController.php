@@ -6,9 +6,11 @@ use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use App\Models\RecoveryToken;
 use App\Rules\StrongPassword;
+use App\Models\Wallpaper;
 use App\Models\SolarSystem;
 use App\Models\Planet;
 use App\Models\Moon;
+use App\Models\LikeWallpaper;
 use App\Models\LikeSolarSystem;
 use App\Models\LikePlanet;
 use App\Models\LikeMoon;
@@ -272,17 +274,26 @@ class UserController
         ]);
 
         $user = $request->user();
-
         if (!Hash::check($request->current_password, $user->user_password)) {
             throw ValidationException::withMessages([
                 'current_password' => ['Current password is incorrect.'],
             ]);
         }
 
-        // Deleting all the likes
+        // Get user wallpapers to delete their likes
+        $userWallpapers = Wallpaper::where('user_id', $user->user_id)->get();
+        foreach ($userWallpapers as $wallpaper) {
+            $wallpaper->likes()->delete();
+        }
+
+        // Delete user wallpapers
+        Wallpaper::where('user_id', $user->user_id)->delete();
+
+        // Deleting all the user likes
         $user->solarSystemLikes()->delete();
         $user->planetLikes()->delete();
         $user->moonLikes()->delete();
+        $user->wallpaperLikes()->delete();
 
         // Release claimed solar systems, planets and moons
         SolarSystem::where('user_id', $user->user_id)->update(['user_id' => null]);

@@ -6,6 +6,9 @@ import { SolarSystem } from '../../interfaces/solar-system/solar-system.interfac
 import { SystemAnimationComponent } from '../../components/system-animation/system-animation.component';
 import { ModalService } from '../../services/modal/modal.service';
 import { LikeableType, LikesService } from '../../services/likes/likes.service';
+import { WallpaperService } from '../../services/wallpaper/wallpaper-service';
+import { WallpaperSettings } from '../../interfaces/wallpaper/wallpaper.interface';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-system-view',
@@ -30,25 +33,46 @@ export class SystemViewComponent implements OnInit {
   
   // Render
   renderer: any;
+  currentCameraData: any = null;
+  currentOrbitalPositions: any = null;
 
-  renderOptions = {
-    showOrbits: true,
-    resolution: '1920x1080',
-    quality: 'high',
-    
-    // Animation control
-    orbitsPaused: false,
-    
-    // Visual effects
-    brightness: 1.0,
-    contrast: 1.0,
-    saturation: 1.0,
+
+  renderOptions: WallpaperSettings = {
+    camera: {
+      position: { x: 0, y: 0, z: 0 }, // Will be set when saving
+      target: { x: 0, y: 0, z: 0 },   // Will be set when saving
+      fov: 0                          // Will be set when saving
+    },
+
+    visibility: {
+      orbits: true,      // showOrbits
+      labels: false,     // Planet/moon labels
+      background: true,   // Skybox/stars
+      animateOrbits: true // Animate orbit
+    },
+
+    effects: {
+      brightness: 1,     // brightness
+      contrast: 1,       // contrast
+      saturation: 1      // saturation
+    },
 
     scale: {
-      star: 1.0,
-      planets: 1.0,
-      moons: 1.0,
-      orbits: 1.0 
+      star: 1,          // scale.star
+      planets: 1,       // scale.planets
+      moons: 1,         // scale.moons
+      orbits: 1         // scale.orbits
+    },
+
+    orbitalPositions: {
+      planets: {},      // Will be filled when capturing
+      moons: {}         // Will be filled when capturing
+    },
+
+    metadata: {
+      systemId: 0,      // Will be set from solarSystem.id
+      createdAt: '',    // Will be set when saving
+      resolution: { width: 1920, height: 1080 } // Will be set when saving
     }
   };
     
@@ -64,7 +88,8 @@ export class SystemViewComponent implements OnInit {
     private galaxiesService: GalaxiesService,
     private modalService: ModalService,
     private likesService: LikesService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private wallpaperService: WallpaperService
   ) { }
 
   ngOnInit(): void {
@@ -146,7 +171,7 @@ export class SystemViewComponent implements OnInit {
 
   private getModalData(objectData: any): any {
     const dataMap: { [key: string]: any } = {
-      star: {
+      solar_system: {
         name: this.solarSystem.solar_system_name,
         content: this.getStarModalContent(),
         likeableType: LikeableType.SOLAR_SYSTEM,
@@ -265,15 +290,22 @@ export class SystemViewComponent implements OnInit {
   toggleOrbitVisibility(): void {
     this.renderOptions = {
       ...this.renderOptions,
-      showOrbits: !this.renderOptions.showOrbits
+      visibility: {
+        ...this.renderOptions.visibility,
+        orbits: !this.renderOptions.visibility.orbits
+      }
     };
   }
 
   onResolutionChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
+    const [width, height] = target.value.split('x').map(Number);
     this.renderOptions = {
       ...this.renderOptions,
-      resolution: target.value
+      metadata: {
+        ...this.renderOptions.metadata,
+        resolution: { width, height }
+      }
     };
   }
 
@@ -284,7 +316,10 @@ export class SystemViewComponent implements OnInit {
   toggleOrbitalAnimation() {
     this.renderOptions = {
       ...this.renderOptions,
-      orbitsPaused: !this.renderOptions.orbitsPaused
+      visibility: {
+        ...this.renderOptions.visibility,
+        animateOrbits: !this.renderOptions.visibility.animateOrbits
+      }
     };
   }
 
@@ -292,7 +327,10 @@ export class SystemViewComponent implements OnInit {
     const target = event.target as HTMLInputElement;
     this.renderOptions = {
       ...this.renderOptions,
-      brightness: parseFloat(target.value)
+      effects: {
+        ...this.renderOptions.effects,
+        brightness: parseFloat(target.value)
+      }
     };
   }
 
@@ -300,7 +338,10 @@ export class SystemViewComponent implements OnInit {
     const target = event.target as HTMLInputElement;
     this.renderOptions = {
       ...this.renderOptions,
-      contrast: parseFloat(target.value)
+      effects: {
+        ...this.renderOptions.effects,
+        contrast: parseFloat(target.value)
+      }
     };
   }
 
@@ -308,7 +349,10 @@ export class SystemViewComponent implements OnInit {
     const target = event.target as HTMLInputElement;
     this.renderOptions = {
       ...this.renderOptions,
-      saturation: parseFloat(target.value)
+      effects: {
+        ...this.renderOptions.effects,
+        saturation: parseFloat(target.value)
+      }
     };
   }
 
@@ -356,9 +400,100 @@ export class SystemViewComponent implements OnInit {
     };
   }
 
-  exportWallpaper() {
-    // TODO: Implementation wallpaper export
-    console.log('Creating wallpaper with settings:', this.renderOptions);
+  // Export wallpaper as image
+  exportWallpaper(): void {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+
+    const width = this.renderOptions.metadata.resolution.width;
+    const height = this.renderOptions.metadata.resolution.height;
+    
+    // Force complete render with all post-processing effects
+    const renderer = this.systemAnimationComponent?.renderer;
+    const composer = this.systemAnimationComponent?.composer; // EffectComposer for bloom
+    const scene = this.systemAnimationComponent?.scene;
+    const camera = this.systemAnimationComponent?.camera;
+    
+    if (renderer && scene && camera) {
+      // If you have post-processing composer (bloom, etc.)
+      if (composer) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
+      
+      // Wait for render to complete
+      renderer.domElement.toBlob((blob) => {
+        if (!blob) return;
+        
+        // Create temporary canvas for scaling
+        const tempCanvas = document.createElement('canvas');
+        const ctx = tempCanvas.getContext('2d');
+        if (!ctx) return;
+
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+
+        // Create image from blob to scale it
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          tempCanvas.toBlob((finalBlob) => {
+            if (!finalBlob) return;
+            
+            const url = URL.createObjectURL(finalBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${this.solarSystem.solar_system_name}_wallpaper_${this.renderOptions.metadata.resolution.width}x${this.renderOptions.metadata.resolution.height}.png`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+          }, 'image/png');
+        };
+        
+        img.src = URL.createObjectURL(blob);
+      }, 'image/png');
+    }
+  }
+
+  // Save wallpaper settings to database
+  saveWallpaper(): void {
+    if (!this.solarSystem) return;
+
+    this.renderOptions.metadata.createdAt = new Date().toString();
+    this.renderOptions.metadata.systemId = this.solarSystemId;
+
+    this.wallpaperService.saveWallpaper(this.currentGalaxy, this.solarSystem.solar_system_id, JSON.stringify(this.renderOptions)).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('You successfully saved your wallpaper settings.', 2000);
+      },
+      error: (error) => {
+        this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500);
+      }
+    });
+  }
+
+  // datas to inject in db
+  onCameraUpdate(cameraData: any): void {
+    this.renderOptions = {
+      ...this.renderOptions,
+      camera: {
+        position: cameraData.position,
+        target: cameraData.target,
+        fov: cameraData.fov
+      }
+    };
+  }
+
+  onOrbitalPositionsUpdate(positions: any): void {
+    this.renderOptions = {
+      ...this.renderOptions,
+      orbitalPositions: {
+        planets: positions.planets,
+        moons: positions.moons
+      }
+    };
   }
 
   //Likes

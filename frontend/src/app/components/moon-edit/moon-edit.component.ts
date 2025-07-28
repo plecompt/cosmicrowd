@@ -109,6 +109,7 @@ export class MoonEditComponent {
     const validation = this.moonValidationService.validateMoon(this.moon);
 
     if (!validation.isValid) {
+      console.log('coucou');
       this.notificationService.showError(validation.errors[0], 2000);
       return;
     }
@@ -125,7 +126,7 @@ export class MoonEditComponent {
           this.notificationService.showSuccess('You successfully added a new moon around your planet !', 2000);
         },
         error: (error) => {
-          this.notificationService.showError(error || 'Something went wrong, please try again later', 5000);
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000);
         }
       })
     } else {
@@ -136,7 +137,7 @@ export class MoonEditComponent {
           this.notificationService.showSuccess('You successfully updated your moon', 2000);
         },
         error: (error) => {
-          this.notificationService.showError(error || 'Something went wrong, please try again later', 5000);
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000);
         }
       })
     }

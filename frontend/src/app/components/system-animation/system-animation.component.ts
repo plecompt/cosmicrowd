@@ -6,6 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { PlanetType } from '../../interfaces/solar-system/planet.interface';
+import { WallpaperSettings } from '../../interfaces/wallpaper/wallpaper.interface';
 
 @Component({
   selector: 'app-system-animation',
@@ -18,27 +19,64 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
   @Input() solarSystem!: SolarSystem;
   @Input() viewMode: 'view' | 'edit' = 'view';
   @Input() followedObject: any = null;
-  @Input() renderOptions: any = {
-    showOrbits: true,
-    resolution: '1920x1080',
-    quality: 'high',
-    animateOrbits: true,
-    scale: {
-      star: 1.0,
-      planets: 1.0,
-      moons: 1.0,
-      orbits: 1
+  @Input() renderOptions: WallpaperSettings = {
+    // Camera settings (will be set when saving)
+    camera: {
+      position: { x: 0, y: 0, z: 0 },
+      target: { x: 0, y: 0, z: 0 },
+      fov: 75
     },
+
+    // Visual toggles
+    visibility: {
+      orbits: true,
+      labels: true,
+      background: true,
+      animateOrbits: true
+    },
+
+    // Rendering effects
     effects: {
       brightness: 1,
       contrast: 1,
       saturation: 1
+    },
+
+    // Scale settings
+    scale: {
+      star: 1.0,
+      planets: 1.0,
+      moons: 1.0,
+      orbits: 1.0
+    },
+
+    // Orbital positions snapshot (will be set when saving)
+    orbitalPositions: {
+      planets: {},
+      moons: {}
+    },
+
+    // Metadata (will be set when saving)
+    metadata: {
+      systemId: 0,
+      createdAt: '',
+      resolution: { width: 1920, height: 1080 }
     }
   };
 
+
   @Output() objectClicked = new EventEmitter<{type: string, data: any}>();
   @Output() renderReady = new EventEmitter<any>();
-  
+  @Output() cameraUpdate = new EventEmitter<{
+    position: { x: number, y: number, z: number },
+    target: { x: number, y: number, z: number },
+    fov: number
+  }>();
+  @Output() orbitalPositionsUpdate = new EventEmitter<{
+    planets: { [key: string]: { x: number, y: number, z: number } },
+    moons: { [key: string]: { x: number, y: number, z: number } }
+  }>();
+
   scene!: THREE.Scene;
   camera!: THREE.PerspectiveCamera;
   renderer!: THREE.WebGLRenderer;
@@ -50,6 +88,8 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
   clickableObjects: THREE.Mesh[] = [];
   moonEllipses: THREE.LineLoop[] = [];
   moonDistanceScale: number = 0;
+  cameraUpdateTimeout?: number;
+  orbitalUpdateTimeout?: number;
 
   constructor() {}
 
@@ -79,7 +119,7 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     
     // Update orbit visibility
     this.moonEllipses.forEach(ellipse => {
-      ellipse.visible = this.renderOptions.showOrbits;
+      ellipse.visible = this.renderOptions.visibility.orbits;
     });
     
     // Update scales and recreate objects
@@ -124,7 +164,6 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
       data: exportData
     });
   }
-
 
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.onWindowResize.bind(this));
@@ -179,6 +218,9 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
   private setupControls(): void {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
+
+    //camera change listener
+    this.controls.addEventListener('change', () => this.onCameraChange());
   }
 
   private setupLights(): void {
@@ -222,6 +264,34 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     }
   }
 
+  private onCameraChange(): void {
+    if (this.cameraUpdateTimeout) {
+      clearTimeout(this.cameraUpdateTimeout);
+    }
+
+    this.cameraUpdateTimeout = setTimeout(() => {
+      this.updateCameraData();
+    }, 500);
+  }
+
+  private updateCameraData(): void {
+    if (this.camera && this.controls) {
+      this.cameraUpdate.emit({
+        position: {
+          x: this.camera.position.x,
+          y: this.camera.position.y,
+          z: this.camera.position.z
+        },
+        target: {
+          x: this.controls.target.x,
+          y: this.controls.target.y,
+          z: this.controls.target.z
+        },
+        fov: this.camera.fov
+      });
+    }
+  }
+
   private clearScene(): void {
     this.scene.children
       .filter(child => !(child instanceof THREE.Light))
@@ -240,8 +310,6 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     const finalStarScale = starScale * (this.renderOptions.scale?.star || 1);
     const finalPlanetOrbitScale = planetDistanceScale * (this.renderOptions.scale?.orbits || 1);
     const finalMoonOrbitScale = moonDistanceScale * (this.renderOptions.scale?.orbits || 1);
-
-//private createPlanet(planet: any, planetScale: number, planetDistanceScale: number, moonScale: number, moonDistanceScale: number):
 
     this.createStar(finalStarScale);
     this.solarSystem.planets.forEach(planet => 
@@ -320,7 +388,7 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
           const apogeeDistance = (moon.moon_apogee || 0) * this.moonDistanceScale;
           const perigeeDistance = (moon.moon_perigee || 0) * this.moonDistanceScale;
           
-          if (this.renderOptions.showOrbits){
+          if (this.renderOptions.visibility.orbits){
             const geometry = this.createEllipseGeometry(
               moon,
               planetMesh.position.x + apogeeDistance, planetMesh.position.y, planetMesh.position.z,
@@ -345,7 +413,7 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     const apogeeDistance = (planet.planet_apogee || 0) * planetDistanceScale;
     const perigeeDistance = (planet.planet_perigee || 0) * planetDistanceScale;
     
-    if (this.renderOptions.showOrbits){
+    if (this.renderOptions.visibility.orbits){
       this.createEllipse(planet, apogeeDistance, 0, 0, -perigeeDistance, 0, 0, 0x5555ff);
     }
     
@@ -471,6 +539,48 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
         });
       }
     });
+
+    // Throttle orbital positions update
+    this.throttleOrbitalUpdate();
+  }
+
+  private throttleOrbitalUpdate(): void {
+    if (this.orbitalUpdateTimeout) {
+      clearTimeout(this.orbitalUpdateTimeout);
+    }
+
+    this.orbitalUpdateTimeout = setTimeout(() => {
+      this.updateOrbitalPositions();
+    }, 100); // Update every 100ms for smoother tracking
+  }
+
+
+  private updateOrbitalPositions(): void {
+    const planetsPositions: { [key: string]: { x: number, y: number, z: number } } = {};
+    const moonsPositions: { [key: string]: { x: number, y: number, z: number } } = {};
+
+    this.clickableObjects.forEach(obj => {
+      if (obj.userData['type'] === 'planet') {
+        const planetId = obj.userData['data'].planet_id;
+        planetsPositions[planetId] = {
+          x: obj.position.x,
+          y: obj.position.y,
+          z: obj.position.z
+        };
+      } else if (obj.userData['type'] === 'moon') {
+        const moonId = obj.userData['data'].moon_id;
+        moonsPositions[moonId] = {
+          x: obj.position.x,
+          y: obj.position.y,
+          z: obj.position.z
+        };
+      }
+    });
+
+    this.orbitalPositionsUpdate.emit({
+      planets: planetsPositions,
+      moons: moonsPositions
+    });
   }
 
   private animate(): void {
@@ -482,7 +592,7 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     this.camera.position.z = this.clamp(this.camera.position.z, -clampVal, clampVal);
 
     // Only animate orbits if not paused
-    if (this.renderOptions.animateOrbits !== false) {
+    if (this.renderOptions.visibility.animateOrbits != false) {
       this.animateOrbits();
       this.updateMoonOrbits();
     }
@@ -545,146 +655,144 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     ]);
   }
 
-
   //View Object and Follow Object
-
-viewObject(obj: any, type: string): void {
-  const objectId = obj[`${type}_id`];
-  const targetObject = this.clickableObjects.find(mesh => 
-    mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
-  );
-
-  if (targetObject) {
-    const targetPosition = targetObject.position.clone();
-    const distance = this.calculateViewDistance(targetObject);
-    
-    // Simple offset behind the object
-    const offset = new THREE.Vector3(0, distance * 0.2, distance);
-    const cameraPosition = targetPosition.clone().add(offset);
-    
-    // Use OrbitControls to smoothly move there
-    this.controls.target.copy(targetPosition);
-    this.camera.position.copy(cameraPosition);
-    this.controls.update();
-
-    // Enable controls for manual interaction
-    this.controls.enabled = true;
-    this.controls.update();
-  }
-}
-
-stopFollowing(): void {
-  this.followedObject = null;
-  this.controls.enabled = true;
-  
-  // Smooth transition back to manual control
-  const currentTarget = new THREE.Vector3();
-  this.camera.getWorldDirection(currentTarget);
-  currentTarget.multiplyScalar(500).add(this.camera.position);
-  
-  this.controls.target.copy(currentTarget);
-  this.controls.update();
-}
-
-
-private startFollowing(): void {
-  if (!this.followedObject) return;
-  
-  const objectId = this.followedObject.id;
-  const type = this.followedObject.type;
-
-  const targetObject = this.clickableObjects.find(mesh => 
-    mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
-  );
-
-  if (targetObject) {
-    const targetPosition = targetObject.position.clone();
-    const distance = this.calculateViewDistance(targetObject);
-    const offset = new THREE.Vector3(0, distance * 0.3, distance);
-    const cameraTargetPosition = targetPosition.clone().add(offset);
-
-    // Smooth transition to follow position
-    this.animateCameraToFollow(cameraTargetPosition, targetPosition);
-  }
-}
-
-
-private animateCameraToFollow(targetPosition: THREE.Vector3, lookAtPosition: THREE.Vector3): void {
-  const startPosition = this.camera.position.clone();
-  const duration = 1500;
-  const startTime = Date.now();
-
-  const animateToFollow = () => {
-    const elapsed = Date.now() - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    
-    const easeProgress = 1 - Math.pow(1 - progress, 3);
-    
-    this.camera.position.lerpVectors(startPosition, targetPosition, easeProgress);
-    this.camera.lookAt(lookAtPosition);
-    
-    if (progress < 1) {
-      requestAnimationFrame(animateToFollow);
-    } else {
-      // Now start continuous following
-      this.controls.enabled = false;
-    }
-  };
-  
-  animateToFollow();
-}
-
-private updateFollowCamera(): void {
-  if (!this.followedObject) return;
-
-  const objectId = this.followedObject.id;
-  const type = this.followedObject.type;
-  
-  const targetObject = this.clickableObjects.find(mesh => 
-    mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
-  );
-
-  if (targetObject) {
-    const targetPosition = targetObject.position.clone();
-    const distance = this.calculateViewDistance(targetObject);
-    
-    // Smooth orbital follow - circular motion around the object
-    const time = Date.now() * 0.0003;
-    const offset = new THREE.Vector3(
-      Math.sin(time) * distance * 0.8,
-      distance * 0.4,
-      Math.cos(time) * distance * 0.8
+  viewObject(obj: any, type: string): void {
+    const objectId = obj[`${type}_id`];
+    const targetObject = this.clickableObjects.find(mesh => 
+      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
     );
-    
-    const desiredPosition = targetPosition.clone().add(offset);
-    
-    // Smooth camera movement to reduce jitter
-    this.camera.position.lerp(desiredPosition, 0.02);
-    this.camera.lookAt(targetPosition);
-  }
-}
 
-private calculateViewDistance(object: THREE.Mesh): number {
-  const geometry = object.geometry as THREE.SphereGeometry;
-  const radius = geometry.parameters?.radius || 50;
-  
-  // Base distance multiplier based on object type
-  let baseMultiplier;
-  switch (object.userData['type']){
-    case ('solar_system'):
-      baseMultiplier = 10;
-      break;
-    case ('planet'):
-      baseMultiplier = 8;
-      break;
-    case ('moon'):
-      baseMultiplier = 5;
-      break;
-    default:
-      baseMultiplier = 20;
+    if (targetObject) {
+      const targetPosition = targetObject.position.clone();
+      const distance = this.calculateViewDistance(targetObject);
+      
+      // Simple offset behind the object
+      const offset = new THREE.Vector3(0, distance * 0.2, distance);
+      const cameraPosition = targetPosition.clone().add(offset);
+      
+      // Use OrbitControls to smoothly move there
+      this.controls.target.copy(targetPosition);
+      this.camera.position.copy(cameraPosition);
+      this.controls.update();
+
+      // Enable controls for manual interaction
+      this.controls.enabled = true;
+      this.controls.update();
+    }
   }
-  
-  return Math.max(radius * baseMultiplier, 100);
-}
+
+  stopFollowing(): void {
+    this.followedObject = null;
+    this.controls.enabled = true;
+    
+    // Smooth transition back to manual control
+    const currentTarget = new THREE.Vector3();
+    this.camera.getWorldDirection(currentTarget);
+    currentTarget.multiplyScalar(500).add(this.camera.position);
+    
+    this.controls.target.copy(currentTarget);
+    this.controls.update();
+  }
+
+
+  private startFollowing(): void {
+    if (!this.followedObject) return;
+    
+    const objectId = this.followedObject.id;
+    const type = this.followedObject.type;
+
+    const targetObject = this.clickableObjects.find(mesh => 
+      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
+    );
+
+    if (targetObject) {
+      const targetPosition = targetObject.position.clone();
+      const distance = this.calculateViewDistance(targetObject);
+      const offset = new THREE.Vector3(0, distance * 0.3, distance);
+      const cameraTargetPosition = targetPosition.clone().add(offset);
+
+      // Smooth transition to follow position
+      this.animateCameraToFollow(cameraTargetPosition, targetPosition);
+    }
+  }
+
+
+  private animateCameraToFollow(targetPosition: THREE.Vector3, lookAtPosition: THREE.Vector3): void {
+    const startPosition = this.camera.position.clone();
+    const duration = 1500;
+    const startTime = Date.now();
+
+    const animateToFollow = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      
+      this.camera.position.lerpVectors(startPosition, targetPosition, easeProgress);
+      this.camera.lookAt(lookAtPosition);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateToFollow);
+      } else {
+        // Now start continuous following
+        this.controls.enabled = false;
+      }
+    };
+    
+    animateToFollow();
+  }
+
+  private updateFollowCamera(): void {
+    if (!this.followedObject) return;
+
+    const objectId = this.followedObject.id;
+    const type = this.followedObject.type;
+    
+    const targetObject = this.clickableObjects.find(mesh => 
+      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
+    );
+
+    if (targetObject) {
+      const targetPosition = targetObject.position.clone();
+      const distance = this.calculateViewDistance(targetObject);
+      
+      // Smooth orbital follow - circular motion around the object
+      const time = Date.now() * 0.0003;
+      const offset = new THREE.Vector3(
+        Math.sin(time) * distance * 0.8,
+        distance * 0.4,
+        Math.cos(time) * distance * 0.8
+      );
+      
+      const desiredPosition = targetPosition.clone().add(offset);
+      
+      // Smooth camera movement to reduce jitter
+      this.camera.position.lerp(desiredPosition, 0.02);
+      this.camera.lookAt(targetPosition);
+    }
+  }
+
+  private calculateViewDistance(object: THREE.Mesh): number {
+    const geometry = object.geometry as THREE.SphereGeometry;
+    const radius = geometry.parameters?.radius || 50;
+    
+    // Base distance multiplier based on object type
+    let baseMultiplier;
+    switch (object.userData['type']){
+      case ('solar_system'):
+        baseMultiplier = 10;
+        break;
+      case ('planet'):
+        baseMultiplier = 8;
+        break;
+      case ('moon'):
+        baseMultiplier = 5;
+        break;
+      default:
+        baseMultiplier = 20;
+    }
+    
+    return Math.max(radius * baseMultiplier, 100);
+  }
 
 }

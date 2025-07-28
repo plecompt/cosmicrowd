@@ -53,10 +53,10 @@ Route::prefix('v1')->group(function () {
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes-stats', [LikeController::class, 'getSolarSystemLikesStats']); //stats des likes (infos plus completes) pour ce systeme solaire
     
     // Wallpaper d'un systeme solaire
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper', [WallpaperController::class, 'show']); //retourne le wallpaper associé à ce solarSystem
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/exists', [WallpaperController::class, 'exists']); //existe-t'il un wallpaper pour ce solarSystem?
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/likes', [LikeController::class, 'countWallpaperLikes']); //nombres de likes pour le wallpaper de ce solarSystem
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/likes-stats', [LikeController::class, 'getWallpaperLikesStats']); //stats des likes pour le wallpaper de ce solarSystem (infos plus complètes)
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'show']); //retourne le wallpaper associé à ce solarSystem
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/exists', [WallpaperController::class, 'exists']); //existe-t'il un wallpaper pour ce solarSystem?
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/likes', [LikeController::class, 'countWallpaperLikes']); //nombres de likes pour le wallpaper de ce solarSystem
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/likes-stats', [LikeController::class, 'getWallpaperLikesStats']); //stats des likes pour le wallpaper de ce solarSystem (infos plus complètes)
         
     // PLANETES d'un systeme solaire
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'index']); //liste des planetes pour ce systeme solaire
@@ -94,6 +94,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', RateLimitMiddleware::class])->g
     // Solar Systems (modification) Pour l'instant, pas d'ajout et de suppression des systemes solaires, juste modifications des systems pré-générés, a voir plus tard
     Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':solar_system');;
     
+    // Wallpaper d'un systeme solaire
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'store'])->middleware(CheckOwnershipMiddleware::class . ':solar_system'); //save le wallpaper associé à ce solar_system
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'destroy'])->middleware(CheckOwnershipMiddleware::class . ':solar_system'); //supprime le wallpaper associé à ce solar_system
+
     // Planets (modification)
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'store'])->middleware(CheckOwnershipMiddleware::class . ':solar_system'); //solar_system car on verifie le parent car planetId n'existe pas
     Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':planet');
@@ -106,7 +110,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', RateLimitMiddleware::class])->g
     
     // Like Routes (toutes privées)
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/to-like', [LikeController::class, 'toggleSolarSystem']); //to like ou unlike un systeme solaire
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpaper/{wallpaperId}/to-like', [LikeController::class, 'toggleWallpaper']); //to like ou unlike un wallpaper
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/{wallpaperId}/to-like', [LikeController::class, 'toggleWallpaper']); //to like ou unlike un wallpaper
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/to-like', [LikeController::class, 'togglePlanet']); //to like ou unlike une planete
     Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon']); //to like ou unlike une lune
     Route::get('user-likes', [LikeController::class, 'checkUserLikes']); //return if given id are liked or not by user

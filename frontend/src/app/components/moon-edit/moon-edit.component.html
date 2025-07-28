@@ -64,6 +64,11 @@
             <label>Orbital Longitude (°):</label>
             <input type="number" [(ngModel)]="moon.moon_orbital_longitude" min="0" max="360" class="form-input">
           </div>
+
+          <div class="form-group">
+            <label>Orbital Period (days):</label>
+            <input type="number" [(ngModel)]="moon.moon_orbital_period" min="1" max="10000" class="form-input">
+          </div>
           
           <div class="form-group">
             <label>Eccentricity:</label>

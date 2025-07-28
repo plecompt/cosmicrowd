@@ -17,7 +17,9 @@
     [followedObject]="followedObject" 
     [renderOptions]="renderOptions"
     (objectClicked)="onObjectClicked($event)"
-    (renderReady)="onRenderReady($event)">
+    (renderReady)="onRenderReady($event)"
+    (cameraUpdate)="onCameraUpdate($event)"
+    (orbitalPositionsUpdate)="onOrbitalPositionsUpdate($event)">
   </app-system-animation>
 
   <!-- Side Panel -->
@@ -38,7 +40,7 @@
           <div class="form-group">
             <button class="btn btn-secondary" 
                     (click)="toggleOrbitalAnimation()">
-              {{ renderOptions.orbitsPaused ? 'Resume Orbits' : 'Pause Orbits' }}
+              {{ renderOptions.visibility.animateOrbits ? 'Pause Orbits' : 'Animate Orbits' }}
             </button>
           </div>
 
@@ -46,7 +48,7 @@
           <div class="form-group">
             <label class="flex">
               <input type="checkbox" 
-                    [checked]="renderOptions.showOrbits"
+                    [checked]="renderOptions.visibility.orbits"
                     (change)="toggleOrbitVisibility()"> 
               &nbsp;Show Orbits
             </label>
@@ -56,65 +58,65 @@
           <div class="form-group">
             <label for="starScale">Star Size: {{ renderOptions.scale.star }}x</label>
             <input type="range" 
-                   id="starScale"
-                   min="0.1" max="3.0" step="0.1" 
-                   [value]="renderOptions.scale.star"
-                   (input)="onStarScaleChange($event)">
+                  id="starScale"
+                  min="0.1" max="3.0" step="0.1" 
+                  [value]="renderOptions.scale.star"
+                  (input)="onStarScaleChange($event)">
           </div>
 
           <div class="form-group">
             <label for="planetsScale">Planets Size: {{ renderOptions.scale.planets }}x</label>
             <input type="range" 
-                   id="planetsScale"
-                   min="0.1" max="3.0" step="0.1" 
-                   [value]="renderOptions.scale.planets"
-                   (input)="onPlanetsScaleChange($event)">
+                  id="planetsScale"
+                  min="0.1" max="3.0" step="0.1" 
+                  [value]="renderOptions.scale.planets"
+                  (input)="onPlanetsScaleChange($event)">
           </div>
 
           <div class="form-group">
             <label for="moonsScale">Moons Size: {{ renderOptions.scale.moons }}x</label>
             <input type="range" 
-                   id="moonsScale"
-                   min="0.1" max="3.0" step="0.1" 
-                   [value]="renderOptions.scale.moons"
-                   (input)="onMoonsScaleChange($event)">
+                  id="moonsScale"
+                  min="0.1" max="3.0" step="0.1" 
+                  [value]="renderOptions.scale.moons"
+                  (input)="onMoonsScaleChange($event)">
           </div>
 
           <div class="form-group">
             <label for="orbitScale">Orbit Distance: {{ renderOptions.scale.orbits }}x</label>
             <input type="range" 
-                   id="orbitScale"
-                   min="0.5" max="2.0" step="0.1" 
-                   [value]="renderOptions.scale.orbits"
-                   (input)="onOrbitScaleChange($event)">
+                  id="orbitScale"
+                  min="0.5" max="2.0" step="0.1" 
+                  [value]="renderOptions.scale.orbits"
+                  (input)="onOrbitScaleChange($event)">
           </div>
 
           <!-- Render Effects -->
           <div class="form-group">
-            <label for="brightness">Brightness: {{ renderOptions.brightness }}</label>
+            <label for="brightness">Brightness: {{ renderOptions.effects.brightness }}</label>
             <input type="range" 
-                   id="brightness"
-                   min="0" max="2" step="0.1" 
-                   [value]="renderOptions.brightness"
-                   (input)="onBrightnessChange($event)">
+                  id="brightness"
+                  min="0" max="2" step="0.1" 
+                  [value]="renderOptions.effects.brightness"
+                  (input)="onBrightnessChange($event)">
           </div>
 
           <div class="form-group">
-            <label for="contrast">Contrast: {{ renderOptions.contrast }}</label>
+            <label for="contrast">Contrast: {{ renderOptions.effects.contrast }}</label>
             <input type="range" 
-                   id="contrast"
-                   min="0" max="2" step="0.1" 
-                   [value]="renderOptions.contrast"
-                   (input)="onContrastChange($event)">
+                  id="contrast"
+                  min="0" max="2" step="0.1" 
+                  [value]="renderOptions.effects.contrast"
+                  (input)="onContrastChange($event)">
           </div>
 
           <div class="form-group">
-            <label for="saturation">Saturation: {{ renderOptions.saturation }}</label>
+            <label for="saturation">Saturation: {{ renderOptions.effects.saturation }}</label>
             <input type="range" 
-                   id="saturation"
-                   min="0" max="2" step="0.1" 
-                   [value]="renderOptions.saturation"
-                   (input)="onSaturationChange($event)">
+                  id="saturation"
+                  min="0" max="2" step="0.1" 
+                  [value]="renderOptions.effects.saturation"
+                  (input)="onSaturationChange($event)">
           </div>
 
           <!-- Export Options -->
@@ -122,7 +124,7 @@
             <label for="resolution">Export Resolution</label>
             <select class="form-select" 
                     id="resolution"
-                    [value]="renderOptions.resolution"
+                    [value]="renderOptions.metadata.resolution.width + 'x' + renderOptions.metadata.resolution.height"
                     (change)="onResolutionChange($event)">
               <option value="1920x1080">1920x1080</option>
               <option value="2560x1440">2560x1440</option>
@@ -130,9 +132,16 @@
             </select>
           </div>
 
-          <button class="btn btn-wallpaper" (click)="exportWallpaper()">
-            Create Wallpaper
-          </button>
+          <div class="wallpaper-actions flex">
+            <button class="btn btn-wallpaper" (click)="exportWallpaper()">
+              Download Wallpaper
+            </button>
+
+
+            <button class="btn btn-wallpaper" (click)="saveWallpaper()">
+              Save Wallpaper
+            </button>
+          </div>
         </div>
 
         <!-- Objects List -->

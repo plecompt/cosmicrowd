@@ -161,9 +161,14 @@ h3, h4 {
   padding: 10px 15px;
   gap: 10px;
 
-  .planet-actions, .moon-actions {
+  .planet-actions, .moon-actions{
     gap: 10px;
   }
+}
+
+.wallpaper-actions {
+  gap: 10px;
+  justify-content: space-between;
 }
 
 .planet-info, .moon-info {
