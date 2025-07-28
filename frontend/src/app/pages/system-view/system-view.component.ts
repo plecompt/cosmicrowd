@@ -401,59 +401,28 @@ export class SystemViewComponent implements OnInit {
   }
 
   // Export wallpaper as image
-  exportWallpaper(): void {
-    const canvas = document.querySelector('canvas');
-    if (!canvas) return;
+  async exportWallpaper(): Promise<void> {
+    if (!this.systemAnimationComponent || !this.solarSystem) return;
 
     const width = this.renderOptions.metadata.resolution.width;
     const height = this.renderOptions.metadata.resolution.height;
     
-    // Force complete render with all post-processing effects
-    const renderer = this.systemAnimationComponent?.renderer;
-    const composer = this.systemAnimationComponent?.composer; // EffectComposer for bloom
-    const scene = this.systemAnimationComponent?.scene;
-    const camera = this.systemAnimationComponent?.camera;
-    
-    if (renderer && scene && camera) {
-      // If you have post-processing composer (bloom, etc.)
-      if (composer) {
-        composer.render();
-      } else {
-        renderer.render(scene, camera);
-      }
+    try {
+      // Use the offscreen rendering method
+      const dataURL = await this.systemAnimationComponent.generateThumbnail(
+        this.solarSystem, 
+        width, 
+        height
+      );
       
-      // Wait for render to complete
-      renderer.domElement.toBlob((blob) => {
-        if (!blob) return;
-        
-        // Create temporary canvas for scaling
-        const tempCanvas = document.createElement('canvas');
-        const ctx = tempCanvas.getContext('2d');
-        if (!ctx) return;
-
-        tempCanvas.width = width;
-        tempCanvas.height = height;
-
-        // Create image from blob to scale it
-        const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          tempCanvas.toBlob((finalBlob) => {
-            if (!finalBlob) return;
-            
-            const url = URL.createObjectURL(finalBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${this.solarSystem.solar_system_name}_wallpaper_${this.renderOptions.metadata.resolution.width}x${this.renderOptions.metadata.resolution.height}.png`;
-            link.click();
-            
-            URL.revokeObjectURL(url);
-          }, 'image/png');
-        };
-        
-        img.src = URL.createObjectURL(blob);
-      }, 'image/png');
+      // Create download link
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = `${this.solarSystem.solar_system_name}_wallpaper_${width}x${height}.png`;
+      link.click();
+      
+    } catch (error) {
+      console.error('Error generating wallpaper:', error);
     }
   }
 

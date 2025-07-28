@@ -14,56 +14,45 @@ import { WallpaperSettings } from '../../interfaces/wallpaper/wallpaper.interfac
   styleUrls: ['./system-animation.component.css']
 })
 export class SystemAnimationComponent implements OnInit, OnChanges {
+  // #region Component Properties
   @ViewChild('container', { static: true }) containerRef!: ElementRef;
   
   @Input() solarSystem!: SolarSystem;
   @Input() viewMode: 'view' | 'edit' = 'view';
   @Input() followedObject: any = null;
   @Input() renderOptions: WallpaperSettings = {
-    // Camera settings (will be set when saving)
     camera: {
       position: { x: 0, y: 0, z: 0 },
       target: { x: 0, y: 0, z: 0 },
       fov: 75
     },
-
-    // Visual toggles
     visibility: {
       orbits: true,
       labels: true,
       background: true,
       animateOrbits: true
     },
-
-    // Rendering effects
     effects: {
       brightness: 1,
       contrast: 1,
       saturation: 1
     },
-
-    // Scale settings
     scale: {
       star: 1.0,
       planets: 1.0,
       moons: 1.0,
       orbits: 1.0
     },
-
-    // Orbital positions snapshot (will be set when saving)
     orbitalPositions: {
       planets: {},
       moons: {}
     },
-
-    // Metadata (will be set when saving)
     metadata: {
       systemId: 0,
       createdAt: '',
       resolution: { width: 1920, height: 1080 }
     }
   };
-
 
   @Output() objectClicked = new EventEmitter<{type: string, data: any}>();
   @Output() renderReady = new EventEmitter<any>();
@@ -77,150 +66,94 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     moons: { [key: string]: { x: number, y: number, z: number } }
   }>();
 
-  scene!: THREE.Scene;
-  camera!: THREE.PerspectiveCamera;
-  renderer!: THREE.WebGLRenderer;
-  composer!: EffectComposer;
-  controls!: OrbitControls;
-  animationId!: number;
-  raycaster = new THREE.Raycaster();
-  mouse = new THREE.Vector2();
-  clickableObjects: THREE.Mesh[] = [];
-  moonEllipses: THREE.LineLoop[] = [];
-  moonDistanceScale: number = 0;
-  cameraUpdateTimeout?: number;
-  orbitalUpdateTimeout?: number;
+  // Three.js core objects
+  private scene!: THREE.Scene;
+  private camera!: THREE.PerspectiveCamera;
+  private renderer!: THREE.WebGLRenderer;
+  private composer!: EffectComposer;
+  private controls!: OrbitControls;
+  private isInitialized = false;
 
-  constructor() {}
+  // Interaction and tracking
+  private raycaster = new THREE.Raycaster();
+  private mouse = new THREE.Vector2();
+  private clickableObjects: THREE.Mesh[] = [];
+  private moonEllipses: THREE.LineLoop[] = [];
+  private animationId: number = 0;
+  private lastScales: { starScale: number, planetScale: number, moonScale: number } | null = null;
 
+  // Scale factors
+  private moonDistanceScale: number = 1;
+
+  // Throttling
+  private cameraUpdateTimeout: any;
+  private orbitalUpdateTimeout: any;
+  // #endregion
+
+  // #region Lifecycle
   ngOnInit(): void {
-    if (this.solarSystem) this.initThreeJS();
-    window.addEventListener('resize', this.onWindowResize.bind(this));
+    this.setupScene();
+    this.setupCamera();
+    this.setupRenderer();
+    this.setupControls();
+    this.setupLights();
+    this.setupPostProcessing();
+    this.setupEventListeners();
+    this.createSolarSystem();
+    this.animate();
+
+    this.isInitialized = true;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['solarSystem'] && this.solarSystem && this.scene) {
+    if (!this.isInitialized) {
+      return;
+    }
+
+    if (changes['solarSystem'] && !changes['solarSystem'].firstChange) {
       this.clearScene();
       this.createSolarSystem();
     }
 
-    if (changes['followedObject'] && this.followedObject) {
-      this.startFollowing();
+    if (changes['followedObject']) {
+      if (this.followedObject) {
+        this.startFollowing();
+      } else {
+        this.stopFollowing();
+      }
     }
-    
-    if (changes['renderOptions'] && this.renderOptions) {
+
+    if (changes['renderOptions'] && !changes['renderOptions'].firstChange) {
       this.updateRenderSettings();
     }
   }
 
-  private updateRenderSettings(): void {
-    if (!this.scene) return;
-
-    
-    // Update orbit visibility
-    this.moonEllipses.forEach(ellipse => {
-      ellipse.visible = this.renderOptions.visibility.orbits;
-    });
-    
-    // Update scales and recreate objects
-    if (this.renderOptions.scale) {
-      this.clearScene();
-      this.createSolarSystem();
-    }
-    
-    // Update post-processing effects
-    this.updatePostProcessing();
-  }
-
-
-  private updatePostProcessing(): void {
-    if (!this.composer) return;
-    
-    // Find bloom pass
-    const bloomPass = this.composer.passes.find(pass => pass instanceof UnrealBloomPass) as UnrealBloomPass;
-    
-    if (bloomPass && this.renderOptions.effects) {
-      bloomPass.strength = this.renderOptions.effects.brightness;
-      bloomPass.radius = this.renderOptions.effects.contrast;
-      bloomPass.threshold = Math.max(0, 1 - this.renderOptions.effects.saturation);
-    }
-  }
-
-    public exportCanvas(): void {
-    if (!this.renderer) return;
-    
-    const canvas = this.renderer.domElement;
-    const dataURL = canvas.toDataURL('image/png');
-    
-    const exportData = {
-      timestamp: new Date().toISOString(),
-      systemId: this.solarSystem.solar_system_id,
-      renderOptions: this.renderOptions,
-      followedObject: this.followedObject
-    };
-    
-    this.renderReady.emit({
-      image: dataURL,
-      data: exportData
-    });
-  }
-
   ngOnDestroy(): void {
-    window.removeEventListener('resize', this.onWindowResize.bind(this));
-    this.renderer?.domElement.removeEventListener('click', this.onCanvasClick.bind(this));
-    if (this.animationId) cancelAnimationFrame(this.animationId);
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
     this.renderer?.dispose();
   }
+  // #endregion
 
-  private onWindowResize(): void {
-    const { clientWidth: width, clientHeight: height } = this.containerRef.nativeElement;
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
-    this.composer.setSize(width, height);
-  }
-
-  private initThreeJS(): void {
-    const container = this.containerRef.nativeElement;
-    const { clientWidth: width, clientHeight: height } = container;
-
-    this.setupScene();
-    this.setupCamera(width, height);
-    this.setupRenderer(width, height, container);
-    this.setupControls();
-    this.setupLights();
-    this.setupPostProcessing();
-    this.createSolarSystem();
-    this.animate();
-  }
-
+  // #region Scene Setup
   private setupScene(): void {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x000010);
   }
 
-  private setupCamera(width: number, height: number): void {
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 1, 15000);
-    this.camera.position.set(0, 300, 1500);
+  private setupCamera(): void {
+    const container = this.containerRef.nativeElement;
+    const aspectRatio = container.clientWidth / container.clientHeight;
+    this.camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 20000);
+    this.camera.position.set(0, 500, 1500);
   }
 
-  private setupRenderer(width: number, height: number, container: HTMLElement): void {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setSize(width, height);
+  private setupRenderer(): void {
+    const container = this.containerRef.nativeElement;
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.5;
     container.appendChild(this.renderer.domElement);
-    this.renderer.domElement.addEventListener('click', this.onCanvasClick.bind(this));
-  }
-
-  private setupControls(): void {
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-
-    //camera change listener
-    this.controls.addEventListener('change', () => this.onCameraChange());
   }
 
   private setupLights(): void {
@@ -245,6 +178,35 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     this.composer.addPass(bloomPass);
   }
 
+  private addSkybox(): void {
+    const loader = new THREE.CubeTextureLoader();
+    this.scene.background = loader.load([
+      'skybox/system/right.png', 'skybox/system/left.png',
+      'skybox/system/top.png', 'skybox/system/bottom.png',
+      'skybox/system/front.png', 'skybox/system/back.png'
+    ]);
+  }
+  // #endregion
+
+  // #region Controls Setup
+  private setupControls(): void {
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.addEventListener('change', () => this.onCameraChange());
+  }
+
+  private setupEventListeners(): void {
+    this.renderer.domElement.addEventListener('click', (event) => this.onCanvasClick(event));
+    
+    window.addEventListener('resize', () => {
+      const container = this.containerRef.nativeElement;
+      this.camera.aspect = container.clientWidth / container.clientHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(container.clientWidth, container.clientHeight);
+      this.composer.setSize(container.clientWidth, container.clientHeight);
+    });
+  }
+
   private onCanvasClick(event: MouseEvent): void {
     const container = this.containerRef.nativeElement;
     const rect = container.getBoundingClientRect();
@@ -263,7 +225,9 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
       });
     }
   }
+  // #endregion
 
+  // #region Camera Management
   private onCameraChange(): void {
     if (this.cameraUpdateTimeout) {
       clearTimeout(this.cameraUpdateTimeout);
@@ -292,13 +256,137 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     }
   }
 
-  private clearScene(): void {
-    this.scene.children
-      .filter(child => !(child instanceof THREE.Light))
-      .forEach(obj => this.scene.remove(obj));
-    this.clickableObjects = [];
+  viewObject(obj: any, type: string): void {
+    const objectId = obj[`${type}_id`];
+    const targetObject = this.clickableObjects.find(mesh => 
+      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
+    );
+
+    if (targetObject) {
+      const targetPosition = targetObject.position.clone();
+      const distance = this.calculateViewDistance(targetObject);
+      
+      const offset = new THREE.Vector3(0, distance * 0.2, distance);
+      const cameraPosition = targetPosition.clone().add(offset);
+      
+      this.controls.target.copy(targetPosition);
+      this.camera.position.copy(cameraPosition);
+      this.controls.update();
+      this.controls.enabled = true;
+    }
   }
 
+  stopFollowing(): void {
+    this.followedObject = null;
+
+    if (this.controls){
+      this.controls.enabled = true;
+    }
+    
+    const currentTarget = new THREE.Vector3();
+    this.camera.getWorldDirection(currentTarget);
+    currentTarget.multiplyScalar(500).add(this.camera.position);
+    
+    this.controls.target.copy(currentTarget);
+    this.controls.update();
+  }
+
+  private startFollowing(): void {
+    if (!this.followedObject) return;
+    
+    const objectId = this.followedObject.id;
+    const type = this.followedObject.type;
+
+    const targetObject = this.clickableObjects.find(mesh => 
+      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
+    );
+
+    if (targetObject) {
+      const targetPosition = targetObject.position.clone();
+      const distance = this.calculateViewDistance(targetObject);
+      const offset = new THREE.Vector3(0, distance * 0.3, distance);
+      const cameraTargetPosition = targetPosition.clone().add(offset);
+
+      this.animateCameraToFollow(cameraTargetPosition, targetPosition);
+    }
+  }
+
+  private animateCameraToFollow(targetPosition: THREE.Vector3, lookAtPosition: THREE.Vector3): void {
+    const startPosition = this.camera.position.clone();
+    const duration = 1500;
+    const startTime = Date.now();
+
+    const animateToFollow = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      
+      this.camera.position.lerpVectors(startPosition, targetPosition, easeProgress);
+      this.camera.lookAt(lookAtPosition);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateToFollow);
+      } else {
+        this.controls.enabled = false;
+      }
+    };
+    
+    animateToFollow();
+  }
+
+  private updateFollowCamera(): void {
+    if (!this.followedObject) return;
+
+    const objectId = this.followedObject.id;
+    const type = this.followedObject.type;
+    
+    const targetObject = this.clickableObjects.find(mesh => 
+      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
+    );
+
+    if (targetObject) {
+      const targetPosition = targetObject.position.clone();
+      const distance = this.calculateViewDistance(targetObject);
+      
+      const time = Date.now() * 0.0003;
+      const offset = new THREE.Vector3(
+        Math.sin(time) * distance * 0.8,
+        distance * 0.4,
+        Math.cos(time) * distance * 0.8
+      );
+      
+      const desiredPosition = targetPosition.clone().add(offset);
+      
+      this.camera.position.lerp(desiredPosition, 0.02);
+      this.camera.lookAt(targetPosition);
+    }
+  }
+
+  private calculateViewDistance(object: THREE.Mesh): number {
+    const geometry = object.geometry as THREE.SphereGeometry;
+    const radius = geometry.parameters?.radius || 50;
+    
+    let baseMultiplier;
+    switch (object.userData['type']) {
+      case 'solar_system':
+        baseMultiplier = 10;
+        break;
+      case 'planet':
+        baseMultiplier = 8;
+        break;
+      case 'moon':
+        baseMultiplier = 5;
+        break;
+      default:
+        baseMultiplier = 20;
+    }
+    
+    return Math.max(radius * baseMultiplier, 100);
+  }
+  // #endregion
+
+  // #region Solar System Creation
   private createSolarSystem(): void {
     const { starScale, planetScale, moonScale } = this.calculateSizeScales();
     const { planetDistanceScale, moonDistanceScale } = this.calculateDistanceScales();
@@ -329,91 +417,12 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     this.clickableObjects.push(star);
   }
 
-  private createEllipseGeometry(body: any, x1: number, y1: number, z1: number, x2: number, y2: number, z2: number): THREE.BufferGeometry {
-    const point1 = new THREE.Vector3(x1, y1, z1);
-    const point2 = new THREE.Vector3(x2, y2, z2);
-    const center = point1.clone().add(point2).multiplyScalar(0.5);
-    const semiMajorAxis = point1.distanceTo(point2) / 2;
-    const direction = point1.clone().sub(center).normalize();
-    
-    const inclination = ((body.planet_orbital_inclination || body.moon_orbital_inclination || 0) * Math.PI) / 180;
-    const longitudeOfAscendingNode = ((body.planet_inclination_angle || body.moon_inclination_angle || 0) * Math.PI) / 180;
-    
-    let perpendicular = new THREE.Vector3(0, 1, 0);
-    perpendicular.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination);
-    perpendicular.applyAxisAngle(new THREE.Vector3(0, 1, 0), longitudeOfAscendingNode);
-    perpendicular = perpendicular.cross(direction).normalize().cross(direction).normalize();
-    
-    const semiMinorAxis = semiMajorAxis * 0.8;
-    const points: THREE.Vector3[] = [];
-    
-    for (let i = 0; i <= 64; i++) {
-      const angle = (i / 64) * Math.PI * 2;
-      const point = center.clone()
-        .add(direction.clone().multiplyScalar(semiMajorAxis * Math.cos(angle)))
-        .add(perpendicular.clone().multiplyScalar(semiMinorAxis * Math.sin(angle)));
-      points.push(point);
-    }
-    
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }
-
-  private createEllipse(body: any, x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, color: number = 0x555555): void {
-    const geometry = this.createEllipseGeometry(body, x1, y1, z1, x2, y2, z2);
-    const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.3 });
-    const ellipse = new THREE.LineLoop(geometry, material);
-    this.scene.add(ellipse);
-  }
-
-  private clearMoonOrbits(): void {
-    this.moonEllipses.forEach(ellipse => {
-      this.scene.remove(ellipse);
-      ellipse.geometry.dispose();
-      (ellipse.material as THREE.Material).dispose();
-    });
-    this.moonEllipses = [];
-  }
-
-  private updateMoonOrbits(): void {
-    this.clearMoonOrbits();
-    if (!this.solarSystem?.planets) return;
-
-    this.solarSystem.planets.forEach(planet => {
-      const planetMesh = this.scene.children.find((child: any) => 
-        child.userData['type'] === 'planet' && child.userData['data'] === planet
-      );
-      
-      if (planetMesh && planet.moons) {
-        planet.moons.forEach(moon => {
-          const apogeeDistance = (moon.moon_apogee || 0) * this.moonDistanceScale;
-          const perigeeDistance = (moon.moon_perigee || 0) * this.moonDistanceScale;
-          
-          if (this.renderOptions.visibility.orbits){
-            const geometry = this.createEllipseGeometry(
-              moon,
-              planetMesh.position.x + apogeeDistance, planetMesh.position.y, planetMesh.position.z,
-              planetMesh.position.x - perigeeDistance, planetMesh.position.y, planetMesh.position.z
-            );
-            
-            const ellipse = new THREE.LineLoop(
-              geometry,
-              new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.3 })
-            );
-            
-            this.moonEllipses.push(ellipse);
-            this.scene.add(ellipse);
-        }
-        });
-      }
-    });
-  }
-
   private createPlanet(planet: any, planetScale: number, planetDistanceScale: number, moonScale: number, moonDistanceScale: number): void {
-    const size = this.clamp((planet.planet_diameter || 10000) * planetScale, 5, 100);
+    const size = this.clamp((planet.planet_diameter || 12000) * planetScale, 5, 100);
     const apogeeDistance = (planet.planet_apogee || 0) * planetDistanceScale;
     const perigeeDistance = (planet.planet_perigee || 0) * planetDistanceScale;
     
-    if (this.renderOptions.visibility.orbits){
+    if (this.renderOptions.visibility.orbits) {
       this.createEllipse(planet, apogeeDistance, 0, 0, -perigeeDistance, 0, 0, 0x5555ff);
     }
     
@@ -459,6 +468,111 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     this.scene.add(moonMesh);
   }
 
+  private getPlanetMaterial(type: PlanetType): THREE.Material {
+    const textureLoader = new THREE.TextureLoader();
+    const textureMap: { [key in PlanetType]: string } = {
+      terrestrial: 'planets-textures/terrestrial.png',
+      gas: 'planets-textures/gas.png',
+      ice: 'planets-textures/ice.png',
+      super_earth: 'planets-textures/super-earth.png',
+      sub_neptune: 'planets-textures/sub-neptune.png',
+      dwarf: 'planets-textures/dwarf.png',
+      lava: 'planets-textures/lava.png',
+      carbon: 'planets-textures/carbon.png',
+      ocean: 'planets-textures/ocean.png',
+    };
+
+    return new THREE.MeshStandardMaterial({
+      map: textureLoader.load(textureMap[type]),
+      roughness: 0.8,
+      metalness: 0.3,
+    });
+  }
+
+  private clearScene(): void {
+    this.scene.children
+      .filter(child => !(child instanceof THREE.Light))
+      .forEach(obj => this.scene.remove(obj));
+    this.clickableObjects = [];
+  }
+  // #endregion
+
+  // #region Orbit Management
+  private createEllipseGeometry(body: any, x1: number, y1: number, z1: number, x2: number, y2: number, z2: number): THREE.BufferGeometry {
+    const point1 = new THREE.Vector3(x1, y1, z1);
+    const point2 = new THREE.Vector3(x2, y2, z2);
+    const center = point1.clone().add(point2).multiplyScalar(0.5);
+    const semiMajorAxis = point1.distanceTo(point2) / 2;
+    const direction = point1.clone().sub(center).normalize();
+    
+    const inclination = ((body.planet_orbital_inclination || body.moon_orbital_inclination || 0) * Math.PI) / 180;
+    const longitudeOfAscendingNode = ((body.planet_inclination_angle || body.moon_inclination_angle || 0) * Math.PI) / 180;
+    
+    let perpendicular = new THREE.Vector3(0, 1, 0);
+    perpendicular.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination);
+    perpendicular.applyAxisAngle(new THREE.Vector3(0, 1, 0), longitudeOfAscendingNode);
+    perpendicular = perpendicular.cross(direction).normalize().cross(direction).normalize();
+    
+    const semiMinorAxis = semiMajorAxis * 0.8;
+    const points: THREE.Vector3[] = [];
+    
+    for (let i = 0; i <= 64; i++) {
+      const angle = (i / 64) * Math.PI * 2;
+      const point = center.clone()
+        .add(direction.clone().multiplyScalar(semiMajorAxis * Math.cos(angle)))
+        .add(perpendicular.clone().multiplyScalar(semiMinorAxis * Math.sin(angle)));
+      points.push(point);
+    }
+    
+    return new THREE.BufferGeometry().setFromPoints(points);
+  }
+
+  private createEllipse(body: any, x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, color: number = 0x555555): void {
+    const geometry = this.createEllipseGeometry(body, x1, y1, z1, x2, y2, z2);
+    const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.3 });
+    const ellipse = new THREE.LineLoop(geometry, material);
+
+    ellipse.userData = { type: 'orbit' };
+
+    this.scene.add(ellipse);
+  }
+
+  private clearMoonOrbits(): void {
+    this.moonEllipses.forEach(ellipse => {
+      this.scene.remove(ellipse);
+      ellipse.geometry.dispose();
+      (ellipse.material as THREE.Material).dispose();
+    });
+    this.moonEllipses = [];
+  }
+
+  private updateMoonOrbits(): void {
+    this.clearMoonOrbits();
+    if (!this.solarSystem?.planets) return;
+
+    this.solarSystem.planets.forEach(planet => {
+      const planetMesh = this.scene.children.find((child: any) => 
+        child.userData['type'] === 'planet' && child.userData['data'] === planet
+      );
+      
+      if (planetMesh && planet.moons) {
+        planet.moons.forEach(moon => {
+          const apogeeDistance = (moon.moon_apogee || 0) * this.moonDistanceScale;
+          const perigeeDistance = (moon.moon_perigee || 0) * this.moonDistanceScale;
+          
+          if (this.renderOptions.visibility.orbits) {
+            const moonOrbitGeometry = this.createEllipseGeometry(moon, apogeeDistance, 0, 0, -perigeeDistance, 0, 0);
+            const moonOrbitMaterial = new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.2 });
+            const moonOrbitLine = new THREE.LineLoop(moonOrbitGeometry, moonOrbitMaterial);
+            moonOrbitLine.position.copy(planetMesh.position);
+            this.scene.add(moonOrbitLine);
+            this.moonEllipses.push(moonOrbitLine);
+          }
+        });
+      }
+    });
+  }
+
   private getOrbitPosition(body: any, distanceScale: number, angle: number): THREE.Vector3 {
     const apogeeDistance = (body.planet_apogee || body.moon_apogee || 0) * distanceScale;
     const perigeeDistance = (body.planet_perigee || body.moon_perigee || 0) * distanceScale;
@@ -485,22 +599,29 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
       .add(direction.clone().multiplyScalar(semiMajorAxis * Math.cos(angle)))
       .add(perpendicular.clone().multiplyScalar(semiMinorAxis * Math.sin(angle)));
   }
+  // #endregion
 
-  private calculateDistanceScales(): { planetDistanceScale: number, moonDistanceScale: number } {
-    let maxPlanetDist = 0;
-    let maxMoonDist = 0;
+  // #region Animation and Rendering
+  private animate(): void {
+    this.animationId = requestAnimationFrame(() => this.animate());
 
-    this.solarSystem.planets.forEach(planet => {
-      maxPlanetDist = Math.max(maxPlanetDist, planet.planet_perigee || 0, planet.planet_apogee || 0);
-      planet.moons?.forEach(moon => {
-        maxMoonDist = Math.max(maxMoonDist, moon.moon_perigee || 0, moon.moon_apogee || 0);
-      });
-    });
+    const clampVal = 8000;
+    this.camera.position.x = this.clamp(this.camera.position.x, -clampVal, clampVal);
+    this.camera.position.y = this.clamp(this.camera.position.y, -clampVal, clampVal);
+    this.camera.position.z = this.clamp(this.camera.position.z, -clampVal, clampVal);
 
-    return {
-      planetDistanceScale: 5000 / (maxPlanetDist || 1),
-      moonDistanceScale: 500 / (maxMoonDist || 1)
-    };
+    if (this.renderOptions.visibility.animateOrbits != false) {
+      this.animateOrbits();
+      this.updateMoonOrbits();
+    }
+    
+    if (this.followedObject) {
+      this.updateFollowCamera();
+    } else {
+      this.controls.update();
+    }
+    
+    this.composer.render();
   }
 
   private animateOrbits(): void {
@@ -540,7 +661,6 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
       }
     });
 
-    // Throttle orbital positions update
     this.throttleOrbitalUpdate();
   }
 
@@ -551,9 +671,8 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
 
     this.orbitalUpdateTimeout = setTimeout(() => {
       this.updateOrbitalPositions();
-    }, 100); // Update every 100ms for smoother tracking
+    }, 100);
   }
-
 
   private updateOrbitalPositions(): void {
     const planetsPositions: { [key: string]: { x: number, y: number, z: number } } = {};
@@ -583,33 +702,234 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     });
   }
 
-  private animate(): void {
-    this.animationId = requestAnimationFrame(() => this.animate());
+  private updateRenderSettings(): void {    
+    this.applyVisibilitySettings();
+    
+    if (this.renderOptions.camera && this.controls) {
+      this.applyCameraSettings();
+    }
 
-    const clampVal = 8000;
-    this.camera.position.x = this.clamp(this.camera.position.x, -clampVal, clampVal);
-    this.camera.position.y = this.clamp(this.camera.position.y, -clampVal, clampVal);
-    this.camera.position.z = this.clamp(this.camera.position.z, -clampVal, clampVal);
-
-    // Only animate orbits if not paused
-    if (this.renderOptions.visibility.animateOrbits != false) {
-      this.animateOrbits();
-      this.updateMoonOrbits();
+    // Check if scales changed
+    const currentScales = this.calculateSizeScales();
+    const scalesChanged = !this.lastScales || 
+        this.lastScales.starScale !== currentScales.starScale ||
+        this.lastScales.planetScale !== currentScales.planetScale ||
+        this.lastScales.moonScale !== currentScales.moonScale;
+        
+    if (scalesChanged) {    
+      const currentDistance = this.camera.position.distanceTo(this.controls.target);
+      const currentDirection = this.camera.position.clone().normalize();
+      
+      // Safeguard: if camera is at origin or distance is 0, use default position
+      if (currentDistance < 1 || this.camera.position.length() < 1) {
+        this.camera.position.set(0, 500, 1500);
+        this.controls.target.set(0, 0, 0);
+      } else {
+        this.clearScene();
+        this.createSolarSystem();
+        
+        // Reposition camera
+        const newDistance = Math.max(currentDistance, 500);
+        this.camera.position.copy(currentDirection.multiplyScalar(newDistance));
+      }
+      
+      this.controls.update();
+      this.lastScales = { ...currentScales };
     }
     
-    if (this.followedObject) {
-      this.updateFollowCamera();
-    } else {
+    // Apply other settings
+    this.applyBrightnessAndContrast();
+  }
+
+  private applyVisibilitySettings(): void {  
+    let orbitCount = 0;
+    this.scene.traverse((child) => {
+      if ((child as any).userData?.type === 'orbit') {
+        child.visible = this.renderOptions.visibility.orbits;
+        orbitCount++;
+      }
+    });
+  }
+
+  private applyCameraSettings(): void {
+    if (this.renderOptions.camera && this.controls) {
+      this.camera.position.set(
+        this.renderOptions.camera.position.x,
+        this.renderOptions.camera.position.y,
+        this.renderOptions.camera.position.z
+      );
+      this.controls.target.set(
+        this.renderOptions.camera.target.x,
+        this.renderOptions.camera.target.y,
+        this.renderOptions.camera.target.z
+      );
+      this.camera.fov = this.renderOptions.camera.fov;
+      this.camera.updateProjectionMatrix();
       this.controls.update();
     }
+  }
+
+  private applyBrightnessAndContrast(): void {
+    // if (this.renderOptions.postProcessing) {
+    //   // You need to implement post-processing effects here
+    //   // For now, just log the values
+    //   console.log('Brightness:', this.renderOptions.postProcessing.brightness);
+    //   console.log('Contrast:', this.renderOptions.postProcessing.contrast);
+    //   console.log('Saturation:', this.renderOptions.postProcessing.saturation);
+    // }
+  }
+
+  // #endregion
+
+  // #region Offscreen Rendering
+  async generateThumbnail(solarSystemData: SolarSystem, width: number, height: number): Promise<string> {
+    // Create offscreen renderer
+    const offscreenRenderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      preserveDrawingBuffer: true 
+    });
+    offscreenRenderer.setSize(width, height);
+    offscreenRenderer.setPixelRatio(1);
+
+    // Create offscreen scene and camera
+    const offscreenScene = new THREE.Scene();
+    const offscreenCamera = new THREE.PerspectiveCamera(75, width / height, 0.1, 20000);
     
-    this.composer.render();
+    // Setup lights for offscreen scene
+    offscreenScene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const offscreenPointLight = new THREE.PointLight(0xfff1aa, 3, 3000);
+    offscreenScene.add(offscreenPointLight);
+
+    // Create temporary solar system in offscreen scene
+    const tempSolarSystem = solarSystemData;
+    const { starScale, planetScale, moonScale } = this.calculateSizeScalesForSystem(tempSolarSystem);
+    const { planetDistanceScale, moonDistanceScale } = this.calculateDistanceScalesForSystem(tempSolarSystem);
+
+    // Create star
+    const starSize = this.clamp(tempSolarSystem.solar_system_diameter * starScale, 10, 300);
+    const offscreenStar = new THREE.Mesh(
+      new THREE.SphereGeometry(starSize, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffffaa })
+    );
+    offscreenScene.add(offscreenStar);
+
+    // Create planets
+    tempSolarSystem.planets.forEach(planet => {
+      const planetSize = this.clamp((planet.planet_diameter || 12000) * planetScale, 5, 100);
+      const initialAngle = (planet.planet_orbital_longitude || 0) * (Math.PI / 180);
+      const planetPos = this.getOrbitPositionForSystem(planet, planetDistanceScale, initialAngle);
+
+      const offscreenPlanet = new THREE.Mesh(
+        new THREE.SphereGeometry(planetSize, 16, 16),
+        this.getPlanetMaterial(planet.planet_type as PlanetType)
+      );
+      offscreenPlanet.position.copy(planetPos);
+      offscreenScene.add(offscreenPlanet);
+
+      // Create moons
+      planet.moons?.forEach(moon => {
+        const moonSize = this.clamp((moon.moon_diameter || 3000) * moonScale, 2, 20);
+        const moonInitialAngle = (moon.moon_orbital_longitude || 0) * (Math.PI / 180);
+        const moonRelativePos = this.getOrbitPositionForSystem(moon, moonDistanceScale, moonInitialAngle);
+        const moonPos = planetPos.clone().add(moonRelativePos);
+
+        const offscreenMoon = new THREE.Mesh(
+          new THREE.SphereGeometry(moonSize, 8, 8),
+          new THREE.MeshStandardMaterial({ color: 0xbbbbbb, roughness: 1 })
+        );
+        offscreenMoon.position.copy(moonPos);
+        offscreenScene.add(offscreenMoon);
+      });
+    });
+
+    // Position camera for good view
+    const boundingBox = new THREE.Box3().setFromObject(offscreenScene);
+    const center = boundingBox.getCenter(new THREE.Vector3());
+    const size = boundingBox.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    
+    offscreenCamera.position.set(
+      center.x + maxDim * 0.8,
+      center.y + maxDim * 0.6,
+      center.z + maxDim * 1.2
+    );
+    offscreenCamera.lookAt(center);
+
+    // Render to canvas
+    offscreenRenderer.render(offscreenScene, offscreenCamera);
+
+    // Extract image data
+    const canvas = offscreenRenderer.domElement;
+    const dataURL = canvas.toDataURL('image/png');
+
+    // Cleanup
+    offscreenRenderer.dispose();
+    offscreenScene.clear();
+
+    return dataURL;
   }
 
-  private clamp(value: number, min: number, max: number): number {
-    return Math.min(Math.max(value, min), max);
+  private calculateSizeScalesForSystem(system: SolarSystem): { starScale: number, planetScale: number, moonScale: number } {
+    const starSize = system.solar_system_diameter || 1000000;
+    const planetSizes = system.planets.map(p => p.planet_diameter || 12000);
+    const moonSizes = system.planets.flatMap(p => p.moons?.map(m => m.moon_diameter || 3000) || []);
+
+    const maxPlanetSize = Math.max(...planetSizes, 1);
+    const maxMoonSize = Math.max(...moonSizes, 1);
+
+    return {
+      starScale: 200 / starSize,
+      planetScale: 80 / maxPlanetSize,
+      moonScale: 15 / maxMoonSize
+    };
   }
 
+  private calculateDistanceScalesForSystem(system: SolarSystem): { planetDistanceScale: number, moonDistanceScale: number } {
+    let maxPlanetDist = 0;
+    let maxMoonDist = 0;
+
+    system.planets.forEach(planet => {
+      maxPlanetDist = Math.max(maxPlanetDist, planet.planet_perigee || 0, planet.planet_apogee || 0);
+      planet.moons?.forEach(moon => {
+        maxMoonDist = Math.max(maxMoonDist, moon.moon_perigee || 0, moon.moon_apogee || 0);
+      });
+    });
+
+    return {
+      planetDistanceScale: 5000 / (maxPlanetDist || 1),
+      moonDistanceScale: 500 / (maxMoonDist || 1)
+    };
+  }
+
+  private getOrbitPositionForSystem(body: any, distanceScale: number, angle: number): THREE.Vector3 {
+    const apogeeDistance = (body.planet_apogee || body.moon_apogee || 0) * distanceScale;
+    const perigeeDistance = (body.planet_perigee || body.moon_perigee || 0) * distanceScale;
+    
+    if (apogeeDistance === 0 && perigeeDistance === 0) return new THREE.Vector3(0, 0, 0);
+    
+    const point1 = new THREE.Vector3(apogeeDistance, 0, 0);
+    const point2 = new THREE.Vector3(-perigeeDistance, 0, 0);
+    const center = point1.clone().add(point2).multiplyScalar(0.5);
+    const semiMajorAxis = point1.distanceTo(point2) / 2;
+    const direction = point1.clone().sub(center).normalize();
+    
+    const inclination = ((body.planet_orbital_inclination || body.moon_orbital_inclination || 0) * Math.PI) / 180;
+    const longitudeOfAscendingNode = ((body.planet_inclination_angle || body.moon_inclination_angle || 0) * Math.PI) / 180;
+    
+    let perpendicular = new THREE.Vector3(0, 1, 0);
+    perpendicular.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination);
+    perpendicular.applyAxisAngle(new THREE.Vector3(0, 1, 0), longitudeOfAscendingNode);
+    perpendicular = perpendicular.cross(direction).normalize().cross(direction).normalize();
+    
+    const semiMinorAxis = semiMajorAxis * 0.8;
+    
+    return center.clone()
+      .add(direction.clone().multiplyScalar(semiMajorAxis * Math.cos(angle)))
+      .add(perpendicular.clone().multiplyScalar(semiMinorAxis * Math.sin(angle)));
+  }
+  // #endregion
+
+  // #region Utility Methods
   private calculateSizeScales(): { starScale: number, planetScale: number, moonScale: number } {
     const starSize = this.solarSystem.solar_system_diameter || 1000000;
     const planetSizes = this.solarSystem.planets.map(p => p.planet_diameter || 10000);
@@ -618,181 +938,34 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     const planetAvg = planetSizes.reduce((a, b) => a + b, 0) / planetSizes.length || 1;
     const moonAvg = moonSizes.reduce((a, b) => a + b, 0) / moonSizes.length || 1;
 
+    // Base scales multiplied by slider values
     return {
-      starScale: 150 / starSize,
-      planetScale: 30 / planetAvg,
-      moonScale: 10 / moonAvg
+      starScale: (150 / starSize) * this.renderOptions.scale.star,
+      planetScale: (30 / planetAvg) * this.renderOptions.scale.planets,
+      moonScale: (10 / moonAvg) * this.renderOptions.scale.moons
     };
   }
 
-  getPlanetMaterial(type: PlanetType): THREE.Material {
-    const textureLoader = new THREE.TextureLoader();
-    const textureMap: { [key in PlanetType]: string } = {
-      terrestrial: 'planets-textures/terrestrial.png',
-      gas: 'planets-textures/gas.png',
-      ice: 'planets-textures/ice.png',
-      super_earth: 'planets-textures/super-earth.png',
-      sub_neptune: 'planets-textures/sub-neptune.png',
-      dwarf: 'planets-textures/dwarf.png',
-      lava: 'planets-textures/lava.png',
-      carbon: 'planets-textures/carbon.png',
-      ocean: 'planets-textures/ocean.png',
-    };
+  private calculateDistanceScales(): { planetDistanceScale: number, moonDistanceScale: number } {
+    let maxPlanetDist = 0;
+    let maxMoonDist = 0;
 
-    return new THREE.MeshStandardMaterial({
-      map: textureLoader.load(textureMap[type]),
-      roughness: 0.8,
-      metalness: 0.3,
+    this.solarSystem.planets.forEach(planet => {
+      maxPlanetDist = Math.max(maxPlanetDist, planet.planet_perigee || 0, planet.planet_apogee || 0);
+      planet.moons?.forEach(moon => {
+        maxMoonDist = Math.max(maxMoonDist, moon.moon_perigee || 0, moon.moon_apogee || 0);
+      });
     });
-  }
 
-  private addSkybox(): void {
-    const loader = new THREE.CubeTextureLoader();
-    this.scene.background = loader.load([
-      'skybox/system/right.png', 'skybox/system/left.png',
-      'skybox/system/top.png', 'skybox/system/bottom.png',
-      'skybox/system/front.png', 'skybox/system/back.png'
-    ]);
-  }
-
-  //View Object and Follow Object
-  viewObject(obj: any, type: string): void {
-    const objectId = obj[`${type}_id`];
-    const targetObject = this.clickableObjects.find(mesh => 
-      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
-    );
-
-    if (targetObject) {
-      const targetPosition = targetObject.position.clone();
-      const distance = this.calculateViewDistance(targetObject);
-      
-      // Simple offset behind the object
-      const offset = new THREE.Vector3(0, distance * 0.2, distance);
-      const cameraPosition = targetPosition.clone().add(offset);
-      
-      // Use OrbitControls to smoothly move there
-      this.controls.target.copy(targetPosition);
-      this.camera.position.copy(cameraPosition);
-      this.controls.update();
-
-      // Enable controls for manual interaction
-      this.controls.enabled = true;
-      this.controls.update();
-    }
-  }
-
-  stopFollowing(): void {
-    this.followedObject = null;
-    this.controls.enabled = true;
-    
-    // Smooth transition back to manual control
-    const currentTarget = new THREE.Vector3();
-    this.camera.getWorldDirection(currentTarget);
-    currentTarget.multiplyScalar(500).add(this.camera.position);
-    
-    this.controls.target.copy(currentTarget);
-    this.controls.update();
-  }
-
-
-  private startFollowing(): void {
-    if (!this.followedObject) return;
-    
-    const objectId = this.followedObject.id;
-    const type = this.followedObject.type;
-
-    const targetObject = this.clickableObjects.find(mesh => 
-      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
-    );
-
-    if (targetObject) {
-      const targetPosition = targetObject.position.clone();
-      const distance = this.calculateViewDistance(targetObject);
-      const offset = new THREE.Vector3(0, distance * 0.3, distance);
-      const cameraTargetPosition = targetPosition.clone().add(offset);
-
-      // Smooth transition to follow position
-      this.animateCameraToFollow(cameraTargetPosition, targetPosition);
-    }
-  }
-
-
-  private animateCameraToFollow(targetPosition: THREE.Vector3, lookAtPosition: THREE.Vector3): void {
-    const startPosition = this.camera.position.clone();
-    const duration = 1500;
-    const startTime = Date.now();
-
-    const animateToFollow = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
-      
-      this.camera.position.lerpVectors(startPosition, targetPosition, easeProgress);
-      this.camera.lookAt(lookAtPosition);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animateToFollow);
-      } else {
-        // Now start continuous following
-        this.controls.enabled = false;
-      }
+    return {
+      planetDistanceScale: 5000 / (maxPlanetDist || 1),
+      moonDistanceScale: 500 / (maxMoonDist || 1)
     };
-    
-    animateToFollow();
   }
 
-  private updateFollowCamera(): void {
-    if (!this.followedObject) return;
-
-    const objectId = this.followedObject.id;
-    const type = this.followedObject.type;
-    
-    const targetObject = this.clickableObjects.find(mesh => 
-      mesh.userData['type'] === type && mesh.userData['data'][`${type}_id`] === objectId
-    );
-
-    if (targetObject) {
-      const targetPosition = targetObject.position.clone();
-      const distance = this.calculateViewDistance(targetObject);
-      
-      // Smooth orbital follow - circular motion around the object
-      const time = Date.now() * 0.0003;
-      const offset = new THREE.Vector3(
-        Math.sin(time) * distance * 0.8,
-        distance * 0.4,
-        Math.cos(time) * distance * 0.8
-      );
-      
-      const desiredPosition = targetPosition.clone().add(offset);
-      
-      // Smooth camera movement to reduce jitter
-      this.camera.position.lerp(desiredPosition, 0.02);
-      this.camera.lookAt(targetPosition);
-    }
+  private clamp(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
   }
-
-  private calculateViewDistance(object: THREE.Mesh): number {
-    const geometry = object.geometry as THREE.SphereGeometry;
-    const radius = geometry.parameters?.radius || 50;
-    
-    // Base distance multiplier based on object type
-    let baseMultiplier;
-    switch (object.userData['type']){
-      case ('solar_system'):
-        baseMultiplier = 10;
-        break;
-      case ('planet'):
-        baseMultiplier = 8;
-        break;
-      case ('moon'):
-        baseMultiplier = 5;
-        break;
-      default:
-        baseMultiplier = 20;
-    }
-    
-    return Math.max(radius * baseMultiplier, 100);
-  }
-
+  // #endregion
 }
+
