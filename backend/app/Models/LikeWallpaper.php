@@ -8,6 +8,8 @@ class LikeWallpaper extends Model
 {
     protected $table = 'like_wallpaper';
     
+    protected $primaryKey = 'wallpaper_id';
+    
     public $timestamps = false;
     
     protected $fillable = [

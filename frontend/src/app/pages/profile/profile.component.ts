@@ -118,14 +118,6 @@ export class ProfileComponent implements OnInit {
       : null;
   }
 
-  // toggleLike(type: LikeableType, object: any): void {
-  //   this.likesService.like(type, this.currentGalaxy, object.solar_system_id, object.planet_id, object.moon_id, object.wallpaper_id)
-  //     .subscribe(() => {
-  //       object.is_liked = !object.is_liked;
-  //       object.likes_count += object.is_liked ? 1 : -1;
-  //     });
-  // }
-
   getSystemNameByWallpaperId(wallpaperId: number): string | null {
     const system = this.solarSystems.find(system => system.wallpaper?.wallpaper_id === wallpaperId);
     return system ? system.solar_system_name : null;
@@ -135,7 +127,7 @@ export class ProfileComponent implements OnInit {
     this.navigationService.navigateTo(`/view-system/${solarSystemId}`);
   }
 
-  viewWallpaper(solarSystemId: number): void {
-    // redirect to vue wallpaper view or something
+   viewWallpaper(solarSystemId: number): void {
+    this.navigationService.navigateTo(`/view-wallpaper/${solarSystemId}`);
   }
 }

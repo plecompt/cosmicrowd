@@ -8,7 +8,7 @@ import { ModalService } from '../../services/modal/modal.service';
 import { LikeableType, LikesService } from '../../services/likes/likes.service';
 import { WallpaperService } from '../../services/wallpaper/wallpaper-service';
 import { WallpaperSettings } from '../../interfaces/wallpaper/wallpaper.interface';
-import { DatePipe } from '@angular/common';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-system-view',
@@ -19,6 +19,7 @@ import { DatePipe } from '@angular/common';
 export class SystemViewComponent implements OnInit {
   @ViewChild(SystemAnimationComponent) systemAnimationComponent!: SystemAnimationComponent;
   
+  solarSystemOwner!: string;
   currentGalaxy: number = 1; //currently there is only one galaxy, so hardcoding to 1, might change in the futur.
   solarSystemId!: number;
   solarSystem!: SolarSystem;
@@ -26,6 +27,7 @@ export class SystemViewComponent implements OnInit {
   
   // Panel state
   isPanelCollapsed = false;
+  showRenderOptions = false;
   
   // Follow system
   followedObject: any = null;
@@ -35,7 +37,6 @@ export class SystemViewComponent implements OnInit {
   renderer: any;
   currentCameraData: any = null;
   currentOrbitalPositions: any = null;
-
 
   renderOptions: WallpaperSettings = {
     camera: {
@@ -89,12 +90,33 @@ export class SystemViewComponent implements OnInit {
     private modalService: ModalService,
     private likesService: LikesService,
     private notificationService: NotificationService,
-    private wallpaperService: WallpaperService
+    private wallpaperService: WallpaperService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
     this.solarSystemId = this.route.snapshot.params['id'];
+    this.checkOwner();
     this.getSolarSystem();
+  }
+
+  //check user is connected and own this system
+  checkOwner() {
+    this.galaxiesService.getSolarSystemOwner(this.currentGalaxy, this.solarSystemId).subscribe({
+      next: (systems) => {
+        this.solarSystemOwner = systems.data.owner;
+
+        // If user is not logged in or don't own this system
+        if (this.authService.isLoggedIn() && (localStorage.getItem('user_login') == this.solarSystemOwner)) {
+          this.showRenderOptions = true;
+        } else {
+          this.showRenderOptions = false;
+        }
+      },
+      error: () => {
+        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+      }
+    });
   }
 
   getSolarSystem() {
@@ -401,28 +423,59 @@ export class SystemViewComponent implements OnInit {
   }
 
   // Export wallpaper as image
-  async exportWallpaper(): Promise<void> {
-    if (!this.systemAnimationComponent || !this.solarSystem) return;
+  exportWallpaper(): void {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
 
     const width = this.renderOptions.metadata.resolution.width;
     const height = this.renderOptions.metadata.resolution.height;
     
-    try {
-      // Use the offscreen rendering method
-      const dataURL = await this.systemAnimationComponent.generateThumbnail(
-        this.solarSystem, 
-        width, 
-        height
-      );
+    // Force complete render with all post-processing effects
+    const renderer = this.systemAnimationComponent?.renderer;
+    const composer = this.systemAnimationComponent?.composer; // EffectComposer for bloom
+    const scene = this.systemAnimationComponent?.scene;
+    const camera = this.systemAnimationComponent?.camera;
+    
+    if (renderer && scene && camera) {
+      // If you have post-processing composer (bloom, etc.)
+      if (composer) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
       
-      // Create download link
-      const link = document.createElement('a');
-      link.href = dataURL;
-      link.download = `${this.solarSystem.solar_system_name}_wallpaper_${width}x${height}.png`;
-      link.click();
-      
-    } catch (error) {
-      console.error('Error generating wallpaper:', error);
+      // Wait for render to complete
+      renderer.domElement.toBlob((blob) => {
+        if (!blob) return;
+        
+        // Create temporary canvas for scaling
+        const tempCanvas = document.createElement('canvas');
+        const ctx = tempCanvas.getContext('2d');
+        if (!ctx) return;
+
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+
+        // Create image from blob to scale it
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          tempCanvas.toBlob((finalBlob) => {
+            if (!finalBlob) return;
+            
+            const url = URL.createObjectURL(finalBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${this.solarSystem.solar_system_name}_wallpaper_${this.renderOptions.metadata.resolution.width}x${this.renderOptions.metadata.resolution.height}.png`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+          }, 'image/png');
+        };
+        
+        img.src = URL.createObjectURL(blob);
+      }, 'image/png');
     }
   }
 

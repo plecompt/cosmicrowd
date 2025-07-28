@@ -32,118 +32,120 @@
 
       <!-- Panel Content -->
       <div class="panel-content">
-        <!-- Wallpaper Creator -->
-        <div class="wallpaper-section">
-          <h3>Wallpaper Creator</h3>
-          
-          <!-- Animation Controls -->
-          <div class="form-group">
-            <button class="btn btn-secondary" 
-                    (click)="toggleOrbitalAnimation()">
-              {{ renderOptions.visibility.animateOrbits ? 'Pause Orbits' : 'Animate Orbits' }}
-            </button>
+        @if (showRenderOptions){
+          <!-- Wallpaper Creator -->
+          <div class="wallpaper-section">
+
+            <h3>Wallpaper Creator</h3>
+            
+            <!-- Animation Controls -->
+            <div class="form-group">
+              <button class="btn btn-secondary" 
+                      (click)="toggleOrbitalAnimation()">
+                {{ renderOptions.visibility.animateOrbits ? 'Pause Orbits' : 'Animate Orbits' }}
+              </button>
+            </div>
+
+            <!-- Visual Options -->
+            <div class="form-group">
+              <label class="flex">
+                <input type="checkbox" 
+                      [checked]="renderOptions.visibility.orbits"
+                      (change)="toggleOrbitVisibility()"> 
+                &nbsp;Show Orbits
+              </label>
+            </div>
+
+            <!-- Scale Controls -->
+            <div class="form-group">
+              <label for="starScale">Star Size: {{ renderOptions.scale.star }}x</label>
+              <input type="range" 
+                    id="starScale"
+                    min="0.1" max="3.0" step="0.1" 
+                    [value]="renderOptions.scale.star"
+                    (input)="onStarScaleChange($event)">
+            </div>
+
+            <div class="form-group">
+              <label for="planetsScale">Planets Size: {{ renderOptions.scale.planets }}x</label>
+              <input type="range" 
+                    id="planetsScale"
+                    min="0.1" max="3.0" step="0.1" 
+                    [value]="renderOptions.scale.planets"
+                    (input)="onPlanetsScaleChange($event)">
+            </div>
+
+            <div class="form-group">
+              <label for="moonsScale">Moons Size: {{ renderOptions.scale.moons }}x</label>
+              <input type="range" 
+                    id="moonsScale"
+                    min="0.1" max="3.0" step="0.1" 
+                    [value]="renderOptions.scale.moons"
+                    (input)="onMoonsScaleChange($event)">
+            </div>
+
+            <div class="form-group">
+              <label for="orbitScale">Orbit Distance: {{ renderOptions.scale.orbits }}x</label>
+              <input type="range" 
+                    id="orbitScale"
+                    min="0.5" max="2.0" step="0.1" 
+                    [value]="renderOptions.scale.orbits"
+                    (input)="onOrbitScaleChange($event)">
+            </div>
+
+            <!-- Render Effects -->
+            <div class="form-group">
+              <label for="brightness">Brightness: {{ renderOptions.effects.brightness }}</label>
+              <input type="range" 
+                    id="brightness"
+                    min="0" max="2" step="0.1" 
+                    [value]="renderOptions.effects.brightness"
+                    (input)="onBrightnessChange($event)">
+            </div>
+
+            <div class="form-group">
+              <label for="contrast">Contrast: {{ renderOptions.effects.contrast }}</label>
+              <input type="range" 
+                    id="contrast"
+                    min="0" max="2" step="0.1" 
+                    [value]="renderOptions.effects.contrast"
+                    (input)="onContrastChange($event)">
+            </div>
+
+            <div class="form-group">
+              <label for="saturation">Saturation: {{ renderOptions.effects.saturation }}</label>
+              <input type="range" 
+                    id="saturation"
+                    min="0" max="2" step="0.1" 
+                    [value]="renderOptions.effects.saturation"
+                    (input)="onSaturationChange($event)">
+            </div>
+
+            <!-- Export Options -->
+            <div class="form-group">
+              <label for="resolution">Export Resolution</label>
+              <select class="form-select" 
+                      id="resolution"
+                      [value]="renderOptions.metadata.resolution.width + 'x' + renderOptions.metadata.resolution.height"
+                      (change)="onResolutionChange($event)">
+                <option value="1920x1080">1920x1080</option>
+                <option value="2560x1440">2560x1440</option>
+                <option value="3840x2160">3840x2160</option>
+              </select>
+            </div>
+
+            <div class="wallpaper-actions flex">
+              <button class="btn btn-wallpaper" (click)="exportWallpaper()">
+                Download Wallpaper
+              </button>
+
+
+              <button class="btn btn-wallpaper" (click)="saveWallpaper()">
+                Save Wallpaper
+              </button>
+            </div>
           </div>
-
-          <!-- Visual Options -->
-          <div class="form-group">
-            <label class="flex">
-              <input type="checkbox" 
-                    [checked]="renderOptions.visibility.orbits"
-                    (change)="toggleOrbitVisibility()"> 
-              &nbsp;Show Orbits
-            </label>
-          </div>
-
-          <!-- Scale Controls -->
-          <div class="form-group">
-            <label for="starScale">Star Size: {{ renderOptions.scale.star }}x</label>
-            <input type="range" 
-                  id="starScale"
-                  min="0.1" max="3.0" step="0.1" 
-                  [value]="renderOptions.scale.star"
-                  (input)="onStarScaleChange($event)">
-          </div>
-
-          <div class="form-group">
-            <label for="planetsScale">Planets Size: {{ renderOptions.scale.planets }}x</label>
-            <input type="range" 
-                  id="planetsScale"
-                  min="0.1" max="3.0" step="0.1" 
-                  [value]="renderOptions.scale.planets"
-                  (input)="onPlanetsScaleChange($event)">
-          </div>
-
-          <div class="form-group">
-            <label for="moonsScale">Moons Size: {{ renderOptions.scale.moons }}x</label>
-            <input type="range" 
-                  id="moonsScale"
-                  min="0.1" max="3.0" step="0.1" 
-                  [value]="renderOptions.scale.moons"
-                  (input)="onMoonsScaleChange($event)">
-          </div>
-
-          <div class="form-group">
-            <label for="orbitScale">Orbit Distance: {{ renderOptions.scale.orbits }}x</label>
-            <input type="range" 
-                  id="orbitScale"
-                  min="0.5" max="2.0" step="0.1" 
-                  [value]="renderOptions.scale.orbits"
-                  (input)="onOrbitScaleChange($event)">
-          </div>
-
-          <!-- Render Effects -->
-          <div class="form-group">
-            <label for="brightness">Brightness: {{ renderOptions.effects.brightness }}</label>
-            <input type="range" 
-                  id="brightness"
-                  min="0" max="2" step="0.1" 
-                  [value]="renderOptions.effects.brightness"
-                  (input)="onBrightnessChange($event)">
-          </div>
-
-          <div class="form-group">
-            <label for="contrast">Contrast: {{ renderOptions.effects.contrast }}</label>
-            <input type="range" 
-                  id="contrast"
-                  min="0" max="2" step="0.1" 
-                  [value]="renderOptions.effects.contrast"
-                  (input)="onContrastChange($event)">
-          </div>
-
-          <div class="form-group">
-            <label for="saturation">Saturation: {{ renderOptions.effects.saturation }}</label>
-            <input type="range" 
-                  id="saturation"
-                  min="0" max="2" step="0.1" 
-                  [value]="renderOptions.effects.saturation"
-                  (input)="onSaturationChange($event)">
-          </div>
-
-          <!-- Export Options -->
-          <div class="form-group">
-            <label for="resolution">Export Resolution</label>
-            <select class="form-select" 
-                    id="resolution"
-                    [value]="renderOptions.metadata.resolution.width + 'x' + renderOptions.metadata.resolution.height"
-                    (change)="onResolutionChange($event)">
-              <option value="1920x1080">1920x1080</option>
-              <option value="2560x1440">2560x1440</option>
-              <option value="3840x2160">3840x2160</option>
-            </select>
-          </div>
-
-          <div class="wallpaper-actions flex">
-            <button class="btn btn-wallpaper" (click)="exportWallpaper()">
-              Download Wallpaper
-            </button>
-
-
-            <button class="btn btn-wallpaper" (click)="saveWallpaper()">
-              Save Wallpaper
-            </button>
-          </div>
-        </div>
-
+        }
         <!-- Objects List -->
         <div class="planet-and-moon-list">
           <h3>System Objects</h3>

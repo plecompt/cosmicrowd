@@ -7,7 +7,7 @@
 
         <!-- Image -->
         <div class="wallpaper-container">
-            <img src="https://threesolar.netlify.app/images/social.png" alt="{{solarSystem.solar_system_name}}">
+            <img [src]="thumbnails[solarSystem.solar_system_id] || '/wallpapers/backup-wallpaper.png'" alt="Wallpaper for {{solarSystem.solar_system_name}}.">
         </div>
 
         <!-- Star informations -->
@@ -114,9 +114,9 @@
                 <span>{{solarSystem.likes_count}}</span>
                 <img id="like-icon" src="/icons/like.png" alt="">
             </div>
-            <button (click)="unclaimSystem(solarSystem.solar_system_id)">unclaim system</button>
-            <button (click)="viewSystem(solarSystem.solar_system_id)">view system</button>
-            <button (click)="editSystem(solarSystem.solar_system_id)">edit system</button>
+            <button (click)="unclaimSystem(solarSystem.solar_system_id)">Unclaim system</button>
+            <button (click)="viewSystem(solarSystem.solar_system_id)">View / Wallpaper</button>
+            <button (click)="editSystem(solarSystem.solar_system_id)">Edit system</button>
         </div>
 
     </div>

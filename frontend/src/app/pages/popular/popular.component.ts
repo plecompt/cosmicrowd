@@ -9,6 +9,7 @@ import { LikeableType, LikesService } from '../../services/likes/likes.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { DatePipe } from '@angular/common';
+import { ThumbnailService } from '../../services/thumbnail/thumbnail-service';
 
 @Component({
   selector: 'app-popular',
@@ -24,8 +25,9 @@ export class PopularComponent implements OnInit {
   mostRecentWallpapers!: Wallpaper[];
   LikeableType = LikeableType;
   currentGalaxy: number = 1; //atm there is only 1 galaxy, so hard coding id = 1, might evolve in the futur
+  thumbnails: { [key: number]: string } = {};
 
-  constructor(public authService: AuthService, private notificationService: NotificationService, public likesService: LikesService, public navigationService: NavigationService, private galaxiesService: GalaxiesService) { }
+  constructor(public authService: AuthService, private notificationService: NotificationService, public likesService: LikesService, public navigationService: NavigationService, private galaxiesService: GalaxiesService, private thumbnailService: ThumbnailService) { }
 
   ngOnInit(): void {
     // If user is logged in
@@ -43,7 +45,6 @@ export class PopularComponent implements OnInit {
     this.authService.me().subscribe({
       next: (response: any) => {
         this.user = response.data.user;
-        console.log(this.user);
       },
       error: () => {
         this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
@@ -61,7 +62,6 @@ export class PopularComponent implements OnInit {
     this.galaxiesService.getMostLikedSolarSystems(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostLikedSolarSystems = success.data;
-        console.log(this.mostLikedSolarSystems);
       },
       error: () => {
         this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
@@ -73,7 +73,8 @@ export class PopularComponent implements OnInit {
     this.galaxiesService.getMostLikedWallpapers(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostLikedWallpapers = success.data;
-        console.log(this.mostLikedWallpapers);
+        this.generateAllThumbnails(this.mostLikedWallpapers, 960, 540);
+        
       },
       error: () => {
         this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
@@ -85,7 +86,6 @@ export class PopularComponent implements OnInit {
     this.galaxiesService.getMostRecentSolarSystems(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostRecentSolarSystems = success.data;
-        console.log(this.mostRecentSolarSystems);
       },
       error: () => {
         this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
@@ -97,7 +97,7 @@ export class PopularComponent implements OnInit {
     this.galaxiesService.getMostRecentWallpapers(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostRecentWallpapers = success.data;
-        console.log(this.mostRecentWallpapers);
+        this.generateAllThumbnails(this.mostRecentWallpapers, 960, 540);
       },
       error: () => {
         this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
@@ -118,8 +118,32 @@ export class PopularComponent implements OnInit {
   }
 
   viewWallpaper(solarSystemId: number): void {
-    // wallpaper id or solarSystemId ???
-    // redirect to vue wallpaper view or something
+    this.navigationService.navigateTo(`/view-wallpaper/${solarSystemId}`);
   }
 
+  async generateAllThumbnails(wallpapers: Wallpaper[], width: number, height: number) {
+    try {
+      //get all systems
+      const systems: SolarSystem[] = await Promise.all(
+        wallpapers.map(wallpaper =>
+          this.galaxiesService.getSolarSystem(1, wallpaper.solar_system_id).toPromise().then(
+            (res) => res.data.solar_system
+          )
+        )
+      );
+
+      // Gerate thumbnails
+      for (const system of systems) {
+        try {
+          const thumbnail = await this.thumbnailService.generateThumbnail(1, system.solar_system_id, width, height);
+          this.thumbnails[system.solar_system_id] = thumbnail;
+        } catch (error) {
+          this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
+        }
+      }
+
+    } catch (error) {
+      this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+    }
+  }
 }

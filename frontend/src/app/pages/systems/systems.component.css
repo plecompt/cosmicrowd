@@ -1,7 +1,11 @@
 .systems-container {
   margin-top: 100px;
-  justify-content: space-evenly;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 20px;
+  min-height: calc(100vh - 100px);
+  width: 100%;
 }
 
 .system-container {

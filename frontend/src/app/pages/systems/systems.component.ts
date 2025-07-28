@@ -8,6 +8,7 @@ import { Planet } from '../../interfaces/solar-system/planet.interface';
 import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal/modal.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import { ThumbnailService } from '../../services/thumbnail/thumbnail-service';
 
 @Component({
   selector: 'app-systems',
@@ -20,8 +21,10 @@ export class SystemsComponent implements OnInit {
   currentGalaxy: number = 1; //At the moment, there is only one galaxy, later, we may need to store the currentGalaxyId
   isLoaded: boolean = false;
   expandedPlanetId: number | null = null;
+  thumbnails: { [key: number]: string } = {};
 
-  constructor(private navigationService: NavigationService, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private modalService: ModalService) { }
+  constructor(private navigationService: NavigationService, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private modalService: ModalService, private thumbnailService: ThumbnailService
+  ) { }
 
   ngOnInit(): void {
     // If user is not logged in
@@ -37,8 +40,7 @@ export class SystemsComponent implements OnInit {
     this.galaxiesService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
       next: (systems) => {
         this.solarSystems = systems.data.solar_systems;
-        //here we need to get images....
-        this.isLoaded = true;
+        this.generateAllThumbnails(this.solarSystems, 960, 540);
       },
       error: () => {
         this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
@@ -173,5 +175,22 @@ export class SystemsComponent implements OnInit {
 
   noSystemNotification() {
     this.notificationService.showError('You can claim up to 3 solar systems', 2500, '/home');
+  }
+
+  async generateAllThumbnails(solarSystems: any[], width: number, height: number) {
+    for (const system of solarSystems) {
+      try {
+        const thumbnail = await this.thumbnailService.generateThumbnail(
+          this.currentGalaxy, 
+          system.solar_system_id, 
+          width, 
+          height
+        );
+        this.thumbnails[system.solar_system_id] = thumbnail;
+      } catch (error) {
+        // nothing, use fallback image
+      }
+    }
+    this.isLoaded = true;
   }
 }

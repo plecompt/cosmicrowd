@@ -35,7 +35,7 @@ export class LikesService {
         return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/moons/${moonId}/to-like`;
 
       case LikeableType.WALLPAPER:
-        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpaper/${wallpaperId}/to-like`;
+        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpapers/${wallpaperId}/to-like`;
     }
   }
 

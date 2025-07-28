@@ -1,0 +1,21 @@
+<div class="wallpaper-viewer">
+  @if (isLoading) {
+  <div class="loading">
+    Loading...
+  </div>
+  }
+
+  @if (!isLoading && solarSystem && wallpaper) {
+  <div class="content">
+
+    @if(authService.isLoggedIn()){
+      <button class="like-button" (click)="toggleSystemLike()" [class.liked]="isSystemLiked()">
+        {{ isSystemLiked() ? 'Unlike Wallpaper!' : 'Like Wallpaper!' }}
+      </button>
+    }
+
+    <app-system-animation [solarSystem]="solarSystem" [renderOptions]="renderOptions" [viewMode]="'wallpaper'">
+    </app-system-animation>
+  </div>
+  }
+</div>

@@ -68,7 +68,10 @@
       <div class="wallpapers-list flex-column">
         @for (wallpaper of mostLikedWallpapers; track wallpaper.wallpaper_id) {
           <div class="wallpaper-item flex-column">
-            <img [src]="" alt="Wallpaper for {{wallpaper.solar_system?.solar_system_name}}"/>
+            <img
+              [src]="thumbnails[wallpaper.solar_system_id]" 
+              alt="Wallpaper for {{wallpaper.solar_system?.solar_system_name}}"
+            />
             <span class="wallpaper-name">{{ wallpaper.solar_system?.solar_system_name}}</span>
             <span class="likes">{{ wallpaper.likes_count }} likes</span>
             <span class="date">created {{ wallpaper.wallpaper_created_at | date:'short' }}</span>
@@ -88,7 +91,10 @@
       <div class="wallpapers-list flex-column">
         @for (wallpaper of mostRecentWallpapers; track wallpaper.wallpaper_id) {
           <div class="wallpaper-item flex-column">
-            <img [src]="" alt="Wallpaper for {{wallpaper.solar_system?.solar_system_name}}"/>
+            <img 
+              [src]="thumbnails[wallpaper.solar_system_id]" 
+              alt="Wallpaper for {{wallpaper.solar_system?.solar_system_name}}"
+            />
             <span class="wallpaper-name">{{ wallpaper.solar_system?.solar_system_name }}</span>
             <span class="likes">{{ wallpaper.likes_count }} likes</span>
             <span class="date">created {{ wallpaper.wallpaper_created_at | date:'short' }}</span>
