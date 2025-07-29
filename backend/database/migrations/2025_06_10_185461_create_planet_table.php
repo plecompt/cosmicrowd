@@ -15,18 +15,18 @@ return new class extends Migration
             $table->string('planet_name', 50);
             $table->enum('planet_type', ['terrestrial', 'gas', 'ice', 'super_earth', 'sub_neptune', 'dwarf', 'lava', 'carbon', 'ocean']);
             $table->float('planet_gravity')->unsigned();
-            $table->float('planet_surface_temp');
+            $table->float('planet_surface_temp')->unsigned();
             $table->float('planet_orbital_longitude')->unsigned();
             $table->float('planet_eccentricity')->unsigned();
+            $table->bigInteger('planet_mass')->unsigned(); // x 10^24kg
+            $table->bigInteger('planet_diameter')->unsigned();
             $table->bigInteger('planet_apogee')->unsigned();
             $table->bigInteger('planet_perigee')->unsigned();
-            $table->integer('planet_orbital_inclination')->unsigned();
             $table->bigInteger('planet_average_distance')->unsigned();
+            $table->integer('planet_orbital_inclination')->unsigned();
             $table->integer('planet_orbital_period')->unsigned();
             $table->integer('planet_inclination_angle')->unsigned();
             $table->integer('planet_rotation_period')->unsigned();
-            $table->bigInteger('planet_mass')->unsigned(); // x 10^24kg
-            $table->bigInteger('planet_diameter')->unsigned();
             $table->integer('planet_rings')->unsigned();
             $table->integer('planet_initial_x');
             $table->integer('planet_initial_y');

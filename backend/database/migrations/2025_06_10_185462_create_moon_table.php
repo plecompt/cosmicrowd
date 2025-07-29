@@ -15,18 +15,18 @@ return new class extends Migration
             $table->string('moon_name', 50);
             $table->enum('moon_type', ['rocky', 'icy', 'mixed', 'primitive', 'regular', 'irregular', 'trojan', 'coorbital']);
             $table->float('moon_gravity')->unsigned();
-            $table->float('moon_surface_temp');
+            $table->float('moon_surface_temp')->unsigned();
             $table->float('moon_orbital_longitude')->unsigned();
             $table->float('moon_eccentricity')->unsigned();
+            $table->bigInteger('moon_mass')->unsigned(); // x 10^24kg
             $table->bigInteger('moon_apogee')->unsigned();
             $table->bigInteger('moon_perigee')->unsigned();
-            $table->integer('moon_orbital_inclination')->unsigned();
+            $table->bigInteger('moon_diameter')->unsigned();
             $table->bigInteger('moon_average_distance')->unsigned();
+            $table->integer('moon_orbital_inclination')->unsigned();
             $table->integer('moon_orbital_period')->unsigned();
             $table->integer('moon_inclination_angle')->unsigned();
             $table->integer('moon_rotation_period')->unsigned();
-            $table->float('moon_mass')->unsigned(); // x 10^24kg
-            $table->bigInteger('moon_diameter')->unsigned();
             $table->integer('moon_rings')->unsigned();
             $table->integer('moon_initial_x');
             $table->integer('moon_initial_y');
