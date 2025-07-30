@@ -12,14 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Ajouter nos middlewares personnalisés
         $middleware->alias([
             'cors' => \App\Http\Middleware\CorsMiddleware::class,
             'rate.limit' => \App\Http\Middleware\RateLimitMiddleware::class,
             'check.owner' => \App\Http\Middleware\CheckOwnershipMiddleware::class,
         ]);
         
-        // Middleware global pour l'API
+        // Global middleware for api
         $middleware->api(prepend: [
             \App\Http\Middleware\CorsMiddleware::class,
         ]);

@@ -29,7 +29,7 @@ check_dependencies() {
     fi
     
     if ! command -v ng &> /dev/null; then
-        echo -e "${RED}❌ Angular CLI not installed!${NC}"
+        echo -e "${RED}Angular CLI not installed!${NC}"
         echo -e "${YELLOW}Run: npm install -g @angular/cli${NC}"
         error=1
     fi
