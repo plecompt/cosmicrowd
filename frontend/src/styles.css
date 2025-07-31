@@ -65,7 +65,7 @@ h4 {
 
 .error-message {
   color: red;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 /* set alt color to white just in case */
