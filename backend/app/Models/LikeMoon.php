@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LikeMoon extends Model
 {
@@ -17,16 +18,23 @@ class LikeMoon extends Model
     protected $fillable = [
         'moon_id',
         'user_id',
-        'like_moon_date'
+        'like_moon_date',
     ];
 
     protected $casts = [
         'like_moon_date' => 'datetime',
     ];
 
-    protected function setKeysForSaveQuery($query)
+    /**
+     * Customize query for composite primary key during save operations.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function setKeysForSaveQuery($query): \Illuminate\Database\Eloquent\Builder
     {
         $keys = $this->getKeyName();
+
         if (!is_array($keys)) {
             return parent::setKeysForSaveQuery($query);
         }
@@ -38,6 +46,12 @@ class LikeMoon extends Model
         return $query;
     }
 
+    /**
+     * Get the value of the primary key for save query, handling composite keys.
+     *
+     * @param  string|null  $keyName
+     * @return mixed
+     */
     protected function getKeyForSaveQuery($keyName = null)
     {
         if (is_null($keyName)) {
@@ -51,12 +65,22 @@ class LikeMoon extends Model
         return $this->getAttribute($keyName);
     }
 
-    public function user()
+    /**
+     * Relation: LikeMoon belongs to User.
+     *
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function moon()
+    /**
+     * Relation: LikeMoon belongs to Moon.
+     *
+     * @return BelongsTo
+     */
+    public function moon(): BelongsTo
     {
         return $this->belongsTo(Moon::class, 'moon_id', 'moon_id');
     }

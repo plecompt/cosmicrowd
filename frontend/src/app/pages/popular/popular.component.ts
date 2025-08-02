@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth/auth.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
-import { User } from '../../models/user/user.model';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
-import { Wallpaper } from '../../interfaces/solar-system/wallpaper.interface';
+import { Wallpaper } from '../../interfaces/wallpaper/wallpaper.interface';
 import { LikeableType, LikesService } from '../../services/likes/likes.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { DatePipe } from '@angular/common';
 import { ThumbnailService } from '../../services/thumbnail/thumbnail-service';
+import { User } from '../../interfaces/user/user.interface';
 
 @Component({
   selector: 'app-popular',

@@ -4,33 +4,29 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\User;
-use App\Models\RecoveryToken;
-use App\Rules\StrongPassword;
-use App\Models\SolarSystem;
-use App\Models\LikeSolarSystem;
-use App\Models\LikePlanet;
-use App\Models\LikeMoon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController
 {
     use ApiResponse;
 
-    // Login
+    /**
+     * Login
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'user_email' => 'required|string',
+            'user_email' => 'required|email',
             'user_password' => 'required|string',
         ]);
 
-        $user = User::where('user_email', $request->user_email)->first();
+        $user = User::firstWhere('user_email', $request->user_email);
 
         if (!$user || !Hash::check($request->user_password, $user->user_password)) {
             throw ValidationException::withMessages([
@@ -44,9 +40,7 @@ class AuthController
             ]);
         }
 
-        $user->update([
-            'user_last_login' => now()
-        ]);
+        $user->update(['user_last_login' => now()]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -57,7 +51,12 @@ class AuthController
         ], 'Login successful');
     }
 
-    // Logout
+    /**
+     * Logout
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -65,7 +64,12 @@ class AuthController
         return $this->success(null, 'Successfully logged out');
     }
 
-    // Me, return current user using token in header
+    /**
+     * Return current user using token in request's header
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function me(Request $request): JsonResponse
     {
         return $this->success([

@@ -1,5 +1,5 @@
 import { Planet } from "./planet.interface";
-import { Wallpaper } from "./wallpaper.interface";
+import { Wallpaper } from '../wallpaper/wallpaper.interface';
 
 export interface SolarSystem {
   solar_system_id: number;
@@ -25,7 +25,7 @@ export interface SolarSystem {
   moonsCount?: number;
 }
 
-// Enum types de solar system
+// Enum types for solar system
 export type SolarSystemType = 
   | 'brown_dwarf' 
   | 'red_dwarf' 

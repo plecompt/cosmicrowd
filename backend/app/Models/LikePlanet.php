@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LikePlanet extends Model
 {
@@ -17,16 +18,23 @@ class LikePlanet extends Model
     protected $fillable = [
         'planet_id',
         'user_id',
-        'like_planet_date'
+        'like_planet_date',
     ];
 
     protected $casts = [
         'like_planet_date' => 'datetime',
     ];
 
-    protected function setKeysForSaveQuery($query)
+    /**
+     * Customize query for composite primary key during save operations.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function setKeysForSaveQuery($query): \Illuminate\Database\Eloquent\Builder
     {
         $keys = $this->getKeyName();
+
         if (!is_array($keys)) {
             return parent::setKeysForSaveQuery($query);
         }
@@ -38,6 +46,12 @@ class LikePlanet extends Model
         return $query;
     }
 
+    /**
+     * Get the value of the primary key for save query, handling composite keys.
+     *
+     * @param  string|null  $keyName
+     * @return mixed
+     */
     protected function getKeyForSaveQuery($keyName = null)
     {
         if (is_null($keyName)) {
@@ -51,12 +65,22 @@ class LikePlanet extends Model
         return $this->getAttribute($keyName);
     }
 
-    public function user()
+    /**
+     * Relation: LikePlanet belongs to User.
+     *
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function planet()
+    /**
+     * Relation: LikePlanet belongs to Planet.
+     *
+     * @return BelongsTo
+     */
+    public function planet(): BelongsTo
     {
         return $this->belongsTo(Planet::class, 'planet_id', 'planet_id');
     }

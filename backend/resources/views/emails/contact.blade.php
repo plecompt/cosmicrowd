@@ -26,7 +26,7 @@
             <p>Reply at: <a href="mailto:{{ $user_email }}" style="color: #61dafb;">{{ $user_email }}</a></p>
         </div>
 
-        <p style="font-size: 12px; color: #888; margin-top: 40px;">
+        <p style="font-size: 0.75rem; color: #888; margin-top: 40px;">
             Message from the CosmiCrowd contact form.<br>
         </p>
     </div>

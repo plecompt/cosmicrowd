@@ -233,7 +233,6 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       //we need to load detailed data...
       this.galaxiesService.getSolarSystem(starData['galaxy_id'], starData['solar_system_id']).subscribe({
         next: (systemInformation) => {
-          console.log(systemInformation.data.solar_system);
           this.showModal(systemInformation.data.solar_system);
         },
         error: () => {

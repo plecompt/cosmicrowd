@@ -27,7 +27,7 @@
             </a>
         </div>
 
-        <p style="font-size: 12px; color: #888; text-align: center; margin-top: 40px;">
+        <p style="font-size: 0.75rem; color: #888; text-align: center; margin-top: 40px;">
             This is an automated email. Do not reply.<br>
             © {{ date('Y') }} CosmiCrowd. All rights reserved.
         </p>

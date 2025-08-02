@@ -21,7 +21,7 @@
 
         <p style="margin-top: 30px;">Best regards,<br><strong>CosmiCrowd Support</strong></p>
 
-        <p style="font-size: 12px; color: #888; text-align: center; margin-top: 40px;">
+        <p style="font-size: 0.75rem; color: #888; text-align: center; margin-top: 40px;">
             © {{ date('Y') }} CosmiCrowd. All rights reserved.
         </p>
     </div>

@@ -31,7 +31,7 @@ return new class extends Migration
             $table->integer('moon_initial_x');
             $table->integer('moon_initial_y');
             $table->integer('moon_initial_z');
-            $table->foreignId('planet_id')->references('planet_id')->on('planet');
+            $table->foreignId('planet_id')->references('planet_id')->on('planet')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->references('user_id')->on('user')->onDelete('set null');
         });
 

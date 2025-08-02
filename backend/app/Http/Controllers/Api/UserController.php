@@ -26,22 +26,38 @@ class UserController
 {
     use ApiResponse;
 
-    // Check if login is available
+    /**
+     * Check if login is available
+     *
+     * @param Request $request
+     * @return JsonResponse Availabality of login
+     */
     public function checkLoginAvailability(Request $request) {
         $available = !User::where('user_login', $request->login)->exists();
         
         return $this->success(['available' => $available]);
     }
 
-    // Check if email is available
+    /**
+     * Check if email is available
+     *
+     * @param Request $request
+     * @return JsonResponse Availabality of email
+     */
     public function checkEmailAvailability(Request $request) {
         $available = !User::where('user_email', $request->email)->exists();
         
         return $this->success(['available' => $available]);
     }
 
-    // Return a user
-    public function view(Request $request, $userId): JsonResponse
+    /**
+     * Return the given user
+     *
+     * @param Request $request
+     * @param string $userId
+     * @return JsonResponse Return the user with given userId
+     */
+    public function view(Request $request, string $userId): JsonResponse
     {
         try {
             if (!$userId) {
@@ -67,7 +83,12 @@ class UserController
         }
     }
 
-    // Contact, send us an email from user_email
+    /**
+     * Contact, send Cosmicrowd an email from user_email and a confirmation to user
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function contact(Request $request): JsonResponse
     {
         try {
@@ -92,14 +113,14 @@ class UserController
             ];
 
             // Sending mail to contact@cosmicrowd.com <- need to get value from .env
-            Mail::send('emails.contact', $contactData, function ($message) use ($contactData) {
+            Mail::send('emails.contact', $contactData, function ($message) use ($contactData): void {
                 $message->to('contact@cosmicrowd.com') // need to get data from .env
                     ->replyTo($contactData['user_email'], $contactData['user_name'])
                     ->subject('[CosmiCrowd Contact] ' . $contactData['subject']);
             });
 
             // Confirmation to user
-            Mail::send('emails.contact-confirmation', $contactData, function ($message) use ($contactData) {
+            Mail::send('emails.contact-confirmation', $contactData, function ($message) use ($contactData): void {
                 $message->to($contactData['user_email'], $contactData['user_name'])
                     ->subject('Message Received - CosmiCrowd');
             });
@@ -111,7 +132,12 @@ class UserController
         }
     }
 
-    // Register
+    /**
+     * Register an user in database
+     *
+     * @param Request $request
+     * @return JsonResponse Return the created user, and a token that front will inject in every request
+     */
     public function register(Request $request): JsonResponse
     {
         try {
@@ -142,7 +168,12 @@ class UserController
         }
     }
 
-    // Change password
+    /**
+     * User asked to change password
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function changePassword(Request $request): JsonResponse
     {
         $request->validate([
@@ -167,7 +198,12 @@ class UserController
         return $this->success(null, 'Password successfully changed.');
     }
 
-    // Change email
+    /**
+     * User asked to change email
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function changeEmail(Request $request): JsonResponse
     {
         $request->validate([
@@ -192,7 +228,12 @@ class UserController
         return $this->success(null, 'Email successfully changed.');
     }
 
-    // ForgotPassword, send an email with a token to reset password
+    /**
+     * Send an email to $user_email with a link containing a token
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function forgotPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -212,7 +253,7 @@ class UserController
         $recoveryToken = RecoveryToken::createForUser($user->user_id);
 
         // Using blade view in folder ressources/views/emails => recovery.blade.php
-        Mail::send('emails.recovery', ['token' => $recoveryToken->recovery_token_value], function ($message) use ($user) {
+        Mail::send('emails.recovery', ['token' => $recoveryToken->recovery_token_value], function ($message) use ($user): void {
             $message->to($user->user_email);
             $message->subject('Password reset request');
         });
@@ -220,7 +261,12 @@ class UserController
         return $this->success(null, 'Recovery email sent.');
     }
 
-    // Return if the current token is valid or not (expired, used, invalid)
+    /**
+     * Return if the current token is valid or not (expired, used, invalid)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function verifyToken(Request $request): JsonResponse
     {
         $token = RecoveryToken::where('recovery_token_value', $request->token)->first();
@@ -242,7 +288,12 @@ class UserController
         ], 'Valid token.');
     }
 
-    //change the password after a forgotten password
+    /**
+     * Change the password after a forgotten password
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function resetPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -274,48 +325,32 @@ class UserController
         return $this->success(null, 'Password successfully reset.');
     }
 
-    // Delete account
+    /**
+     * Deleting the account after user requested it
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function deleteAccount(Request $request): JsonResponse
     {
         $request->validate([
             'current_password' => 'required|string',
         ]);
-
+    
         $user = $request->user();
         if (!Hash::check($request->current_password, $user->user_password)) {
             throw ValidationException::withMessages([
                 'current_password' => ['Current password is incorrect.'],
             ]);
         }
-
-        // Get user wallpapers to delete their likes
-        $userWallpapers = Wallpaper::where('user_id', $user->user_id)->get();
-        foreach ($userWallpapers as $wallpaper) {
-            $wallpaper->likes()->delete();
-        }
-
-        // Delete user wallpapers
-        Wallpaper::where('user_id', $user->user_id)->delete();
-
-        // Deleting all the user likes
-        $user->solarSystemLikes()->delete();
-        $user->planetLikes()->delete();
-        $user->moonLikes()->delete();
-        $user->wallpaperLikes()->delete();
-
-        // Release claimed solar systems, planets and moons
+    
+        // Release claimed resources by setting user_id to null
         SolarSystem::where('user_id', $user->user_id)->update(['user_id' => null]);
         Planet::where('user_id', $user->user_id)->update(['user_id' => null]);
         Moon::where('user_id', $user->user_id)->update(['user_id' => null]);
-
-        // Deleting tokens
-        if (method_exists($user, 'tokens')) {
-            $user->tokens()->delete();
-        }
-
-        // Deleting user
+    
         $user->delete();
-
+    
         return $this->success(null, 'Account successfully deleted.');
     }
 }

@@ -47,33 +47,61 @@ class User extends Authenticatable
         return $this->user_password;
     }
 
-    // Override Laravel auth methods, replace user.email for user.user_email
+    /**
+     * Override Laravel auth methods, replace user.email for user.user_email
+     *
+     * @return string
+     */
     public function getEmailForPasswordReset()
     {
         return $this->user_email;
     }
 
-    // Relations
+    /**
+     * Get the solar systems owned by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function ownedSolarSystems()
     {
         return $this->hasMany(SolarSystem::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the solar systems liked by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function solarSystemLikes()
     {
         return $this->hasMany(LikeSolarSystem::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the planets liked by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function planetLikes()
     {
         return $this->hasMany(LikePlanet::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the moons liked by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function moonLikes()
     {
         return $this->hasMany(LikeMoon::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the wallpapers liked by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function wallpaperLikes()
     {
         return $this->hasMany(LikeWallpaper::class, 'user_id', 'user_id');

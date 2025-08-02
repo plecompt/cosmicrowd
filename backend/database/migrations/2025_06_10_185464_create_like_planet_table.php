@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('like_planet', function (Blueprint $table) {
-            $table->foreignId('planet_id')->references('planet_id')->on('planet');
-            $table->foreignId('user_id')->references('user_id')->on('user');
+            $table->foreignId('planet_id')->references('planet_id')->on('planet')->onDelete('cascade');
+            $table->foreignId('user_id')->references('user_id')->on('user')->onDelete('cascade');
             $table->timestamp('like_planet_date')->useCurrent();
             
             $table->primary(['planet_id', 'user_id']);

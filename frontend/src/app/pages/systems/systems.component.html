@@ -51,11 +51,11 @@
                     <!-- Likes of this planet -->
                     <div id="planet-likes" class="likes flex">
                         <span>{{planet.likes_count}}</span>
-                        <img id="like-icon" src="/icons/like.png" alt="">
+                        <img id="like-icon" src="/icons/like.png" alt="Like icon.">
                     </div>
 
                     <div class="planet-card-top flex-column">
-                        <img class="planet-img" src="{{getImageForPlanetType(planet)}}" alt="{{planet.planet_name}}">
+                        <img class="planet-img" src="{{getImageForPlanetType(planet)}}" alt="Image for {{planet.planet_name}}.">
                     </div>
 
                     <div class="planet-card-bottom flex">
@@ -95,7 +95,7 @@
                                 <span class="moon-item">{{moon.moon_name}}</span>
                                 <div class="like flex">
                                     <span>{{moon.likes_count}}</span>
-                                    <img id="like-icon" src="/icons/like.png" alt="">
+                                    <img id="like-icon" src="/icons/like.png" alt="Like icon.">
                                 </div>
                             </div>
                             }
@@ -112,7 +112,7 @@
         <div class="actions-and-likes-container flex">
             <div class="likes flex">
                 <span>{{solarSystem.likes_count}}</span>
-                <img id="like-icon" src="/icons/like.png" alt="">
+                <img id="like-icon" src="/icons/like.png" alt="Like icon.">
             </div>
             <button (click)="unclaimSystem(solarSystem.solar_system_id)">Unclaim system</button>
             <button (click)="viewSystem(solarSystem.solar_system_id)">View / Wallpaper</button>

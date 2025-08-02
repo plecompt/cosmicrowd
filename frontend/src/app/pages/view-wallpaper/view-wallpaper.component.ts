@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
-import { Wallpaper } from '../../interfaces/solar-system/wallpaper.interface';
+import { Wallpaper } from '../../interfaces/wallpaper/wallpaper.interface';
 import { ActivatedRoute } from '@angular/router';
 import { WallpaperService } from '../../services/wallpaper/wallpaper-service';
 import { GalaxiesService } from '../../services/galaxies/galaxies.service';

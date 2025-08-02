@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Builder;
 
 class Galaxy extends Model
 {
@@ -19,7 +20,7 @@ class Galaxy extends Model
         'galaxy_name',
         'galaxy_desc',
         'galaxy_size',
-        'galaxy_age'
+        'galaxy_age',
     ];
 
     protected $casts = [
@@ -27,41 +28,61 @@ class Galaxy extends Model
         'galaxy_age' => 'integer',
     ];
 
-    // Relations
+    /**
+     * Get all solar systems belonging to this galaxy.
+     *
+     * @return HasMany
+     */
     public function solarSystems(): HasMany
     {
         return $this->hasMany(SolarSystem::class, 'galaxy_id');
     }
 
-    // Get the number of SolarSystem in this galaxy
-    public function solarSystemsCount()
+    /**
+     * Get the count of solar systems in this galaxy.
+     *
+     * @return int
+     */
+    public function solarSystemsCount(): int
     {
         return $this->solarSystems()->count();
     }
 
-    // Get all the planets in this galaxy, having to go through Galaxy -> SolarSystem -> Planet
+    /**
+     * Get all planets in this galaxy via solar systems.
+     *
+     * @return HasManyThrough
+     */
     public function planets(): HasManyThrough
     {
         return $this->hasManyThrough(
-            Planet::class, // Final model we want to get
-            SolarSystem::class, // Intermediate model we are passing through
-            'galaxy_id', // FK in SolarSystem is referencing in Galaxy Table
-            'solar_system_id', // FK in planet which is referencing in SolarSystem Table  
-            'galaxy_id', // PK local in Galaxy
-            'solar_system_id'); // PK in SolarSystem
+            Planet::class, 
+            SolarSystem::class, 
+            'galaxy_id',      // FK on SolarSystem referencing Galaxy
+            'solar_system_id',// FK on Planet referencing SolarSystem
+            'galaxy_id',      // Local PK on Galaxy
+            'solar_system_id' // Local PK on SolarSystem
+        );
     }
 
-    // Get all the moons in this galaxy
-    public function moons()
+    /**
+     * Get all moons in this galaxy by filtering moons via planets and solar systems.
+     *
+     * @return Builder
+     */
+    public function moons(): Builder
     {
-        return Moon::whereHas('planet.solarSystem', function ($query) {
+        return Moon::whereHas('planet.solarSystem', function ($query): void {
             $query->where('galaxy_id', $this->galaxy_id);
         });
     }
 
-
-    // Global count of this galaxy
-    public function getTotalObjectsCount()
+    /**
+     * Get total count of solar systems, planets, and moons in this galaxy.
+     *
+     * @return int
+     */
+    public function getTotalObjectsCount(): int
     {
         return $this->solarSystemsCount() + $this->planets()->count() + $this->moons()->count();
     }

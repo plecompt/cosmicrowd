@@ -13,9 +13,9 @@ return new class extends Migration
             $table->text('wallpaper_settings');
             $table->timestamp('wallpaper_created_at')->useCurrent();
             
-            $table->foreignId('user_id')->constrained('user', 'user_id');
-            $table->foreignId('galaxy_id')->constrained('galaxy', 'galaxy_id');
-            $table->foreignId('solar_system_id')->constrained('solar_system', 'solar_system_id');
+            $table->foreignId('user_id')->constrained('user', 'user_id')->onDelete('cascade');
+            $table->foreignId('galaxy_id')->constrained('galaxy', 'galaxy_id')->onDelete('cascade');
+            $table->foreignId('solar_system_id')->constrained('solar_system', 'solar_system_id')->onDelete('cascade');
         });
     }
 

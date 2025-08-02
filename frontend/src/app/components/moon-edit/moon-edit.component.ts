@@ -109,7 +109,6 @@ export class MoonEditComponent {
     const validation = this.moonValidationService.validateMoon(this.moon);
 
     if (!validation.isValid) {
-      console.log('coucou');
       this.notificationService.showError(validation.errors[0], 2000);
       return;
     }

@@ -27,7 +27,7 @@ export interface Moon {
   likes_count?: number;
 }
 
-// Enum types de solar system
+// Enum types for moon
 export type MoonType = 
   | 'rocky'
   | 'icy'

@@ -12,8 +12,19 @@ class RateLimitMiddleware
 {
     use ApiResponse;
 
-    // Limit the number of request to 60 by minute
-    public function handle(Request $request, Closure $next, $maxAttempts = 60, $decayMinutes = 1): Response
+    /**
+     * Handle incoming request with rate limiting
+     * 
+     * Implements rate limiting by tracking request attempts per user/IP combination.
+     * Blocks requests when limit is exceeded and adds rate limit headers to responses.
+     *
+     * @param Request $request The incoming HTTP request
+     * @param Closure $next The next middleware in the pipeline
+     * @param int $maxAttempts Maximum allowed requests (default: 60)
+     * @param int $decayMinutes Time window in minutes (default: 1)
+     * @return Response Either continues request or returns rate limit error
+     */
+    public function handle(Request $request, Closure $next, int $maxAttempts = 60, int $decayMinutes = 1): Response
     {
         $key = $this->resolveRequestSignature($request);
         
@@ -21,7 +32,7 @@ class RateLimitMiddleware
         
         if ($attempts >= $maxAttempts) {
             return $this->error(
-                'Too many tentatives. Please try again in ' . $decayMinutes . ' minute(s).', 
+                'Too many attempts. Please try again in ' . $decayMinutes . ' minute(s).', 
                 429,
                 ['retry_after' => $decayMinutes * 60]
             );
@@ -31,7 +42,6 @@ class RateLimitMiddleware
         
         $response = $next($request);
         
-        // Adding headers
         $response->headers->set('X-RateLimit-Limit', $maxAttempts);
         $response->headers->set('X-RateLimit-Remaining', max(0, $maxAttempts - $attempts - 1));
         $response->headers->set('X-RateLimit-Reset', now()->addMinutes($decayMinutes)->timestamp);
@@ -39,6 +49,15 @@ class RateLimitMiddleware
         return $response;
     }
     
+    /**
+     * Generate unique signature for request rate limiting
+     * 
+     * Creates a unique cache key combining user ID (or 'guest'), IP address,
+     * and route name to track rate limits per specific request context.
+     *
+     * @param Request $request The incoming HTTP request
+     * @return string Unique cache key for rate limiting
+     */
     protected function resolveRequestSignature(Request $request): string
     {
         $userId = $request->user()?->id ?? 'guest';

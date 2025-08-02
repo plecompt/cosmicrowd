@@ -31,7 +31,7 @@ return new class extends Migration
             $table->integer('planet_initial_x');
             $table->integer('planet_initial_y');
             $table->integer('planet_initial_z');
-            $table->foreignId('solar_system_id')->references('solar_system_id')->on('solar_system');
+            $table->foreignId('solar_system_id')->references('solar_system_id')->on('solar_system')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->references('user_id')->on('user')->onDelete('set null');
         });
 

@@ -34,22 +34,41 @@ class SolarSystem extends Model
         'solar_system_mass' => 'integer'
     ];
 
-    // Relations
+    /**
+     * Get the galaxy this solar system belongs to.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function galaxy()
     {
         return $this->belongsTo(Galaxy::class, 'galaxy_id', 'galaxy_id');
     }
 
+    /**
+     * Get the user who owns this solar system.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the planets associated with this solar system.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function planets()
     {
         return $this->hasMany(Planet::class, 'solar_system_id', 'solar_system_id');
     }
 
+    /**
+     * Get the likes associated with this solar system.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function likes()
     {
         return $this->hasMany(LikeSolarSystem::class, 'solar_system_id', 'solar_system_id');

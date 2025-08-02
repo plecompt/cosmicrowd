@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('like_wallpaper', function (Blueprint $table) {
-            $table->foreignId('wallpaper_id')->references('wallpaper_id')->on('wallpaper');
-            $table->foreignId('user_id')->references('user_id')->on('user');
+            $table->foreignId('wallpaper_id')->references('wallpaper_id')->on('wallpaper')->onDelete('cascade');
+            $table->foreignId('user_id')->references('user_id')->on('user')->onDelete('cascade');
             $table->timestamp('like_wallpaper_date')->useCurrent();
             
             $table->primary(['wallpaper_id', 'user_id']);

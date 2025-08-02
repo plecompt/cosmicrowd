@@ -11,7 +11,16 @@ class IsAdmin
 {
     use ApiResponse;
 
-    // Check if user is admin
+    /**
+     * Handle incoming request to verify admin privileges
+     * 
+     * Checks if the authenticated user has admin role before allowing
+     * access to admin-restricted endpoints and operations.
+     *
+     * @param Request $request The incoming HTTP request
+     * @param Closure $next The next middleware in the pipeline
+     * @return Response Either continues request or returns error response
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();

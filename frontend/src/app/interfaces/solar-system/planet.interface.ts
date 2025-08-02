@@ -31,7 +31,7 @@ export interface Planet {
   expanded: boolean;
 }
 
-// Enum types de planet
+// Enum types for planet
 export type PlanetType = 
   | 'terrestrial'
   | 'gas'

@@ -4,10 +4,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { NotificationService } from '../../services/notifications/notification.service';
-import { User } from '../../models/user/user.model';
 import { TitleCasePipe } from '@angular/common';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import { User } from '../../interfaces/user/user.interface';
 
 @Component({
   selector: 'app-login',

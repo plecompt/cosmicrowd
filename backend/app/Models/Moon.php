@@ -4,6 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\{
+    BelongsTo,
+    HasOneThrough,
+    HasMany,
+    BelongsToMany
+};
 
 class Moon extends Model
 {
@@ -35,43 +41,67 @@ class Moon extends Model
         'moon_initial_y',
         'moon_initial_z',
         'planet_id',
-        'user_id'
+        'user_id',
     ];
 
     protected $casts = [
         'moon_average_distance' => 'integer',
-        'moon_mass' => 'integer'
+        'moon_mass' => 'integer',
     ];
 
-    // Relations
-    public function user()
+    /**
+     * Relation: Moon belongs to User.
+     *
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function planet()
+    /**
+     * Relation: Moon belongs to Planet.
+     *
+     * @return BelongsTo
+     */
+    public function planet(): BelongsTo
     {
         return $this->belongsTo(Planet::class, 'planet_id', 'planet_id');
     }
 
-    public function solarSystem()
+    /**
+     * Relation: Moon has one SolarSystem through Planet.
+     *
+     * @return HasOneThrough
+     */
+    public function solarSystem(): HasOneThrough
     {
         return $this->hasOneThrough(
             SolarSystem::class,
             Planet::class,
-            'planet_id',
-            'solar_system_id',
-            'planet_id', 
-            'solar_system_id'
+            'planet_id',        // Foreign key on Planet table
+            'solar_system_id',  // Foreign key on SolarSystem table
+            'planet_id',        // Local key on Moon table
+            'solar_system_id'   // Local key on Planet table
         );
     }
 
-    public function likes()
+    /**
+     * Relation: Moon has many LikeMoon.
+     *
+     * @return HasMany
+     */
+    public function likes(): HasMany
     {
         return $this->hasMany(LikeMoon::class, 'moon_id', 'moon_id');
     }
 
-    public function likedBy()
+    /**
+     * Relation: Moon liked by many Users (pivot table like_moon).
+     *
+     * @return BelongsToMany
+     */
+    public function likedBy(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'like_moon', 'moon_id', 'user_id');
     }

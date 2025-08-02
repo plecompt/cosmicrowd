@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LikeSolarSystem extends Model
 {
@@ -17,16 +18,23 @@ class LikeSolarSystem extends Model
     protected $fillable = [
         'solar_system_id',
         'user_id',
-        'like_solar_system_date'
+        'like_solar_system_date',
     ];
 
     protected $casts = [
         'like_solar_system_date' => 'datetime',
     ];
 
-    protected function setKeysForSaveQuery($query)
+    /**
+     * Customize query for composite primary key during save operations.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function setKeysForSaveQuery($query): \Illuminate\Database\Eloquent\Builder
     {
         $keys = $this->getKeyName();
+
         if (!is_array($keys)) {
             return parent::setKeysForSaveQuery($query);
         }
@@ -38,6 +46,12 @@ class LikeSolarSystem extends Model
         return $query;
     }
 
+    /**
+     * Get the value of the primary key for save query, handling composite keys.
+     *
+     * @param  string|null  $keyName
+     * @return mixed
+     */
     protected function getKeyForSaveQuery($keyName = null)
     {
         if (is_null($keyName)) {
@@ -51,13 +65,23 @@ class LikeSolarSystem extends Model
         return $this->getAttribute($keyName);
     }
 
-    public function user()
+    /**
+     * Relation: LikeSolarSystem belongs to User.
+     *
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function solarSystem()
+    /**
+     * Relation: LikeSolarSystem belongs to SolarSystem.
+     *
+     * @return BelongsTo
+     */
+    public function solarSystem(): BelongsTo
     {
-        return $this->belongsTo(SolarSystem::class, 'planet_id', 'planet_id');
+        return $this->belongsTo(SolarSystem::class, 'solar_system_id', 'solar_system_id');
     }
 }
