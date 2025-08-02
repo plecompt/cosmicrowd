@@ -91,9 +91,9 @@ class UserController
                 'user_ip' => $request->ip(),
             ];
 
-            // Sending mail to contact@cosmicrowd.com <- from .env
+            // Sending mail to contact@cosmicrowd.com <- need to get value from .env
             Mail::send('emails.contact', $contactData, function ($message) use ($contactData) {
-                $message->to('contact@cosmicrowd.com') // FROM .ENV
+                $message->to('contact@cosmicrowd.com') // need to get data from .env
                     ->replyTo($contactData['user_email'], $contactData['user_name'])
                     ->subject('[CosmiCrowd Contact] ' . $contactData['subject']);
             });
@@ -114,28 +114,32 @@ class UserController
     // Register
     public function register(Request $request): JsonResponse
     {
-        $request->validate([
-            'user_login' => 'required|string|max:50|unique:user,user_login',
-            'user_email' => 'required|email|max:100|unique:user,user_email',
-            'user_password' => ['required', new StrongPassword],
-        ]);
+        try {
+            $request->validate([
+                'user_login' => 'required|string|max:50|unique:user,user_login',
+                'user_email' => 'required|email|max:100|unique:user,user_email',
+                'user_password' => ['required', new StrongPassword],
+            ]);
 
-        $user = User::create([
-            'user_login' => $request->user_login,
-            'user_email' => $request->user_email,
-            'user_password' => Hash::make($request->user_password),
-            'user_active' => true,
-            'user_role' => 'member',
-            'user_date_inscription' => now()
-        ]);
+            $user = User::create([
+                'user_login' => $request->user_login,
+                'user_email' => $request->user_email,
+                'user_password' => Hash::make($request->user_password),
+                'user_active' => true,
+                'user_role' => 'member',
+                'user_date_inscription' => now()
+            ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        return $this->success([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
-        ], 'User registered successfully', 201);
+            return $this->success([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $user
+            ], 'User registered successfully', 201);
+        } catch (\Exception $e) {
+            return $this->error('Error while regestering, please try again.', 500);
+        }
     }
 
     // Change password
@@ -149,9 +153,11 @@ class UserController
         $user = $request->user();
 
         if (!Hash::check($request->current_password, $user->user_password)) {
-            throw ValidationException::withMessages([
-                'current_password' => ['Current password is incorrect.'],
-            ]);
+            return $this->error(
+                'Current password is incorrect',
+                401,
+                ['current_password' => ['Current password is incorrect.']]
+            );
         }
 
         $user->update([
@@ -172,9 +178,11 @@ class UserController
         $user = $request->user();
 
         if (!Hash::check($request->current_password, $user->user_password)) {
-            throw ValidationException::withMessages([
-                'current_password' => ['Current password is incorrect.'],
-            ]);
+            return $this->error(
+                'Current password is incorrect',
+                401,
+                ['current_password' => ['Current password is incorrect.']]
+            );
         }
 
         $user->update([

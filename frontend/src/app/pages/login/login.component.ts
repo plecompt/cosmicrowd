@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth/auth.service';
-import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
@@ -24,12 +23,10 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   constructor(
-    private router: Router, 
     public authService: AuthService, 
     private fb: FormBuilder, 
     public formValidator: FormValidatorService,
     private notificationService: NotificationService,
-    private customFormValidator: CustomValidatorsService,
     public navigationService: NavigationService
   ) { }
 
@@ -49,7 +46,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   initLoginForm(){
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]] //must be 12 in prod, 6 for dev
     });
   }
 

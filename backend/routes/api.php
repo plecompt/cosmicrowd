@@ -30,7 +30,7 @@ Route::prefix('v1')->group(function () {
     Route::post('users/reset-password', [UserController::class, 'resetPassword']); // changement de mdp apres mdp oublié
     Route::post('users/check-login', [UserController::class, 'checkLoginAvailability']); //verifie si un login est disponible en bdd
     Route::post('users/check-email', [UserController::class, 'checkEmailAvailability']); //verifie si un mdp est disponible en bdd
-    Route::post('users/contact', [UserController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utiliateur
+    Route::post('users/contact', [UserController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utilisateur
     Route::get('users/{userId}', [UserController::class, 'view']);//retourne un user
 
     // Wallpapers
