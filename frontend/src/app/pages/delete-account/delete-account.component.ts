@@ -6,6 +6,7 @@ import { FormValidatorService } from '../../services/form-validators/form-valida
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 import { ModalService } from '../../services/modal/modal.service';
 import { NotificationService } from '../../services/notifications/notification.service';
+import { UserService } from '../../services/user/user-service';
 
 @Component({
   selector: 'app-delete-account',
@@ -23,7 +24,8 @@ export class DeleteAccountComponent implements OnInit {
     private notificationService: NotificationService,
     private fb: FormBuilder, 
     public formValidator: FormValidatorService,
-    public customValidators: CustomValidatorsService
+    public customValidators: CustomValidatorsService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -62,8 +64,9 @@ export class DeleteAccountComponent implements OnInit {
       title: 'Delete Account Forever',
       content: 'This action cannot be undone. Your account and all associated data will be permanently deleted. Your claimed solar systems will become available for other explorers.',
       showCancel: true,
+      showConfirm: true,
       onConfirm: () => {
-        this.authService.deleteAccount(
+        this.userService.deleteAccount(
           this.deleteAccountForm.value.currentPassword
         ).subscribe({
           next: () => {

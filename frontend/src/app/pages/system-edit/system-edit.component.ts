@@ -2,13 +2,14 @@ import { Component, Input, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { SystemAnimationComponent } from '../../components/system-animation/system-animation.component';
 import { FormsModule } from '@angular/forms';
 import { PlanetEditComponent } from '../../components/planet-edit/planet-edit.component';
 import { User } from '../../interfaces/user/user.interface';
 import { SystemValidationService } from '../../services/system-validation/system-validation-service';
+import { SolarSystemsService } from '../../services/solar-systems/solar-systems-service';
+import { UserService } from '../../services/user/user-service';
 
 @Component({
   selector: 'app-system-edit',
@@ -39,7 +40,7 @@ export class SystemEditComponent {
     private route: ActivatedRoute,
     public authService: AuthService,
     private notificationService: NotificationService,
-    private galaxiesService: GalaxiesService,
+    private solarSystemsService: SolarSystemsService,
     private systemValidationService: SystemValidationService,
   ) { }
 
@@ -52,7 +53,7 @@ export class SystemEditComponent {
 
   //check user is connected and own this system
   checkOwner() {
-    this.galaxiesService.getSolarSystemOwner(this.currentGalaxy, this.solarSystemId).subscribe({
+    this.solarSystemsService.getSolarSystemOwner(this.currentGalaxy, this.solarSystemId).subscribe({
       next: (systems) => {
         this.solarSystemOwner = systems.data.owner;
 
@@ -87,7 +88,7 @@ export class SystemEditComponent {
   getSolarSystems() {
     const user_id = parseInt(localStorage.getItem('user_id') || '');
 
-    this.galaxiesService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
+    this.solarSystemsService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
       next: (solarSystems) => {
         this.solarSystems = solarSystems.data.solar_systems;
         const result = this.solarSystems.find(system => system.solar_system_id == this.solarSystemId);
@@ -114,7 +115,7 @@ export class SystemEditComponent {
     }
 
     // Updating in db
-    this.galaxiesService.updateSolarSystem(this.currentGalaxy, this.solarSystem.solar_system_id, this.solarSystem).subscribe({
+    this.solarSystemsService.updateSolarSystem(this.currentGalaxy, this.solarSystem.solar_system_id, this.solarSystem).subscribe({
       next: () => {
         this.notificationService.showSuccess('You successfully updated your solar system !', 2000);
       },

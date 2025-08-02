@@ -3,12 +3,12 @@ import { SolarSystem } from '../../interfaces/solar-system/solar-system.interfac
 import { Wallpaper } from '../../interfaces/wallpaper/wallpaper.interface';
 import { ActivatedRoute } from '@angular/router';
 import { WallpaperService } from '../../services/wallpaper/wallpaper-service';
-import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { SystemAnimationComponent } from '../../components/system-animation/system-animation.component';
 import { WallpaperSettings } from '../../interfaces/wallpaper/wallpaper.interface';
 import { LikeableType, LikesService } from '../../services/likes/likes.service';
 import { AuthService } from '../../services/auth/auth.service';
+import { SolarSystemsService } from '../../services/solar-systems/solar-systems-service';
 
 @Component({
   selector: 'app-view-wallpaper',
@@ -32,7 +32,7 @@ export class ViewWallpaperComponent {
   constructor(
     private route: ActivatedRoute,
     private wallpaperService: WallpaperService,
-    private galaxiesService: GalaxiesService,
+    private solarSystemsService: SolarSystemsService,
     private notificationService: NotificationService,
     private likesService: LikesService,
     public authService: AuthService
@@ -44,7 +44,7 @@ export class ViewWallpaperComponent {
   }
 
   getSolarSystem() {
-      this.galaxiesService.getSolarSystem(this.currentGalaxy, this.solarSystemId).subscribe({
+      this.solarSystemsService.getSolarSystem(this.currentGalaxy, this.solarSystemId).subscribe({
         next: (solarSystem) => {
           this.solarSystem = solarSystem.data.solar_system;
           this.getWallpaper();

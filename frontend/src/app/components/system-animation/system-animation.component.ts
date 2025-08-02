@@ -88,7 +88,6 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
   clickableObjects: THREE.Mesh[] = [];
   moonEllipses: THREE.LineLoop[] = [];
   moonDistanceScale: number = 0;
-  cameraUpdateTimeout?: number;
   orbitalUpdateTimeout?: number;
 
   constructor() {}
@@ -232,9 +231,6 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
       this.controls.enabled = false;
       return;
     }
-
-    //camera change listener
-    this.controls.addEventListener('change', () => this.onCameraChange());
   }
 
   private setupLights(): void {
@@ -278,17 +274,8 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
     }
   }
 
-  private onCameraChange(): void {
-    if (this.cameraUpdateTimeout) {
-      clearTimeout(this.cameraUpdateTimeout);
-    }
-
-    this.cameraUpdateTimeout = setTimeout(() => {
-      this.updateCameraData();
-    }, 500);
-  }
-
-  private updateCameraData(): void {
+  public updateCameraData(): void {
+    console.log(`before: ${this.camera.position.x}`);
     if (this.camera && this.controls) {
       this.cameraUpdate.emit({
         position: {
@@ -793,7 +780,8 @@ private createPlanet(planet: any, planetScale: number, planetDistanceScale: numb
       if (progress < 1) {
         requestAnimationFrame(animateToFollow);
       } else {
-        // Now start continuous following
+        // Now start continuous following and copying target position
+        this.controls.target.copy(lookAtPosition);
         this.controls.enabled = false;
       }
     };

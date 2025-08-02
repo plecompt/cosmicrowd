@@ -6,6 +6,7 @@ import { ModalService } from '../../services/modal/modal.service';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { Router } from '@angular/router';
+import { SearchService } from '../../services/search/search-service';
 
 @Component({
   selector: 'app-navbar',
@@ -31,7 +32,13 @@ export class NavigationBarComponent implements OnInit, OnDestroy {
   private clickListener?: (event: Event) => void;
 
 
-  constructor(private galaxiesService: GalaxiesService, public authService: AuthService, private modalService: ModalService, private notificationService: NotificationService, private navigationService: NavigationService, private router: Router) { }
+  constructor(
+    private searchService: SearchService,
+    public authService: AuthService,
+    private modalService: ModalService,
+    private notificationService: NotificationService,
+    private navigationService: NavigationService,
+    private router: Router) { }
 
   ngOnInit() {
     this.scrollListener = this.onScroll.bind(this);
@@ -54,7 +61,7 @@ export class NavigationBarComponent implements OnInit, OnDestroy {
     this.isMenuOpen = false; //closing dropdown menu
 
     if (this.searchQuery.trim()) {
-      this.galaxiesService.searchStars(this.searchQuery, this.filters).subscribe({
+      this.searchService.search(this.searchQuery, this.filters).subscribe({
         next: (response) => {
           this.searchResults = response.data.results || [];
           this.showModal(this.searchResults);

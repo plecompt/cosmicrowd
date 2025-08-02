@@ -5,7 +5,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 import { NotificationService } from '../../services/notifications/notification.service';
-import { Router } from '@angular/router';
+import { UserService } from '../../services/user/user-service';
 
 @Component({
   selector: 'app-contact',
@@ -21,7 +21,8 @@ export class ContactComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder, 
     public authService: AuthService, 
     public formValidator: FormValidatorService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private userService: UserService
   ){}
 
   ngAfterViewInit(): void {}
@@ -43,7 +44,7 @@ export class ContactComponent implements OnInit, AfterViewInit {
     if (this.contactForm.valid) {
       const { email, message, subject, login } = this.contactForm.value;
 
-      this.authService.contact(email, message, login, subject).subscribe({
+      this.userService.contact(email, message, login, subject).subscribe({
         next: () => {
           this.notificationService.showSuccess('Message sent successfully!', 3000, '/home');
         },

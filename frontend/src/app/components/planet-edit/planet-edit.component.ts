@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Moon, MoonType } from '../../interfaces/solar-system/moon.interface';
 import { User } from '../../interfaces/user/user.interface';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
@@ -8,9 +7,9 @@ import { MoonEditComponent } from '../moon-edit/moon-edit.component';
 import { TitleCasePipe } from '@angular/common';
 import { PlanetValidationService } from '../../services/planet-validation/planet-validation-service';
 import { PlanetType } from '../../interfaces/solar-system/planet.interface';
-import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { ModalService } from '../../services/modal/modal.service';
+import { PlanetsService } from '../../services/planets/planets-service';
 
 @Component({
   selector: 'app-planet-edit',
@@ -30,7 +29,12 @@ export class PlanetEditComponent implements OnInit {
   isVisible: boolean = false;
   showAddMoons: boolean = false;
 
-  constructor(private authService: AuthService, private notificationService: NotificationService, private planetValidationService: PlanetValidationService, private galaxiesService: GalaxiesService, private modalService: ModalService) { }
+  constructor(
+    private authService: AuthService,
+    private notificationService: NotificationService,
+    private planetValidationService: PlanetValidationService,
+    private planetsService: PlanetsService,
+    private modalService: ModalService) { }
 
   ngOnInit(): void {
     this.getUser();
@@ -118,7 +122,7 @@ export class PlanetEditComponent implements OnInit {
 
     //if planet_id is -42, it's a new planet we need to insert in db else, we're modifying an allready existing planet
     if (this.planet.planet_id == -42) {
-      this.galaxiesService.addPlanet(this.currentGalaxy, this.planet.solar_system_id, this.planet).subscribe({
+      this.planetsService.addPlanet(this.currentGalaxy, this.planet.solar_system_id, this.planet).subscribe({
         next: () => {
           this.emitRefresh();
           this.notificationService.showSuccess('You successfully added a new planet to your solar system !', 2000);
@@ -128,7 +132,7 @@ export class PlanetEditComponent implements OnInit {
         }
       })
     } else {
-      this.galaxiesService.updatePlanet(this.currentGalaxy, this.planet.solar_system_id, this.planet.planet_id, this.planet).subscribe({
+      this.planetsService.updatePlanet(this.currentGalaxy, this.planet.solar_system_id, this.planet.planet_id, this.planet).subscribe({
         next: () => {
           this.emitRefresh();
           this.notificationService.showSuccess('You successfully updated your planet', 2000);
@@ -149,12 +153,12 @@ export class PlanetEditComponent implements OnInit {
       showCancel: true,
       showConfirm: true,
       onConfirm: () => {
-        this.galaxiesService.deletePlanet(this.currentGalaxy, this.solarSystem.solar_system_id, planetId).subscribe({
+        this.planetsService.deletePlanet(this.currentGalaxy, this.solarSystem.solar_system_id, planetId).subscribe({
           next: () => {
             this.emitRefresh();
             this.notificationService.showSuccess('Planet successfully deleted !', 2500);
           },
-          error: (error) => {
+          error: () => {
             this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
           }
         });

@@ -28,11 +28,6 @@ export class UserService {
     return this.http.post('http://localhost:8000/api/v1/users/contact', {user_email, user_message, user_name, subject});
   }
 
-  //return connected user
-  me(){
-    return this.http.get('http://localhost:8000/api/v1/auth/me');
-  }
-
   //3 step forgotten password
   //send email to user with the token in the url
   forgotPassword(user_email: string){

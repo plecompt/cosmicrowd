@@ -10,6 +10,8 @@ import { SolarSystem } from '../../interfaces/solar-system/solar-system.interfac
 import { NotificationService } from '../../services/notifications/notification.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { firstValueFrom } from 'rxjs';
+import { SolarSystemsService } from '../../services/solar-systems/solar-systems-service';
+import { ClaimService } from '../../services/claim/claim-service';
 
 type StarType = keyof ReturnType<GalaxyAnimationComponent['getStarColorMap']>;
 
@@ -44,7 +46,14 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   private systemsData: SolarSystem[] = [];
   private scaleFactor = 1;
 
-  constructor(private galaxiesService: GalaxiesService, private modalService: ModalService, private notificationService: NotificationService, private navigationService: NavigationService) { }
+  constructor(
+    private galaxiesService: GalaxiesService,
+    private modalService: ModalService,
+    private notificationService: NotificationService,
+    private navigationService: NavigationService,
+    private claimService: ClaimService,
+    private solarSystemsService: SolarSystemsService
+  ) { }
 
   ngAfterViewInit(): void {
     // Initialize Three.js scene
@@ -231,7 +240,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       const selectedSprite = intersects[0].object;
       const starData = selectedSprite.userData;
       //we need to load detailed data...
-      this.galaxiesService.getSolarSystem(starData['galaxy_id'], starData['solar_system_id']).subscribe({
+      this.solarSystemsService.getSolarSystem(starData['galaxy_id'], starData['solar_system_id']).subscribe({
         next: (systemInformation) => {
           this.showModal(systemInformation.data.solar_system);
         },
@@ -251,7 +260,7 @@ private async showModal(starData: any): Promise<void> {
   if (starData.user_id != null) {
     try {
       const response = await firstValueFrom(
-        this.galaxiesService.getSolarSystemOwner(1, starData.solar_system_id)
+        this.solarSystemsService.getSolarSystemOwner(1, starData.solar_system_id)
       );
       owner = response.data.owner;
     } catch (error) {
@@ -302,10 +311,10 @@ private async showModal(starData: any): Promise<void> {
       showView: true,
       onClaim: () => {
         // Check if user can claim this system
-        this.galaxiesService.isSolarSystemClaimable(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
+        this.claimService.isSolarSystemClaimable(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
           next: () => {
               // User can claim, proceed with claim
-              this.galaxiesService.claimSolarSystem(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
+              this.claimService.claimSolarSystem(parseInt(this.userId), starData.galaxy_id, starData.solar_system_id).subscribe({
                 next: (claimResponse: any) => {
                   starData.user_login = this.userLogin;
                   starData.user_id = this.userId;

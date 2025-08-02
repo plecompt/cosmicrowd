@@ -55,6 +55,12 @@ class UserController
         }
 
         $user = User::findOrFail($userId);
+
+        // Delete tokens
+        if (method_exists($user, 'tokens')) {
+            $user->tokens()->delete();
+        }
+
         $user->delete();
 
         return $this->success(null, 'User deleted', 200);

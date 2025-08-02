@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { SystemAnimationComponent } from '../../components/system-animation/system-animation.component';
@@ -9,6 +8,7 @@ import { LikeableType, LikesService } from '../../services/likes/likes.service';
 import { WallpaperService } from '../../services/wallpaper/wallpaper-service';
 import { WallpaperSettings } from '../../interfaces/wallpaper/wallpaper.interface';
 import { AuthService } from '../../services/auth/auth.service';
+import { SolarSystemsService } from '../../services/solar-systems/solar-systems-service';
 
 @Component({
   selector: 'app-system-view',
@@ -86,7 +86,7 @@ export class SystemViewComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private galaxiesService: GalaxiesService,
+    private solarSystemsService: SolarSystemsService,
     private modalService: ModalService,
     private likesService: LikesService,
     private notificationService: NotificationService,
@@ -102,7 +102,7 @@ export class SystemViewComponent implements OnInit {
 
   //check user is connected and own this system
   checkOwner() {
-    this.galaxiesService.getSolarSystemOwner(this.currentGalaxy, this.solarSystemId).subscribe({
+    this.solarSystemsService.getSolarSystemOwner(this.currentGalaxy, this.solarSystemId).subscribe({
       next: (systems) => {
         this.solarSystemOwner = systems.data.owner;
 
@@ -120,17 +120,20 @@ export class SystemViewComponent implements OnInit {
   }
 
   getSolarSystem() {
-    this.galaxiesService.getSolarSystem(this.currentGalaxy, this.solarSystemId).subscribe({
+    this.solarSystemsService.getSolarSystem(this.currentGalaxy, this.solarSystemId).subscribe({
       next: (solarSystem) => {
         this.solarSystem = solarSystem.data.solar_system;
         if (!this.solarSystem) {
-          this.isLoading = false;
           this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
           return;
         }
-        this.loadLikes();
+        if (this.authService.isLoggedIn()){
+          this.loadLikes();
+        } else {
+          this.isLoading = false;
+        }
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
       }
@@ -424,6 +427,10 @@ export class SystemViewComponent implements OnInit {
 
   // Export wallpaper as image
   exportWallpaper(): void {
+    // get camera position, target and fov
+    this.systemAnimationComponent.updateCameraData();
+    console.log(this.renderOptions.camera.position.x);
+
     const canvas = document.querySelector('canvas');
     if (!canvas) return;
 
@@ -482,6 +489,9 @@ export class SystemViewComponent implements OnInit {
   // Save wallpaper settings to database
   saveWallpaper(): void {
     if (!this.solarSystem) return;
+    // get camera position, target and fov
+    this.systemAnimationComponent.updateCameraData();
+    console.log(this.renderOptions.camera.position.x);
 
     this.renderOptions.metadata.createdAt = new Date().toString();
     this.renderOptions.metadata.systemId = this.solarSystemId;

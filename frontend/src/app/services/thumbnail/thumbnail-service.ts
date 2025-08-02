@@ -5,14 +5,17 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
 import { PlanetType } from '../../interfaces/solar-system/planet.interface';
-import { GalaxiesService } from '../galaxies/galaxies.service';
 import { WallpaperService } from '../wallpaper/wallpaper-service';
+import { SolarSystemsService } from '../solar-systems/solar-systems-service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThumbnailService {
-  constructor(private galaxiesService: GalaxiesService, private wallpaperService: WallpaperService) { }
+  constructor(
+    private wallpaperService: WallpaperService,
+    private solarSystemsService: SolarSystemsService
+  ) { }
 
   async generateThumbnail(
     galaxyId: number,
@@ -20,7 +23,7 @@ export class ThumbnailService {
     width: number = 300, 
     height: number = 200
   ): Promise<string> {
-    const solarSystemResponse = await this.galaxiesService.getSolarSystem(galaxyId, solarSystemId).toPromise();
+    const solarSystemResponse = await this.solarSystemsService.getSolarSystem(galaxyId, solarSystemId).toPromise();
     const wallpaperResponse = await this.wallpaperService.getWallpaper(galaxyId, solarSystemId).toPromise();
 
     const solarSystemData = solarSystemResponse?.data?.solar_system;

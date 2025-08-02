@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth/auth.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { NotificationService } from '../../services/notifications/notification.service';
+import { UserService } from '../../services/user/user-service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -13,7 +14,12 @@ import { NotificationService } from '../../services/notifications/notification.s
 export class ForgotPasswordComponent {
   forgotPasswordForm!: any;
 
-  constructor(private fb: FormBuilder, public authService: AuthService, private notificationService: NotificationService){}
+  constructor(
+    private fb: FormBuilder,
+    public authService: AuthService,
+    private notificationService: NotificationService,
+    private userService: UserService
+  ){}
 
   ngAfterViewInit(): void {
   }
@@ -39,7 +45,7 @@ export class ForgotPasswordComponent {
     if (this.forgotPasswordForm.valid) {
       const { email } = this.forgotPasswordForm.value;
 
-      this.authService.forgotPassword(email).subscribe({
+      this.userService.forgotPassword(email).subscribe({
         next: () => {
           this.notificationService.showSuccess('Password reset instructions have been sent to your email. Please check your inbox and spam folder.', 3000, '/home');
         },

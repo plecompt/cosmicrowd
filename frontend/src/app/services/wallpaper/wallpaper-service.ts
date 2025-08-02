@@ -22,4 +22,13 @@ export class WallpaperService {
     return this.http.delete(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpapers`);
   }
 
+  // Get if there is a wallpaper associated to given solarSystemId
+  ifExistWallpaperForSystem(galaxyId: number, solarSystemId: number): Observable<any>{
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpapers/exists`);
+  }
+
+  // Get most recent wallpapers in a given galaxy
+  getMostRecentWallpapers(galaxyId: number, limit: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/wallpapers/most-recent?limit=${limit}`);
+  }
 }

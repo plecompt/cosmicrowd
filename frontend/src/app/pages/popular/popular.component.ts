@@ -10,6 +10,8 @@ import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { DatePipe } from '@angular/common';
 import { ThumbnailService } from '../../services/thumbnail/thumbnail-service';
 import { User } from '../../interfaces/user/user.interface';
+import { SolarSystemsService } from '../../services/solar-systems/solar-systems-service';
+import { WallpaperService } from '../../services/wallpaper/wallpaper-service';
 
 @Component({
   selector: 'app-popular',
@@ -27,7 +29,15 @@ export class PopularComponent implements OnInit {
   currentGalaxy: number = 1; //atm there is only 1 galaxy, so hard coding id = 1, might evolve in the futur
   thumbnails: { [key: number]: string } = {};
 
-  constructor(public authService: AuthService, private notificationService: NotificationService, public likesService: LikesService, public navigationService: NavigationService, private galaxiesService: GalaxiesService, private thumbnailService: ThumbnailService) { }
+  constructor(public authService: AuthService,
+    private notificationService: NotificationService,
+    public likesService: LikesService,
+    public navigationService: NavigationService,
+    private galaxiesService: GalaxiesService,
+    private thumbnailService: ThumbnailService,
+    private solarSystemsService: SolarSystemsService,
+    private wallpaperService: WallpaperService
+  ) { }
 
   ngOnInit(): void {
     // If user is logged in
@@ -59,7 +69,7 @@ export class PopularComponent implements OnInit {
   }
 
   getMostLikedSolarSystems() {
-    this.galaxiesService.getMostLikedSolarSystems(this.currentGalaxy).subscribe({
+    this.likesService.getMostLikedSolarSystems(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostLikedSolarSystems = success.data;
       },
@@ -70,7 +80,7 @@ export class PopularComponent implements OnInit {
   }
 
   getMostLikedWallpapers() {
-    this.galaxiesService.getMostLikedWallpapers(this.currentGalaxy).subscribe({
+    this.likesService.getMostLikedWallpapers(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostLikedWallpapers = success.data;
         this.generateAllThumbnails(this.mostLikedWallpapers, 960, 540);
@@ -83,7 +93,7 @@ export class PopularComponent implements OnInit {
   }
 
   getMostRecentSolarSystems() {
-    this.galaxiesService.getMostRecentSolarSystems(this.currentGalaxy).subscribe({
+    this.solarSystemsService.getMostRecentSolarSystems(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostRecentSolarSystems = success.data;
       },
@@ -94,7 +104,7 @@ export class PopularComponent implements OnInit {
   }
 
   getMostRecentWallpapers() {
-    this.galaxiesService.getMostRecentWallpapers(this.currentGalaxy).subscribe({
+    this.wallpaperService.getMostRecentWallpapers(this.currentGalaxy).subscribe({
       next: (success) => {
         this.mostRecentWallpapers = success.data;
         this.generateAllThumbnails(this.mostRecentWallpapers, 960, 540);
@@ -126,7 +136,7 @@ export class PopularComponent implements OnInit {
       //get all systems
       const systems: SolarSystem[] = await Promise.all(
         wallpapers.map(wallpaper =>
-          this.galaxiesService.getSolarSystem(1, wallpaper.solar_system_id).toPromise().then(
+          this.solarSystemsService.getSolarSystem(1, wallpaper.solar_system_id).toPromise().then(
             (res) => res.data.solar_system
           )
         )

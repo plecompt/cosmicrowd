@@ -45,4 +45,14 @@ export class LikesService {
       params: { ids: ids, type: type }
     });
   }
+
+  // Get 10 most liked solarSystems in given galaxy
+  getMostLikedSolarSystems(galaxyId: number, limit: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/most-liked?limit=${limit}`);
+  }
+
+  // Get most liked wallpapers in a given galaxy
+  getMostLikedWallpapers(galaxyId: number, limit: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/wallpapers/most-liked?limit=${limit}`);
+  }
 }

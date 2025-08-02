@@ -6,6 +6,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 import { NotificationService } from '../../services/notifications/notification.service';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
+import { UserService } from '../../services/user/user-service';
 
 @Component({
   selector: 'app-reset-password',
@@ -19,7 +20,14 @@ export class ResetPasswordComponent implements OnInit {
   isValidToken: boolean = false;
   errorMessage: string = "";
 
-  constructor(private fb: FormBuilder, public authService: AuthService, private route: ActivatedRoute, private notificationService: NotificationService, public formValidator: FormValidatorService, private customValidators: CustomValidatorsService){}
+  constructor(
+    private fb: FormBuilder,
+    public authService: AuthService,
+    private route: ActivatedRoute,
+    private notificationService: NotificationService,
+    public formValidator: FormValidatorService,
+    private userService: UserService,
+    private customValidators: CustomValidatorsService){}
 
 
   ngOnInit(): void {
@@ -39,7 +47,7 @@ export class ResetPasswordComponent implements OnInit {
     this.route.queryParamMap.subscribe(params => {
       const token = params.get('token');
       if (token) {
-        this.authService.verifyResetToken(token.toString()).subscribe({
+        this.userService.verifyResetToken(token.toString()).subscribe({
           next: () => {
             this.token = token;
             this.isValidToken = true;
@@ -57,7 +65,7 @@ export class ResetPasswordComponent implements OnInit {
     if (this.resetPasswordForm.valid) {
       const { newPassword } = this.resetPasswordForm.value;
 
-      this.authService.setNewPassword(newPassword, this.token).subscribe({
+      this.userService.setNewPassword(newPassword, this.token).subscribe({
         next: () => {
           this.notificationService.showSuccess('Password successfully changed !', 3000, '/home');
           this.authService.logout().subscribe();

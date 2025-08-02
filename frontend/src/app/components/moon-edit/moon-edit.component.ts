@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Moon, MoonType } from '../../interfaces/solar-system/moon.interface';
 import { MoonValidationService } from '../../services/moon-validation/moon-validation-service';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { Planet } from '../../interfaces/solar-system/planet.interface';
-import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { User } from '../../interfaces/user/user.interface';
 import { ModalService } from '../../services/modal/modal.service';
+import { MoonsService } from '../../services/moons/moons-service';
 
 @Component({
   selector: 'app-moon-edit',
@@ -27,7 +27,12 @@ export class MoonEditComponent {
   moon!: Moon;
   currentPlanet!: Planet;
 
-  constructor(private authService: AuthService, private moonValidationService: MoonValidationService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private modalService: ModalService) { }
+  constructor(
+    private authService: AuthService, 
+    private moonValidationService: MoonValidationService, 
+    private notificationService: NotificationService, 
+    private moonsService: MoonsService, 
+    private modalService: ModalService) { }
 
   ngOnInit(): void {
     this.getUser();
@@ -118,7 +123,7 @@ export class MoonEditComponent {
 
     //if moon_id is -42, it's a new moon we need to insert in db else, we're modifying an allready existing moon
     if (this.moon.moon_id == -42) {
-      this.galaxiesService.addMoon(this.currentGalaxy, this.currentPlanet.solar_system_id, this.currentPlanet.planet_id, this.moon).subscribe({
+      this.moonsService.addMoon(this.currentGalaxy, this.currentPlanet.solar_system_id, this.currentPlanet.planet_id, this.moon).subscribe({
         next: () => {
           this.emitRefresh();
           this.emitCloseParentModal();
@@ -129,7 +134,7 @@ export class MoonEditComponent {
         }
       })
     } else {
-      this.galaxiesService.updateMoon(this.currentGalaxy, this.currentPlanet.solar_system_id, this.currentPlanet.planet_id, this.moon.moon_id, this.moon).subscribe({
+      this.moonsService.updateMoon(this.currentGalaxy, this.currentPlanet.solar_system_id, this.currentPlanet.planet_id, this.moon.moon_id, this.moon).subscribe({
         next: () => {
           this.emitRefresh();
           this.emitCloseParentModal();
@@ -151,7 +156,7 @@ export class MoonEditComponent {
       showCancel: true,
       showConfirm: true,
       onConfirm: () => {
-        this.galaxiesService.deleteMoon(this.currentGalaxy, planet.solar_system_id, planet.planet_id, moonId).subscribe({
+        this.moonsService.deleteMoon(this.currentGalaxy, planet.solar_system_id, planet.planet_id, moonId).subscribe({
           next: () => {
             this.emitRefresh();
             this.emitCloseParentModal();

@@ -119,7 +119,7 @@ class UserController
                     ->subject('[CosmiCrowd Contact] ' . $contactData['subject']);
             });
 
-            // Confirmation to user
+            // Sending mail confirmation to user
             Mail::send('emails.contact-confirmation', $contactData, function ($message) use ($contactData): void {
                 $message->to($contactData['user_email'], $contactData['user_name'])
                     ->subject('Message Received - CosmiCrowd');
@@ -349,6 +349,11 @@ class UserController
         Planet::where('user_id', $user->user_id)->update(['user_id' => null]);
         Moon::where('user_id', $user->user_id)->update(['user_id' => null]);
     
+        // Delete tokens
+        if (method_exists($user, 'tokens')) {
+            $user->tokens()->delete();
+        }
+
         $user->delete();
     
         return $this->success(null, 'Account successfully deleted.');

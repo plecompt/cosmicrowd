@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth/auth.service';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
-import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
 import { Planet } from '../../interfaces/solar-system/planet.interface';
-import { Router } from '@angular/router';
 import { ModalService } from '../../services/modal/modal.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { ThumbnailService } from '../../services/thumbnail/thumbnail-service';
+import { SolarSystemsService } from '../../services/solar-systems/solar-systems-service';
+import { ClaimService } from '../../services/claim/claim-service';
 
 @Component({
   selector: 'app-systems',
@@ -23,7 +23,13 @@ export class SystemsComponent implements OnInit {
   expandedPlanetId: number | null = null;
   thumbnails: { [key: number]: string } = {};
 
-  constructor(private navigationService: NavigationService, public authService: AuthService, private notificationService: NotificationService, private galaxiesService: GalaxiesService, private modalService: ModalService, private thumbnailService: ThumbnailService
+  constructor(private navigationService: NavigationService,
+    public authService: AuthService,
+    private notificationService: NotificationService,
+    private solarSystemsService: SolarSystemsService,
+    private modalService: ModalService,
+    private thumbnailService: ThumbnailService,
+    private claimService: ClaimService
   ) { }
 
   ngOnInit(): void {
@@ -37,7 +43,7 @@ export class SystemsComponent implements OnInit {
 
   getSystems() {
     const user_id = parseInt(localStorage.getItem('user_id') || '');
-    this.galaxiesService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
+    this.solarSystemsService.getSolarSystemsForUser(user_id, this.currentGalaxy).subscribe({
       next: (systems) => {
         this.solarSystems = systems.data.solar_systems;
         this.generateAllThumbnails(this.solarSystems, 960, 540);
@@ -149,7 +155,7 @@ export class SystemsComponent implements OnInit {
       showCancel: true,
       showConfirm: true,
       onConfirm: () => {
-        this.galaxiesService.unclaimSolarSystem(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, solarSystemId).subscribe({
+        this.claimService.unclaimSolarSystem(parseInt(localStorage.getItem('user_id') || '0'), this.currentGalaxy, solarSystemId).subscribe({
           next: () => {
             this.getSystems();
             this.notificationService.showSuccess('You successfully unclaimed this system', 2500, '/systems');

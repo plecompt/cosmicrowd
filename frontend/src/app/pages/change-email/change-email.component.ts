@@ -5,6 +5,7 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 import { NotificationService } from '../../services/notifications/notification.service';
 import { FormValidatorService } from '../../services/form-validators/form-validator-service';
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
+import { UserService } from '../../services/user/user-service';
 
 @Component({
   selector: 'app-change-email',
@@ -16,7 +17,14 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
   changeEmailForm!: any;
   changeEmailErrorMessage: string = "";
 
-  constructor(private fb: FormBuilder, public authService: AuthService, private notificationService: NotificationService, public formValidator: FormValidatorService, private customValidators: CustomValidatorsService){}
+  constructor(
+    private fb: FormBuilder,
+    public authService: AuthService,
+    private notificationService: NotificationService,
+    public formValidator: FormValidatorService,
+    private customValidators: CustomValidatorsService,
+    private userService: UserService
+  ){}
 
   ngAfterViewInit(): void {
   }
@@ -45,7 +53,7 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
     if (this.changeEmailForm.valid) {
       const { email, password } = this.changeEmailForm.value;
 
-      this.authService.changeEmail(password, email).subscribe({
+      this.userService.changeEmail(password, email).subscribe({
         next: () => {
           this.notificationService.showSuccess('Email successfully modified !', 3000, '/home');
           this.authService.logout().subscribe();

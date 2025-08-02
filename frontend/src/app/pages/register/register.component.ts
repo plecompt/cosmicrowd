@@ -5,6 +5,7 @@ import { FormValidatorService } from '../../services/form-validators/form-valida
 import { CustomValidatorsService } from '../../services/custom-validators/custom-validators.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { NotificationService } from '../../services/notifications/notification.service';
+import { UserService } from '../../services/user/user-service';
 
 @Component({
   selector: 'app-register',
@@ -18,7 +19,8 @@ export class RegisterComponent implements OnInit{
   registrationError: string = "";
 
   constructor(
-    public authService: AuthService, 
+    public authService: AuthService,
+    private userService: UserService,
     private fb: FormBuilder, 
     public formValidator: FormValidatorService, 
     private customValidators: CustomValidatorsService,
@@ -75,7 +77,7 @@ export class RegisterComponent implements OnInit{
       return;
     }
 
-    this.authService.register(this.registerForm.value.login, this.registerForm.value.password, this.registerForm.value.email).subscribe({
+    this.userService.register(this.registerForm.value.login, this.registerForm.value.password, this.registerForm.value.email).subscribe({
       next: () => {
         this.notificationService.showSuccess('Account created successfully! Welcome to CosmiCrowd !', 3000, '/home');
       },

@@ -6,11 +6,11 @@ import { SolarSystem } from '../../interfaces/solar-system/solar-system.interfac
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { UserService } from '../../services/user/user-service';
 import { User } from '../../interfaces/user/user.interface';
-import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { forkJoin } from 'rxjs';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { BackgroundStarsComponent } from '../../components/background-stars/background-stars.component';
-import { LikeableType, LikesService } from '../../services/likes/likes.service';
+import { LikesService } from '../../services/likes/likes.service';
+import { SolarSystemsService } from '../../services/solar-systems/solar-systems-service';
 
 @Component({
   selector: 'app-profile',
@@ -34,7 +34,7 @@ export class ProfileComponent implements OnInit {
     public authService: AuthService,
     private userService: UserService,
     private notificationService: NotificationService,
-    private galaxiesService: GalaxiesService,
+    private solarSystemsService: SolarSystemsService,
     private route: ActivatedRoute,
     private navigationService: NavigationService,
     public likesService: LikesService,
@@ -56,7 +56,7 @@ export class ProfileComponent implements OnInit {
   loadUserData(): void {
     forkJoin({
       user: this.userService.getUserById(this.profileUserId),
-      solarSystems: this.galaxiesService.getSolarSystemsForUser(this.profileUserId, this.currentGalaxy),
+      solarSystems: this.solarSystemsService.getSolarSystemsForUser(this.profileUserId, this.currentGalaxy),
     }).subscribe({
       next: (responses: any) => {
         this.user = responses.user.data.user;

@@ -11,6 +11,9 @@ import { BackgroundStarsComponent } from '../../components/background-stars/back
 })
 export class AccountComponent {
 
-  constructor(public navigationService: NavigationService, public authService: AuthService) {}
+  constructor(
+    public navigationService: NavigationService,
+    public authService: AuthService
+  ) {}
 
 }
