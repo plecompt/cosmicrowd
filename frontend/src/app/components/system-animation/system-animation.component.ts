@@ -275,7 +275,6 @@ export class SystemAnimationComponent implements OnInit, OnChanges {
   }
 
   public updateCameraData(): void {
-    console.log(`before: ${this.camera.position.x}`);
     if (this.camera && this.controls) {
       this.cameraUpdate.emit({
         position: {

@@ -57,6 +57,8 @@ export class ResetPasswordComponent implements OnInit {
           }
         }
         );
+      } else {
+        this.notificationService.showError('This link is not valid or expired', 2500, '/home');
       }
     });
   }

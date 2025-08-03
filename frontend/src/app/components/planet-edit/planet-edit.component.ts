@@ -80,8 +80,8 @@ export class PlanetEditComponent implements OnInit {
       planet_surface_temp: 288,
       planet_orbital_longitude: 0,
       planet_eccentricity: 0,
-      planet_apogee: 1000000,
-      planet_perigee: 1000000,
+      planet_apogee: 10000000000,
+      planet_perigee: 10000000000,
       planet_orbital_inclination: 0,
       planet_average_distance: -42, // Temporary distance
       planet_orbital_period: 365,

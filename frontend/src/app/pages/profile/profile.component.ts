@@ -28,8 +28,6 @@ export class ProfileComponent implements OnInit {
   topLikedMoon: any = null;
   topLikedWallpaper: any = null;
 
-  // LikeableType = LikeableType;
-
   constructor(
     public authService: AuthService,
     private userService: UserService,

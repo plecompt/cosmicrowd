@@ -185,17 +185,11 @@ export class SystemsComponent implements OnInit {
 
   async generateAllThumbnails(solarSystems: any[], width: number, height: number) {
     for (const system of solarSystems) {
-      try {
-        const thumbnail = await this.thumbnailService.generateThumbnail(
-          this.currentGalaxy, 
-          system.solar_system_id, 
-          width, 
-          height
-        );
-        this.thumbnails[system.solar_system_id] = thumbnail;
-      } catch (error) {
-        // nothing, use fallback image
-      }
+        if (system.wallpaper){
+
+          const thumbnail = await this.thumbnailService.generateThumbnail(this.currentGalaxy, system.solar_system_id, width, height);
+          this.thumbnails[system.solar_system_id] = thumbnail;
+        }
     }
     this.isLoaded = true;
   }

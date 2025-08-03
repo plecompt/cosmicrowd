@@ -429,7 +429,6 @@ export class SystemViewComponent implements OnInit {
   exportWallpaper(): void {
     // get camera position, target and fov
     this.systemAnimationComponent.updateCameraData();
-    console.log(this.renderOptions.camera.position.x);
 
     const canvas = document.querySelector('canvas');
     if (!canvas) return;
@@ -491,7 +490,6 @@ export class SystemViewComponent implements OnInit {
     if (!this.solarSystem) return;
     // get camera position, target and fov
     this.systemAnimationComponent.updateCameraData();
-    console.log(this.renderOptions.camera.position.x);
 
     this.renderOptions.metadata.createdAt = new Date().toString();
     this.renderOptions.metadata.systemId = this.solarSystemId;

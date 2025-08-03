@@ -56,7 +56,6 @@ export class SystemEditComponent {
     this.solarSystemsService.getSolarSystemOwner(this.currentGalaxy, this.solarSystemId).subscribe({
       next: (systems) => {
         this.solarSystemOwner = systems.data.owner;
-
         // If user is not logged in or don't own this system
         if (!this.authService.isLoggedIn() || localStorage.getItem('user_login') != this.solarSystemOwner) {
           this.notificationService.showError('You can\'t access this page', 2500, '/home');

@@ -17,12 +17,7 @@ export class ThumbnailService {
     private solarSystemsService: SolarSystemsService
   ) { }
 
-  async generateThumbnail(
-    galaxyId: number,
-    solarSystemId: number,
-    width: number = 300, 
-    height: number = 200
-  ): Promise<string> {
+  async generateThumbnail(galaxyId: number, solarSystemId: number, width: number = 300, height: number = 200): Promise<string> {
     const solarSystemResponse = await this.solarSystemsService.getSolarSystem(galaxyId, solarSystemId).toPromise();
     const wallpaperResponse = await this.wallpaperService.getWallpaper(galaxyId, solarSystemId).toPromise();
 

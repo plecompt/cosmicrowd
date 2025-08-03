@@ -44,7 +44,7 @@ Route::prefix('v1')->group(function (): void {
     // Solar-systems from a galaxy
     Route::get('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'index'])->middleware('throttle.moderate'); // List solar systems for this galaxy
     Route::get('galaxies/{galaxyId}/solar-systems/systems', [SolarSystemController::class, 'getSolarSystemsByUser'])->middleware('throttle.moderate'); // List owned systems for given user
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'show'])->middleware('throttle.moderate'); // Get solar system with its stats for this galaxy
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'show'])->middleware('throttle.normal'); // Get solar system with its stats for this galaxy
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/owner', [SolarSystemController::class, 'getOwner'])->middleware('throttle.moderate'); // Get solar system owner
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes', [LikeController::class, 'countSolarSystemLikes'])->middleware('throttle.relaxed'); // Get likes count for this solar system
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes-stats', [LikeController::class, 'getSolarSystemLikesStats'])->middleware('throttle.relaxed'); // Get likes stats (more complete info) for this solar system
@@ -57,14 +57,14 @@ Route::prefix('v1')->group(function (): void {
 
     // Planets from a solar system
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'index'])->middleware('throttle.moderate'); // List planets for this solar system
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'show'])->middleware('throttle.moderate'); // Get planet with its stats
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'show'])->middleware('throttle.normal'); // Get planet with its stats
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/owner', [PlanetController::class, 'getOwner'])->middleware('throttle.moderate'); // Get planet owner
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes', [LikeController::class, 'countPlanetLikes'])->middleware('throttle.relaxed'); // Get likes count for this planet
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes-stats', [LikeController::class, 'getPlanetLikesStats'])->middleware('throttle.relaxed'); // Get likes stats (more complete info) for this planet
 
     // Moons from a planet
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'index'])->middleware('throttle.moderate'); // List moons for this planet
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'show'])->middleware('throttle.moderate'); // Get moon with its stats
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'show'])->middleware('throttle.normal'); // Get moon with its stats
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/owner', [MoonController::class, 'getOwner'])->middleware('throttle.moderate'); // Get moon owner
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes', [LikeController::class, 'countMoonLikes'])->middleware('throttle.relaxed'); // Get likes count for this moon
     Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes-stats', [LikeController::class, 'getMoonLikesStats'])->middleware('throttle.relaxed'); // Get likes stats (more complete info) for this moon
