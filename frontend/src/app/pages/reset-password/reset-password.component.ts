@@ -53,7 +53,7 @@ export class ResetPasswordComponent implements OnInit {
             this.isValidToken = true;
           },
           error:() => {
-            this.notificationService.showError('This link is not valid or expired', 5000, '/home');
+            this.notificationService.showError('This link is not valid or expired', 2500, '/home');
           }
         }
         );

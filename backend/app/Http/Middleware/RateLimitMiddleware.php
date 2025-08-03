@@ -20,31 +20,33 @@ class RateLimitMiddleware
      *
      * @param Request $request The incoming HTTP request
      * @param Closure $next The next middleware in the pipeline
-     * @param int $maxAttempts Maximum allowed requests (default: 60)
-     * @param int $decayMinutes Time window in minutes (default: 1)
+     * @param string $maxAttempts Maximum allowed requests (default: 60)
+     * @param string $decayMinutes Time window in minutes (default: 1)
      * @return Response Either continues request or returns rate limit error
      */
-    public function handle(Request $request, Closure $next, int $maxAttempts = 60, int $decayMinutes = 1): Response
+    public function handle(Request $request, Closure $next, string $maxAttempts = '60', string $decayMinutes = '1'): Response
     {
-        $key = $this->resolveRequestSignature($request);
+        $maxAttemptsInt = (int) $maxAttempts;
+        $decayMinutesInt = (int) $decayMinutes;
         
+        $key = $this->resolveRequestSignature($request);
         $attempts = Cache::get($key, 0);
         
-        if ($attempts >= $maxAttempts) {
+        if ($attempts >= $maxAttemptsInt) {
             return $this->error(
-                'Too many attempts. Please try again in ' . $decayMinutes . ' minute(s).', 
+                'Too many attempts. Please try again in ' . $decayMinutesInt . ' minute(s).', 
                 429,
-                ['retry_after' => $decayMinutes * 60]
+                ['retry_after' => $decayMinutesInt]
             );
         }
         
-        Cache::put($key, $attempts + 1, now()->addMinutes($decayMinutes));
+        Cache::put($key, $attempts + 1, now()->addMinutes($decayMinutesInt));
         
         $response = $next($request);
         
-        $response->headers->set('X-RateLimit-Limit', $maxAttempts);
-        $response->headers->set('X-RateLimit-Remaining', max(0, $maxAttempts - $attempts - 1));
-        $response->headers->set('X-RateLimit-Reset', now()->addMinutes($decayMinutes)->timestamp);
+        $response->headers->set('X-RateLimit-Limit', $maxAttemptsInt);
+        $response->headers->set('X-RateLimit-Remaining', max(0, $maxAttemptsInt - $attempts - 1));
+        $response->headers->set('X-RateLimit-Reset', now()->addMinutes($decayMinutesInt)->timestamp);
         
         return $response;
     }

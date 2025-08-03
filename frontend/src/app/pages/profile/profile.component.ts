@@ -43,7 +43,7 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     // If user is not logged in
     if (!this.authService.isLoggedIn()) {
-        this.notificationService.showError('You can\'t access this page', 3000, '/home');
+        this.notificationService.showError('You can\'t access this page', 2500, '/home');
         return;
     }
 
@@ -65,7 +65,7 @@ export class ProfileComponent implements OnInit {
         this.calculateTopLiked();
       },
       error: () => {
-        this.notificationService.showError('Failed to load user data', 5000, '/home');
+        this.notificationService.showError('Something went wrong. Please try again later.', 2500, '/home');
       }
     });
   }

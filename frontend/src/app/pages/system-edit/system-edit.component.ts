@@ -59,7 +59,7 @@ export class SystemEditComponent {
 
         // If user is not logged in or don't own this system
         if (!this.authService.isLoggedIn() || localStorage.getItem('user_login') != this.solarSystemOwner) {
-          this.notificationService.showError('You can\'t access this page', 3000, '/home');
+          this.notificationService.showError('You can\'t access this page', 2500, '/home');
           return;
         } else {
           //if user is logged in, and own the solarSystem, get user solarSystems
@@ -67,7 +67,7 @@ export class SystemEditComponent {
         }
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     });
   }
@@ -79,7 +79,7 @@ export class SystemEditComponent {
         this.user = response.data.user;
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/systems');
       }
     })
   }
@@ -94,13 +94,13 @@ export class SystemEditComponent {
         const result = this.solarSystems.find(system => system.solar_system_id == this.solarSystemId);
         //in case we didnt find the solarSystem in solarSystems, seem unlikly, might occur if backend die
         if (result == undefined) {
-          this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+          this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
         } else {
           this.solarSystem = result;
         }
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     });
   }
@@ -110,17 +110,17 @@ export class SystemEditComponent {
     const validation = this.systemValidationService.validateSystem(this.solarSystem);
 
     if (!validation.isValid) {
-      this.notificationService.showError(validation.errors[0], 2000);
+      this.notificationService.showError(validation.errors[0], 2500);
       return;
     }
 
     // Updating in db
     this.solarSystemsService.updateSolarSystem(this.currentGalaxy, this.solarSystem.solar_system_id, this.solarSystem).subscribe({
       next: () => {
-        this.notificationService.showSuccess('You successfully updated your solar system !', 2000);
+        this.notificationService.showSuccess('You successfully updated your solar system !', 2500);
       },
       error: (error) => {
-        this.notificationService.showError(error || 'Something went wrong, please try again later', 5000);
+        this.notificationService.showError(error || 'Something went wrong, please try again later.', 2500);
       }
     });
     //in any case, refresh

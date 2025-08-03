@@ -47,7 +47,7 @@ export class PlanetEditComponent implements OnInit {
         this.user = response.data.user;
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/systems');
       }
     })
   }
@@ -113,7 +113,7 @@ export class PlanetEditComponent implements OnInit {
     const validation = this.planetValidationService.validatePlanet(this.planet);
 
     if (!validation.isValid) {
-      this.notificationService.showError(validation.errors[0], 2000);
+      this.notificationService.showError(validation.errors[0], 2500);
       return;
     }
 
@@ -128,7 +128,7 @@ export class PlanetEditComponent implements OnInit {
           this.notificationService.showSuccess('You successfully added a new planet to your solar system !', 2000);
         },
         error: (error) => {
-          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000);
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500);
         }
       })
     } else {
@@ -138,7 +138,7 @@ export class PlanetEditComponent implements OnInit {
           this.notificationService.showSuccess('You successfully updated your planet', 2000);
         },
         error: (error) => {
-          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000);
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500);
         }
       })
     }
@@ -159,7 +159,7 @@ export class PlanetEditComponent implements OnInit {
             this.notificationService.showSuccess('Planet successfully deleted !', 2500);
           },
           error: () => {
-            this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
+            this.notificationService.showError('Something went wrong, please try again later.', 2500, '/systems');
           }
         });
       },

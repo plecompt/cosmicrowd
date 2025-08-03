@@ -132,7 +132,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
         this.createSprites();
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     });
   }
@@ -245,7 +245,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
           this.showModal(systemInformation.data.solar_system);
         },
         error: () => {
-          this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+          this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
         }
       })
     }
@@ -264,7 +264,7 @@ private async showModal(starData: any): Promise<void> {
       );
       owner = response.data.owner;
     } catch (error) {
-      this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+      this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       return;
     }
   }
@@ -321,13 +321,13 @@ private async showModal(starData: any): Promise<void> {
                   this.notificationService.showSuccess(claimResponse.message, 3000, '/systems');
                 },
                 error: (error) => {
-                  this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
+                  this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500, '/home');
                   return ;
                 }
               });
           },
           error: (error) => {
-            this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 5000, '/home');
+            this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500, '/home');
           }
         });
       },

@@ -35,7 +35,7 @@ export class SystemsComponent implements OnInit {
   ngOnInit(): void {
     // If user is not logged in
     if (!this.authService.isLoggedIn()) {
-      this.notificationService.showError('You can\'t access this page', 3000, '/home');
+      this.notificationService.showError('You can\'t access this page', 2500, '/home');
       return;
     }
     this.getSystems();
@@ -49,7 +49,7 @@ export class SystemsComponent implements OnInit {
         this.generateAllThumbnails(this.solarSystems, 960, 540);
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     });
   }
@@ -161,7 +161,7 @@ export class SystemsComponent implements OnInit {
             this.notificationService.showSuccess('You successfully unclaimed this system', 2500, '/systems');
           },
           error: () => {
-            this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
+            this.notificationService.showError('Something went wrong, please try again later.', 2500, '/systems');
           }
         });
       },

@@ -67,7 +67,7 @@ export class NavigationBarComponent implements OnInit, OnDestroy {
           this.showModal(this.searchResults);
         },
         error: () => {
-          this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+          this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
         }
       });
     }

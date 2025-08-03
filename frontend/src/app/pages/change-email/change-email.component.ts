@@ -32,7 +32,7 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     // If user is not logged in
     if (!this.authService.isLoggedIn()) {
-        this.notificationService.showError('You can\'t access this page', 3000, '/home');
+        this.notificationService.showError('You can\'t access this page', 2500, '/home');
         return;
     }
     this.initEmailForm();

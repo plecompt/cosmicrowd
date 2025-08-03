@@ -114,7 +114,7 @@ export class SystemViewComponent implements OnInit {
         }
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     });
   }
@@ -124,7 +124,7 @@ export class SystemViewComponent implements OnInit {
       next: (solarSystem) => {
         this.solarSystem = solarSystem.data.solar_system;
         if (!this.solarSystem) {
-          this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+          this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
           return;
         }
         if (this.authService.isLoggedIn()){
@@ -135,7 +135,7 @@ export class SystemViewComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     });
   }

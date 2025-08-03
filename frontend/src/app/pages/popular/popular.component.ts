@@ -57,7 +57,7 @@ export class PopularComponent implements OnInit {
         this.user = response.data.user;
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/systems');
       }
     })
   }
@@ -74,7 +74,7 @@ export class PopularComponent implements OnInit {
         this.mostLikedSolarSystems = success.data;
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     })
   }
@@ -87,7 +87,7 @@ export class PopularComponent implements OnInit {
         
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     })
   }
@@ -98,7 +98,7 @@ export class PopularComponent implements OnInit {
         this.mostRecentSolarSystems = success.data;
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     })
   }
@@ -110,7 +110,7 @@ export class PopularComponent implements OnInit {
         this.generateAllThumbnails(this.mostRecentWallpapers, 960, 540);
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later.', 5000, '/home');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
       }
     })
   }

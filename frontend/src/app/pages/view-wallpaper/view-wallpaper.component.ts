@@ -50,7 +50,7 @@ export class ViewWallpaperComponent {
           this.getWallpaper();
         },
         error: (error) => {
-          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000, '/home');
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500, '/home');
         }
       });
   }

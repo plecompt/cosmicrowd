@@ -53,7 +53,7 @@ export class MoonEditComponent {
         this.user = response.data.user;
       },
       error: () => {
-        this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
+        this.notificationService.showError('Something went wrong, please try again later.', 2500, '/systems');
       }
     })
   }
@@ -114,7 +114,7 @@ export class MoonEditComponent {
     const validation = this.moonValidationService.validateMoon(this.moon);
 
     if (!validation.isValid) {
-      this.notificationService.showError(validation.errors[0], 2000);
+      this.notificationService.showError(validation.errors[0], 2500);
       return;
     }
 
@@ -130,7 +130,7 @@ export class MoonEditComponent {
           this.notificationService.showSuccess('You successfully added a new moon around your planet !', 2000);
         },
         error: (error) => {
-          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000);
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500);
         }
       })
     } else {
@@ -141,7 +141,7 @@ export class MoonEditComponent {
           this.notificationService.showSuccess('You successfully updated your moon', 2000);
         },
         error: (error) => {
-          this.notificationService.showError(error.message || 'Something went wrong, please try again later', 5000);
+          this.notificationService.showError(error.message || 'Something went wrong, please try again later.', 2500);
         }
       })
     }
@@ -163,7 +163,7 @@ export class MoonEditComponent {
             this.notificationService.showSuccess('Moon successfully deleted !', 2500);
           },
           error: () => {
-            this.notificationService.showError('Something went wrong, please try again later', 5000, '/systems');
+            this.notificationService.showError('Something went wrong, please try again later.', 2500, '/systems');
           }
         });
       },

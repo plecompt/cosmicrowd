@@ -14,124 +14,115 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ClaimController;
 use App\Http\Controllers\Api\WallpaperController;
 
-use App\Http\Middleware\IsAdmin;
-use App\Http\Middleware\CheckOwnershipMiddleware;
-use App\Http\Middleware\RateLimitMiddleware;
-
-// Routes publiques (pas d'authentification requise)
+// Public routes (no authentication required)
 Route::prefix('v1')->group(function (): void {
-    // Authentification
-    Route::post('auth/login', [AuthController::class, 'login']); //login
 
-    // User
-    Route::post('users/register', [UserController::class, 'register']); //inscription
-    Route::post('users/forgot-password', [UserController::class, 'forgotPassword']); //envoi du token par mail
-    Route::post('users/verify-token', [UserController::class, 'verifyToken']); // verification du token
-    Route::post('users/reset-password', [UserController::class, 'resetPassword']); // changement de mdp apres mdp oublié
-    Route::post('users/check-login', [UserController::class, 'checkLoginAvailability']); //verifie si un login est disponible en bdd
-    Route::post('users/check-email', [UserController::class, 'checkEmailAvailability']); //verifie si un mdp est disponible en bdd
-    Route::post('users/contact', [UserController::class, 'contact']); //envoi un mail à CosmiCrowd + confirmation à l'utilisateur
-    Route::get('users/{userId}', [UserController::class, 'view']);//retourne un user
+    // Authentication
+    Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle.strict'); // User login
+
+    // Users
+    Route::post('users/register', [UserController::class, 'register'])->middleware('throttle.strict'); // User registration
+    Route::post('users/forgot-password', [UserController::class, 'forgotPassword'])->middleware('throttle.strict'); // Send reset token by email
+    Route::post('users/verify-token', [UserController::class, 'verifyToken'])->middleware('throttle.strict'); // Verify reset token
+    Route::post('users/reset-password', [UserController::class, 'resetPassword'])->middleware('throttle.strict'); // Reset password after forgot password
+    Route::post('users/check-login', [UserController::class, 'checkLoginAvailability'])->middleware('throttle.relaxed'); // Check if login is available in database
+    Route::post('users/check-email', [UserController::class, 'checkEmailAvailability'])->middleware('throttle.relaxed'); // Check if email is available in database
+    Route::post('users/contact', [UserController::class, 'contact'])->middleware('throttle.strict'); // Send email to CosmiCrowd + confirmation to user
+    Route::get('users/{userId}', [UserController::class, 'view'])->middleware('throttle.relaxed'); // Get user details
 
     // Wallpapers
-    Route::get('galaxies/{id}/wallpapers/most-liked', [WallpaperController::class, 'getMostLikedWallpapers']); //les x wallpapers les plus aimés
-    Route::get('galaxies/{id}/wallpapers/most-recent', [WallpaperController::class, 'getMostRecentWallpapers']); //les x wallpapers les plus récents
+    Route::get('galaxies/{id}/wallpapers/most-liked', [WallpaperController::class, 'getMostLikedWallpapers'])->middleware('throttle.relaxed'); // Get most liked wallpapers
+    Route::get('galaxies/{id}/wallpapers/most-recent', [WallpaperController::class, 'getMostRecentWallpapers'])->middleware('throttle.relaxed'); // Get most recent wallpapers
 
-    // GALAXIES et leurs systèmes solaires
-    Route::get('galaxies', [GalaxyController::class, 'index']); //liste des galaxies avec leurs stats
-    Route::get('galaxies/{id}', [GalaxyController::class, 'show']); //une galaxie avec ses stats
-    Route::get('galaxies/{id}/animation', [GalaxyController::class, 'getSolarSystemsForAnimation']); //liste des systemes solaires pour l'animation
-    Route::get('galaxies/{id}/most-liked', [GalaxyController::class, 'getMostLikedSolarSystems']); //les x systemes solaires les plus aimés
-    Route::get('galaxies/{id}/most-recent', [GalaxyController::class, 'getMostRecentSolarSystems']); //les x systemes solaires les plus récents
+    // Galaxies and their solar systems
+    Route::get('galaxies', [GalaxyController::class, 'index'])->middleware('throttle.normal'); // List galaxies with their stats
+    Route::get('galaxies/{id}', [GalaxyController::class, 'show'])->middleware('throttle.normal'); // Get galaxy with its stats
+    Route::get('galaxies/{id}/animation', [GalaxyController::class, 'getSolarSystemsForAnimation'])->middleware('throttle.strict'); // Get solar systems list for animation
+    Route::get('galaxies/{id}/most-liked', [GalaxyController::class, 'getMostLikedSolarSystems'])->middleware('throttle.relaxed'); // Get most liked solar systems
+    Route::get('galaxies/{id}/most-recent', [GalaxyController::class, 'getMostRecentSolarSystems'])->middleware('throttle.relaxed'); // Get most recent solar systems
 
-    // SOLAR SYSTEMS d'une galaxie
-    Route::get('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'index']); //liste des systemes solaire pour cette galaxie
-    Route::get('galaxies/{galaxyId}/solar-systems/systems', [SolarSystemController::class, 'getSolarSystemsByUser']); //liste des systemes owned pour l'utilisateur donné
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'show']); //le systeme solaire avec ses stats pour cette galaxie
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/owner', [SolarSystemController::class, 'getOwner']); //le propriétaire du systeme solaire
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes', [LikeController::class, 'countSolarSystemLikes']); //nombre de likes pour ce systeme solaire
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes-stats', [LikeController::class, 'getSolarSystemLikesStats']); //stats des likes (infos plus completes) pour ce systeme solaire
+    // Solar-systems from a galaxy
+    Route::get('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'index'])->middleware('throttle.moderate'); // List solar systems for this galaxy
+    Route::get('galaxies/{galaxyId}/solar-systems/systems', [SolarSystemController::class, 'getSolarSystemsByUser'])->middleware('throttle.moderate'); // List owned systems for given user
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'show'])->middleware('throttle.moderate'); // Get solar system with its stats for this galaxy
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/owner', [SolarSystemController::class, 'getOwner'])->middleware('throttle.moderate'); // Get solar system owner
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes', [LikeController::class, 'countSolarSystemLikes'])->middleware('throttle.relaxed'); // Get likes count for this solar system
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/likes-stats', [LikeController::class, 'getSolarSystemLikesStats'])->middleware('throttle.relaxed'); // Get likes stats (more complete info) for this solar system
 
-    // Wallpaper d'un systeme solaire
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'show']); //retourne le wallpaper associé à ce solarSystem
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/exists', [WallpaperController::class, 'exists']); //existe-t'il un wallpaper pour ce solarSystem?
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/likes', [LikeController::class, 'countWallpaperLikes']); //nombres de likes pour le wallpaper de ce solarSystem
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/likes-stats', [LikeController::class, 'getWallpaperLikesStats']); //stats des likes pour le wallpaper de ce solarSystem (infos plus complètes)
+    // Wallpaper of a solar system
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'show'])->middleware('throttle.moderate'); // Get wallpaper associated with this solar system
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/exists', [WallpaperController::class, 'exists'])->middleware('throttle.moderate'); // Check if wallpaper exists for this solar system
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/likes', [LikeController::class, 'countWallpaperLikes'])->middleware('throttle.relaxed'); // Get likes count for this solar system's wallpaper
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/likes-stats', [LikeController::class, 'getWallpaperLikesStats'])->middleware('throttle.relaxed'); // Get likes stats for this solar system's wallpaper (more complete info)
 
-    // PLANETES d'un systeme solaire
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'index']); //liste des planetes pour ce systeme solaire
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'show']); //une planète avec ses stats
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/owner', [PlanetController::class, 'getOwner']); //le propriétaire de la planete
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes', [LikeController::class, 'countPlanetLikes']); //nombre de likes pour cette planete
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes-stats', [LikeController::class, 'getPlanetLikesStats']); //stats des likes (infos plus completes) pour cette planete
+    // Planets from a solar system
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'index'])->middleware('throttle.moderate'); // List planets for this solar system
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'show'])->middleware('throttle.moderate'); // Get planet with its stats
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/owner', [PlanetController::class, 'getOwner'])->middleware('throttle.moderate'); // Get planet owner
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes', [LikeController::class, 'countPlanetLikes'])->middleware('throttle.relaxed'); // Get likes count for this planet
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/likes-stats', [LikeController::class, 'getPlanetLikesStats'])->middleware('throttle.relaxed'); // Get likes stats (more complete info) for this planet
 
-    // MOONS d'une planète
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'index']); //liste des lunes pour cette planete
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'show']); //une lune avec ses stats
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/owner', [MoonController::class, 'getOwner']); //le propriétaire de la lune
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes', [LikeController::class, 'countMoonLikes']); //nombre de likes pour cette lune
-    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes-stats', [LikeController::class, 'getMoonLikesStats']); //stats des likes (infos plus completes) pour cette lune
+    // Moons from a planet
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'index'])->middleware('throttle.moderate'); // List moons for this planet
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'show'])->middleware('throttle.moderate'); // Get moon with its stats
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/owner', [MoonController::class, 'getOwner'])->middleware('throttle.moderate'); // Get moon owner
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes', [LikeController::class, 'countMoonLikes'])->middleware('throttle.relaxed'); // Get likes count for this moon
+    Route::get('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/likes-stats', [LikeController::class, 'getMoonLikesStats'])->middleware('throttle.relaxed'); // Get likes stats (more complete info) for this moon
 
     // Search
-    Route::get('search', [SearchController::class, 'globalSearch']); //retourne une liste de systemes solaires, planetes, lunes, galaxies, etc... qui matchent la requette.
+    Route::get('search', [SearchController::class, 'globalSearch'])->middleware('throttle.moderate'); // Global search returning solar systems, planets, moons, galaxies, etc. matching the query
 
-    // ClaimController, check if the system is claimable for given user id
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [ClaimController::class, 'isClaimable']); //retourne si le system est 'claimable' pour l'utilisateur donné
-
+    // Claim 
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/is-claimable', [ClaimController::class, 'isClaimable'])->middleware('throttle.normal'); // Check if system is claimable for given user
 });
 
-// Routes protégées (authentification requise)
-Route::prefix('v1')->middleware(['auth:sanctum', RateLimitMiddleware::class])->group(function (): void {
-    // Auth
-    Route::post('auth/logout', [AuthController::class, 'logout']); //deconnexion
-    Route::get('auth/me', [AuthController::class, 'me']); //retourn l'utilisateur actuel
+// Protected routes (authentication required)
+Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
+    // Authentication
+    Route::post('auth/logout', [AuthController::class, 'logout'])->middleware('throttle.normal'); // User logout
+    Route::get('auth/me', [AuthController::class, 'me'])->middleware('throttle.normal'); // Get current authenticated user
 
-    // User
-    Route::post('users/change-password', [UserController::class, 'changePassword']); //changement mdp via profil
-    Route::post('users/change-email', [UserController::class, 'changeEmail']); //changement de mail via profil
-    Route::post('users/delete-account', [UserController::class, 'deleteAccount']); //suppression du compte
+    // User account management
+    Route::post('users/change-password', [UserController::class, 'changePassword'])->middleware('throttle.strict'); // Change password via profile
+    Route::post('users/change-email', [UserController::class, 'changeEmail'])->middleware('throttle.strict'); // Change email via profile
+    Route::post('users/delete-account', [UserController::class, 'deleteAccount'])->middleware('throttle.strict'); // Delete user account
 
-    // Solar Systems (modification) Pour l'instant, pas d'ajout et de suppression des systemes solaires, juste modifications des systems pré-générés, a voir plus tard
-    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':solar_system');;
+    // Solar Systems (modification) - For now, no add/delete of solar systems, only modifications of pre-generated systems, to be reviewed in v2
+    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'update'])->middleware(['throttle.moderate', 'check.owner:solar_system']); // Update solar system
 
-    // Wallpaper d'un systeme solaire
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'store'])->middleware(CheckOwnershipMiddleware::class . ':solar_system'); //save le wallpaper associé à ce solar_system
-    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'destroy'])->middleware(CheckOwnershipMiddleware::class . ':solar_system'); //supprime le wallpaper associé à ce solar_system
+    // Solar system wallpaper management
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'store'])->middleware(['throttle.moderate', 'check.owner:solar_system']); // Save wallpaper for this solar system
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers', [WallpaperController::class, 'destroy'])->middleware(['throttle.moderate', 'check.owner:solar_system']); // Delete wallpaper for this solar system
 
-    // Planets (modification)
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'store'])->middleware(CheckOwnershipMiddleware::class . ':solar_system'); //solar_system car on verifie le parent car planetId n'existe pas
-    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':planet');
-    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'destroy'])->middleware(CheckOwnershipMiddleware::class . ':planet');
+    // Planets management
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets', [PlanetController::class, 'store'])->middleware(['throttle.moderate', 'check.owner:solar_system']); // Create planet (check solar_system owner since planetId doesn't exist yet)
+    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'update'])->middleware(['throttle.moderate', 'check.owner:planet']); // Update planet
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}', [PlanetController::class, 'destroy'])->middleware(['throttle.moderate', 'check.owner:planet']); // Delete planet
 
-    // Moons (modification)
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'store'])->middleware(CheckOwnershipMiddleware::class . ':planet'); //planet car on verifie le parent car moonId n'existe pas
-    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'update'])->middleware(CheckOwnershipMiddleware::class . ':moon');
-    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'destroy'])->middleware(CheckOwnershipMiddleware::class . ':moon');
+    // Moons management
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons', [MoonController::class, 'store'])->middleware(['throttle.moderate', 'check.owner:planet']); // Create moon (check planet owner since moonId doesn't exist yet)
+    Route::put('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'update'])->middleware(['throttle.moderate', 'check.owner:moon']); // Update moon
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}', [MoonController::class, 'destroy'])->middleware(['throttle.moderate', 'check.owner:moon']); // Delete moon
 
-    // Like Routes (toutes privées)
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/to-like', [LikeController::class, 'toggleSolarSystem']); //to like ou unlike un systeme solaire
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/{wallpaperId}/to-like', [LikeController::class, 'toggleWallpaper']); //to like ou unlike un wallpaper
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/to-like', [LikeController::class, 'togglePlanet']); //to like ou unlike une planete
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon']); //to like ou unlike une lune
-    Route::get('user-likes', [LikeController::class, 'checkUserLikes']); //return if given id are liked or not by user
+    // Like Routes (all private)
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/to-like', [LikeController::class, 'toggleSolarSystem'])->middleware('throttle.moderate'); // Toggle like/unlike solar system
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/wallpapers/{wallpaperId}/to-like', [LikeController::class, 'toggleWallpaper'])->middleware('throttle.moderate'); // Toggle like/unlike wallpaper
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/to-like', [LikeController::class, 'togglePlanet'])->middleware('throttle.moderate'); // Toggle like/unlike planet
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/planets/{planetId}/moons/{moonId}/to-like', [LikeController::class, 'toggleMoon'])->middleware('throttle.moderate'); // Toggle like/unlike moon
+    Route::get('user-likes', [LikeController::class, 'checkUserLikes'])->middleware('throttle.relaxed'); // Check if given IDs are liked by user
 
-    // Routes pour les claims de systèmes solaires
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [ClaimController::class, 'claim']); //claim le solarSystem
-    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [ClaimController::class, 'unclaim']); //unclaim le solarSystem
+    // Solar system claim routes
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/claim', [ClaimController::class, 'claim'])->middleware('throttle.moderate'); // Claim solar system
+    Route::post('galaxies/{galaxyId}/solar-systems/{solarSystemId}/unclaim', [ClaimController::class, 'unclaim'])->middleware('throttle.moderate'); // Unclaim solar system
 });
 
-// Routes Admin (authentification + admin requise) A REVOIR POUR LES MIDDLEWARE: Throttle:api ?
-Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api', IsAdmin::class])->group(function (): void {
-    // Galaxies
-    Route::post('galaxies', [GalaxyController::class, 'store']); //Création
-    Route::put('galaxies/{id}', [GalaxyController::class, 'update']); //Modification
-    Route::delete('galaxies/{id}', [GalaxyController::class, 'destroy']); //Suppression
+// Admin routes (authentication + admin role required)
+Route::prefix('v1')->middleware(['auth:sanctum', 'admin'])->group(function (): void {
+    // Solar Systems admin management
+    Route::post('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'store'])->middleware('throttle.moderate'); // Create solar system
+    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'destroy'])->middleware('throttle.moderate'); // Delete solar system
 
-    // Solar Systems
-    Route::post('galaxies/{galaxyId}/solar-systems', [SolarSystemController::class, 'store']); //creation d'un system solaire
-    Route::delete('galaxies/{galaxyId}/solar-systems/{solarSystemId}', [SolarSystemController::class, 'destroy']); //suppression d'un systeme solaire
-
-    // User
-    Route::post('user/{userId}', [AdminController::class, 'add']); //ajout d'un user
-    Route::delete('user/{userId}', [AdminController::class, 'delete']); //suppression d'un user
+    // User admin management
+    Route::post('users/{userId}', [AdminController::class, 'add'])->middleware('throttle.strict'); // Add user (admin)
+    Route::delete('users/{userId}', [AdminController::class, 'delete'])->middleware('throttle.strict'); // Delete user (admin)
 });

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Traits\ApiResponse;
 
-class IsAdmin
+class IsAdminMiddleware
 {
     use ApiResponse;
 
