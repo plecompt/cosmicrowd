@@ -19,10 +19,6 @@ class PasswordRecoveryMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Password recovery')
-                    ->view('emails.recovery')
-                    ->with([
-                        'token' => $this->token
-                    ]);
+        return $this->subject('Password recovery')->view('emails.recovery')->with(['token' => $this->token]);
     }
 }
