@@ -58,43 +58,18 @@ class SearchController
 
             // Search planets if filter is enabled
             if (isset($filters['planets']) && $filters['planets']) {
-                $planets = Planet::with(['solarSystem:solar_system_id,solar_system_name'])
-                                ->where('planet_name', 'LIKE', '%' . $query . '%')
+                $planets = Planet::where('planet_name', 'LIKE', '%' . $query . '%')
                                 ->limit($limit)
-                                ->get()
-                                ->map(function ($planet) {
-                                    return [
-                                        'planet_id' => $planet->planet_id,
-                                        'planet_name' => $planet->planet_name,
-                                        'planet_type' => $planet->planet_type,
-                                        'solar_system_id' => $planet->solarSystem->solar_system_id ?? null,
-                                        'solar_system_name' => $planet->solarSystem->solar_system_name ?? null,
-                                    ];
-                                });
+                                ->get();
                 $results['planets'] = $planets;
                 $totalResults += $planets->count();
             }
 
             // Search moons if filter is enabled
             if (isset($filters['moons']) && $filters['moons']) {
-                $moons = Moon::with([
-                                'planet:planet_id,planet_name,solar_system_id',
-                                'planet.solarSystem:solar_system_id,solar_system_name'
-                            ])
-                            ->where('moon_name', 'LIKE', '%' . $query . '%')
+                $moons = Moon::where('moon_name', 'LIKE', '%' . $query . '%')
                             ->limit($limit)
-                            ->get()
-                            ->map(function ($moon) {
-                                return [
-                                    'moon_id' => $moon->moon_id,
-                                    'moon_name' => $moon->moon_name,
-                                    'moon_type' => $moon->moon_type,
-                                    'planet_id' => $moon->planet->planet_id ?? null,
-                                    'planet_name' => $moon->planet->planet_name ?? null,
-                                    'solar_system_id' => $moon->planet->solarSystem->solar_system_id ?? null,
-                                    'solar_system_name' => $moon->planet->solarSystem->solar_system_name ?? null,
-                                ];
-                            });
+                            ->get();
                 $results['moons'] = $moons;
                 $totalResults += $moons->count();
             }

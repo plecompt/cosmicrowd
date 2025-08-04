@@ -31,8 +31,10 @@ backend/vendor/
 backend/node_modules/
 backend/.env
 backend/.env.backup
+backend/.env.testing
 backend/.phpunit.result.cache
 backend/phpunit.xml
+backend/phpunit.xml.dist
 backend/Homestead.json
 backend/Homestead.yaml
 backend/auth.json
