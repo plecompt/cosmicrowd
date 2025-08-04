@@ -15,7 +15,7 @@ import { User } from '../../interfaces/user/user.interface';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css', '../../shared/styles/form.template.css']
 })
-export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
+export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   loginError: String = "";
   user!: User;
@@ -30,10 +30,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     public navigationService: NavigationService
   ) { }
 
-  ngOnDestroy(): void {}
-
-  ngAfterViewInit(): void {}
-
   ngOnInit(): void {
     // If user is allready logged in
     if (this.authService.isLoggedIn()) {
@@ -46,7 +42,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   initLoginForm(){
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, CustomValidatorsService.strictEmail()]],
-      password: ['', [Validators.required, Validators.minLength(6)]] //must be 12 in prod, 6 for dev
+      password: ['', [Validators.required, Validators.minLength(12), CustomValidatorsService.strongPassword()]]
     });
   }
 
@@ -62,8 +58,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           });
         },
-        error: () => {
-          this.loginError = 'Invalid email/password combination';
+        error: (error: any) => {
+          this.loginError = error.message || 'Something went wrong, please try again later.';
         }
       });
     } else {

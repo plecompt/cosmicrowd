@@ -15,6 +15,7 @@ export class BackgroundStarsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.createTwinkleAnimation();
+  
     setTimeout(() => {
       this.generateStars();
     }, 100);
@@ -27,14 +28,13 @@ export class BackgroundStarsComponent implements OnInit, OnDestroy {
   private generateStars(): void {
     const container: HTMLElement = this.starsContainer.nativeElement;
     
-    if (!container) return;
-
-    this.clearStars();
+    if (!container)
+      return;
 
     // Container dimension
     const containerRect: DOMRect = container.getBoundingClientRect();
-    const containerWidth: number = containerRect.width || container.clientWidth;
-    const containerHeight: number = containerRect.height || container.clientHeight;
+    const containerWidth: number = containerRect.width;
+    const containerHeight: number = containerRect.height;
 
     for (let i: number = 0; i < this.numberOfStars; i++) {
       const star: HTMLDivElement = document.createElement('div');

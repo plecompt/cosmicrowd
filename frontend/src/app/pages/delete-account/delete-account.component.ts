@@ -50,15 +50,15 @@ export class DeleteAccountComponent implements OnInit {
     });
   }
 
+  //onAccountDeletionSubmit
   onAccountDeletionSubmit() {
-    
     if (!this.formValidator.canSubmit(this.deleteAccountForm)) {
       return;
     }
     this.showModal();
   }
 
-
+  //Show confirmation with modal
   private showModal(): void {
     this.modalService.show({
       title: 'Delete Account Forever',

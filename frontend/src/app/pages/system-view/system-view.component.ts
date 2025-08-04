@@ -334,10 +334,6 @@ export class SystemViewComponent implements OnInit {
     };
   }
 
-  onRenderReady(data: any): void {
-    this.renderer = data;
-  }
-
   toggleOrbitalAnimation() {
     this.renderOptions = {
       ...this.renderOptions,

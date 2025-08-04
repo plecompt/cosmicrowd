@@ -24,6 +24,11 @@ class GalaxySeeder extends Seeder
         'GALAXY_RADIUS' => 1000,
     ];
 
+    /**
+     * Main seeder method.
+     * Creates the galaxy and initiates the generation of solar systems, planets and moons.
+     * @return void
+     */
     public function run()
     {      
         $galaxy = Galaxy::factory()->create([
@@ -36,6 +41,12 @@ class GalaxySeeder extends Seeder
         $this->generateSolarSystems($galaxy->galaxy_id);
     }
 
+    /**
+     * Generates all the solar systems for the given galaxy.
+     * The solar systems are positioned in a spiral pattern to form the galaxy's arms.
+     *
+     * @param int $galaxyId The ID of the galaxy to populate.
+     */
     private function generateSolarSystems(int $galaxyId)
     {
         for($i = 0; $i < self::CONFIG['NUM_ARMS']; $i++){
@@ -59,6 +70,11 @@ class GalaxySeeder extends Seeder
         }
     }
 
+    /**
+     * Generates a random number of planets (0-8) for a given solar system.
+     *
+     * @param SolarSystem $solarSystem The solar system to add planets to.
+     */
     private function generatePlanets($solarSystem)
     {
         $numPlanets = rand(0, 8);
@@ -73,6 +89,11 @@ class GalaxySeeder extends Seeder
         }
     }
 
+    /**
+     * Generates a random number (0-3) of moons for a given planet.
+     *
+     * @param Planet $planet The planet to add moons to.
+     */
     private function generateMoons($planet)
     {
         $numMoons = rand(0, 3);
@@ -85,6 +106,13 @@ class GalaxySeeder extends Seeder
         }
     }
 
+    /**
+     * Generates a random number with a Gaussian (normal) distribution.
+     *
+     * @param float $center The mean of the distribution.
+     * @param float $deviation The standard deviation of the distribution.
+     * @return float A random number following a Gaussian distribution.
+     */
     private function gaussianRandom(float $center = 0.0, float $deviation = 1.0): float 
     {
         $u = mt_rand() / mt_getrandmax();
@@ -95,6 +123,16 @@ class GalaxySeeder extends Seeder
         return $z * $deviation + $center;
     }
 
+    /**
+     * Calculates a new position for a celestial body to form a spiral arm.
+     * It applies a spiral transformation to a given 3D position.
+     *
+     * @param float $x The initial x-coordinate.
+     * @param float $y The initial y-coordinate.
+     * @param float $z The initial z-coordinate.
+     * @param float $offset The angular offset for the spiral arm.
+     * @return \App\Utils\Vector3 The new position in the spiral arm.
+     */
     private function spiral(float $x, float $y, float $z, float $offset)
     {
         $r = sqrt($x**2 + $y**2);

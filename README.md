@@ -152,10 +152,12 @@ maildev
 - Access the application via http://localhost:4200
 - Create an account or log in
 
-By default, there is two users:
+By default, there is one admin and three users:
 
-- email: user@cosmicrowd.com & password: user1234 
-- email: admin@cosmicrowd.com & password: admin1234
+- email: user@cosmicrowd.com & password: @User1234567
+- email: user2@cosmicrowd.com & password: @User1234567 
+- email: user3@cosmicrowd.com & password: @User1234567 
+- email: admin@cosmicrowd.com & password: @Admin123456
                                              
 
 ### Database Structure

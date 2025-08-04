@@ -11,5 +11,5 @@ import { GalaxyAnimationComponent } from '../../components/galaxy-animation/gala
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-
+  
 }

@@ -37,10 +37,6 @@
   border-left: 4px solid #f87171;
 }
 
-.info {
-  border-left: 4px solid #60a5fa;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;

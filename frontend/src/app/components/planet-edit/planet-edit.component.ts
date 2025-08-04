@@ -19,11 +19,14 @@ import { PlanetsService } from '../../services/planets/planets-service';
   styleUrls: ['./planet-edit.component.css', '../../shared/styles/edit.template.css']
 })
 export class PlanetEditComponent implements OnInit {
-  @ViewChild('editMoonRef') moonEditComponent!: MoonEditComponent;
+  //Inputs and Outputs
   @Input() planet: any = null;
   @Input() solarSystem!: SolarSystem;
   @Output() refresh = new EventEmitter<void>();
-
+  
+  @ViewChild('editMoonRef') moonEditComponent!: MoonEditComponent;
+  
+  //Datas
   user!: User;
   currentGalaxy: number = 1; //actually there is only one galaxy, in the future it might change
   isVisible: boolean = false;
@@ -64,12 +67,14 @@ export class PlanetEditComponent implements OnInit {
     this.isVisible = true;
   }
 
+  //Edit planet
   editPlanet(planet: any): void {
     this.planet = planet;
     this.showAddMoons = true;
     this.openModal();
   }
 
+  //Add a new planet
   addPlanet(): void {
     const newPlanet = {
       planet_id: -42, // Temporary ID
@@ -109,6 +114,7 @@ export class PlanetEditComponent implements OnInit {
     }
   }
 
+  //Save planet in DB
   savePlanet(): void {
     const validation = this.planetValidationService.validatePlanet(this.planet);
 
@@ -146,6 +152,7 @@ export class PlanetEditComponent implements OnInit {
     this.closeModal();
   }
 
+  //Delete Planet
   deletePlanet(planetId: number): void {
     this.modalService.show({
       title: 'Delete Planet ?',

@@ -48,6 +48,7 @@
           <button (click)="navigateTo('/')">Home</button>
           <button (click)="navigateTo('/new-popular')">New & Popular</button>
           <button (click)="navigateTo('/contact')">Contact</button>
+          <button (click)="navigateTo('/privacy')">Privacy Policy</button>
         @if(this.authService.isLoggedIn()){
           <button (click)="navigateTo('/systems')">Systems</button>
           <button (click)="navigateToProfile()">Profile</button>

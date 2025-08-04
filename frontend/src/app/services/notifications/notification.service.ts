@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { NavigationService } from '../navigation/navigation.service';
 
 export interface Notification {
@@ -13,16 +13,16 @@ export interface Notification {
   providedIn: 'root'
 })
 export class NotificationService {
-  private notificationSubject = new BehaviorSubject<Notification | null>(null);
+  private notificationSubject = new Subject<Notification | null>();
   public notification$ = this.notificationSubject.asObservable();
 
   constructor(private navigationService: NavigationService) {}
 
-  showSuccess(message: string, duration: number = 3000, redirectTo?: string): void {
+  showSuccess(message: string, duration: number = 2500, redirectTo?: string): void {
     this.showNotification({ message, type: 'success', duration, redirectTo });
   }
 
-  showError(message: string, duration: number = 5000, redirectTo?: string): void {
+  showError(message: string, duration: number = 2500, redirectTo?: string): void {
     this.showNotification({ message, type: 'error', duration, redirectTo });
   }
 

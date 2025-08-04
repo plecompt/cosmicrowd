@@ -14,7 +14,9 @@
 
       <label for="password" class="screen-reader-only">Password</label>
       <input type="password" id="password" placeholder="Password" required formControlName="password">
-
+      @if (formValidator.isInvalid(loginForm, 'password')) {
+        <div class="error-message">{{ formValidator.getErrorMessage(loginForm, 'password') }}</div>
+      }
       @if (loginError) {
         <div class="error-message">{{ loginError }}</div>
       }

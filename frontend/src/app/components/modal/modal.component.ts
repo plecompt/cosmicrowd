@@ -21,7 +21,7 @@ export class ModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.modalService.modal$.subscribe(data => {
+    this.modalService.modal.subscribe(data => {
       this.modalData = data;
       this.cachedContent = this.modalData?.content ? this.sanitizer.bypassSecurityTrustHtml(this.modalData.content) : '';
     });
@@ -31,6 +31,7 @@ export class ModalComponent implements OnInit {
     return this.cachedContent;
   }
 
+  //For each method, if callback is defined, execute callback, then close
   onConfirm(): void {
     this.modalData?.onConfirm?.();
     this.modalService.close();

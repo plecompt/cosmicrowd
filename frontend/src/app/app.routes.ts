@@ -15,6 +15,7 @@ import { DeleteAccountComponent } from './pages/delete-account/delete-account.co
 import { ContactComponent } from './pages/contact/contact.component';
 import { PopularComponent } from './pages/popular/popular.component';
 import { ViewWallpaperComponent } from './pages/view-wallpaper/view-wallpaper.component';
+import { RgpdComponent } from './pages/rgpd/rgpd.component';
 
 
 export const routes: Routes = [
@@ -35,5 +36,6 @@ export const routes: Routes = [
     { path: 'edit-system/:id', component: SystemEditComponent, title: 'CosmiCrowd - Edit System' },
     { path: 'new-popular', component: PopularComponent, title: 'CosmiCrowd - New and Popular' },
     { path: 'view-wallpaper/:id', component: ViewWallpaperComponent, title: 'CosmiCrowd - View Wallpaper' },
+    { path: 'privacy', component: RgpdComponent, title: 'CosmiCrowd - Privacy Policy' },
     { path: '**', redirectTo: '' }
 ];

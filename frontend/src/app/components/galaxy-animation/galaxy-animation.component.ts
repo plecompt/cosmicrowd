@@ -26,7 +26,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   userId: string = localStorage.getItem('user_id') || '';
 
   // Reference to the canvas container DOM element
-  @ViewChild('canvasContainer', { static: true }) canvasContainer!: ElementRef;
+  @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
   // Three.js core objects
   private scene = new THREE.Scene();
@@ -138,10 +138,6 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   }
 
   private createSprites() {
-    // Remove existing sprites from scene
-    this.systems.forEach(s => this.scene.remove(s));
-    this.systems = [];
-
     // Create sprite for each solar system
     this.systemsData.forEach(data => {
       // Get star color and size based on type
@@ -184,9 +180,9 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     const ctx = canvas.getContext('2d')!;
     // Create radial gradient for star glow effect
     const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 28);
-    gradient.addColorStop(0, '#FFF');
-    gradient.addColorStop(0.5, `#${color.getHexString()}`);
-    gradient.addColorStop(1, 'transparent');
+    gradient.addColorStop(0, '#FFF'); //center
+    gradient.addColorStop(0.5, `#${color.getHexString()}`); //middle
+    gradient.addColorStop(1, 'transparent'); //border
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 64, 64);
     // Return Three.js texture from canvas

@@ -21,9 +21,6 @@ export class ForgotPasswordComponent {
     private userService: UserService
   ){}
 
-  ngAfterViewInit(): void {
-  }
-
   ngOnInit(): void {
     // If user is allready logged in
     if (this.authService.isLoggedIn()) {

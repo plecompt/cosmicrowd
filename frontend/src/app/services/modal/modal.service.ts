@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export interface ModalData {
   title: string;
@@ -22,8 +22,8 @@ export interface ModalData {
   providedIn: 'root'
 })
 export class ModalService {
-  private modalSubject = new BehaviorSubject<ModalData | null>(null);
-  modal$ = this.modalSubject.asObservable();
+  private modalSubject = new Subject<ModalData | null>();
+  modal = this.modalSubject.asObservable(); //parent component can only subscribe, cant modify.
 
   show(data: ModalData): void {
     this.modalSubject.next(data);

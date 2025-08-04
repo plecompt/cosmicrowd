@@ -18,9 +18,11 @@ import { MoonsService } from '../../services/moons/moons-service';
   styleUrls: ['./moon-edit.component.css', '../../shared/styles/edit.template.css']
 })
 export class MoonEditComponent {
+  //Outputs
   @Output() refresh = new EventEmitter<void>();
   @Output() closeParentModal = new EventEmitter<void>();
 
+  //Datas
   user!: User;
   currentGalaxy: number = 1; //actually there is only one galaxy, in the future it might change
   isVisible: boolean = false;
@@ -66,6 +68,7 @@ export class MoonEditComponent {
     this.isVisible = false;
   }
 
+  //Add a new moon
   addMoon(planet: Planet): void {
     const newMoon: Moon = {
       moon_id: -42, // Temporary ID
@@ -103,12 +106,14 @@ export class MoonEditComponent {
     }
   }
 
+  //Edit a moon
   editMoon(planet: Planet, moon: Moon): void {
     this.moon = moon;
     this.currentPlanet = planet;
     this.openModal();
   }
 
+  //Save moon in db
   saveMoon(): void {
     // Validate moon
     const validation = this.moonValidationService.validateMoon(this.moon);
@@ -149,6 +154,7 @@ export class MoonEditComponent {
     this.closeModal();
   }
 
+  //Delete moon after confirmation
   deleteMoon(planet: Planet, moonId: number): void {
     this.modalService.show({
       title: 'Delete Moon ?',
