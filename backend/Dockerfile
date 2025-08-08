@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2-fmp
 
 WORKDIR /app
 
@@ -8,24 +8,24 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy composer files first (for better caching)
+# Copy composer files first
 COPY composer.json composer.lock ./
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
 # Copy application code
 COPY . .
 
-# Generate key (without database)
-RUN php artisan key:generate --no-interaction
+# Create .env from example and generate key
+RUN cp .env.example .env && php artisan key:generate --no-interaction
 
 EXPOSE 8000
 
-# Start command with migrations
+# Start command
 CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
