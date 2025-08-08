@@ -1,0 +1,54 @@
+services:
+  - type: web
+    name: cosmicrowd-backend
+    env: php
+    buildCommand: composer install --no-dev --optimize-autoloader && php artisan key:generate && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    envVars:
+      - key: APP_NAME
+        value: Cosmicrowd
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        sync: false
+      - key: APP_KEY
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: cosmicrowd-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: cosmicrowd-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: cosmicrowd-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: cosmicrowd-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: cosmicrowd-db
+          property: password
+      - key: FRONTEND_URL
+        sync: false
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+
+databases:
+  - name: cosmicrowd-db
+    databaseName: cosmicrowd
+    user: cosmicrowd
