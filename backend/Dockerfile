@@ -25,7 +25,11 @@ COPY . .
 # Create .env from example and generate key
 RUN cp .env.example .env && php artisan key:generate --no-interaction
 
-EXPOSE 8000
 
-# Start command, migration then seeding
-CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000
+# Start command
+EXPOSE ${PORT:-8000}
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+
+
+#drop db + seeding
+#CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
