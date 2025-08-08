@@ -26,7 +26,7 @@ COPY . .
 RUN cp .env.example .env && php artisan key:generate --no-interaction
 
 
-# Start command
+# Start command without seeding and migrations
 EXPOSE ${PORT:-8000}
 CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
 
