@@ -1,14 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiConfigService } from '../api-config-service/api-config-service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SearchService {
-  private apiUrl = 'http://localhost:8000/api/v1';
-
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apiConfigService: ApiConfigService
+  ) {}
 
   search(query: string, filters: any): Observable<any> {
     let params = new HttpParams()
@@ -20,7 +22,7 @@ export class SearchService {
     if (filters.planets) params = params.set('filters[planets]', 'true');
     if (filters.moons) params = params.set('filters[moons]', 'true');
 
-    return this.http.get(`${this.apiUrl}/search`, { params });
+    return this.http.get(`${this.apiConfigService.baseUrl}/search`, { params });
   }
 
 }

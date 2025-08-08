@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, FormGroup, AsyncValidatorFn } from '@angular/forms';
 import { catchError, debounceTime, map, Observable, of } from 'rxjs';
+import { ApiConfigService } from '../api-config-service/api-config-service';
 
 
 @Injectable({
@@ -9,7 +10,10 @@ import { catchError, debounceTime, map, Observable, of } from 'rxjs';
 })
 export class CustomValidatorsService {
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private apiConfigService: ApiConfigService
+  ) { }
 
   // Strong password validator
   static strongPassword(): ValidatorFn {
@@ -159,7 +163,7 @@ export class CustomValidatorsService {
       if (!control.value) return of(null);
       
       // Call API to check login availability
-      return this.http.post<{data: {available: boolean}}>('http://localhost:8000/api/v1/users/check-login', { login: control.value })
+      return this.http.post<{data: {available: boolean}}>(`${this.apiConfigService.baseUrl}/users/check-login`, { login: control.value })
         .pipe(
           // Debounce to avoid too many API calls
           debounceTime(200),
@@ -178,7 +182,7 @@ export class CustomValidatorsService {
       if (!control.value) return of(null);
       
       // Call API to check email availability
-      return this.http.post<{data: {available: boolean}}>('http://localhost:8000/api/v1/users/check-email', { email: control.value })
+      return this.http.post<{data: {available: boolean}}>(`${this.apiConfigService.baseUrl}/users/check-email`, { email: control.value })
         .pipe(
           // Debounce to avoid too many API calls
           debounceTime(200),

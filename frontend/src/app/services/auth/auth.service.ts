@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs'; 
 import { tap, shareReplay, finalize } from 'rxjs/operators';
+import { ApiConfigService } from '../api-config-service/api-config-service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private apiConfigService: ApiConfigService) {}
 
   //set session in localStorage
   private setSession(authResult: any) {
@@ -30,7 +31,7 @@ export class AuthService {
 
   //login
   login(user_email: string, user_password: string): any{
-    return this.http.post('http://localhost:8000/api/v1/auth/login', {user_email, user_password}).pipe(
+    return this.http.post(`${this.apiConfigService.baseUrl}/auth/login`, {user_email, user_password}).pipe(
       tap(res=> this.setSession(res)),
       shareReplay(1)
     );
@@ -38,7 +39,7 @@ export class AuthService {
 
   //logout
   logout(): Observable<any> {
-     return this.http.post<any>('http://localhost:8000/api/v1/auth/logout', {}).pipe(
+     return this.http.post<any>(`${this.apiConfigService.baseUrl}/auth/logout`, {}).pipe(
       finalize(() => {
         this.clearSession();
       }),
@@ -48,6 +49,6 @@ export class AuthService {
 
   //return connected user
   me(){
-    return this.http.get('http://localhost:8000/api/v1/auth/me');
+    return this.http.get(`${this.apiConfigService.baseUrl}/auth/me`);
   }
 }

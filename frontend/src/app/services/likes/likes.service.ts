@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfigService } from '../api-config-service/api-config-service';
 
 export enum LikeableType {
   SOLAR_SYSTEM = 'solar_system',
@@ -13,9 +14,11 @@ export enum LikeableType {
   providedIn: 'root'
 })
 export class LikesService {
-  private apiUrl = 'http://localhost:8000/api/v1';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private apiConfigService: ApiConfigService
+  ) { }
 
   like(type: LikeableType, galaxyId: number, solarSystemId?: number, planetId?: number, moonId?: number, wallpaperId?: number): Observable<any> {
     const url = this.buildLikeUrl(type, galaxyId, solarSystemId, planetId, moonId, wallpaperId);
@@ -26,33 +29,33 @@ export class LikesService {
   private buildLikeUrl(type: LikeableType, galaxyId?: number, solarSystemId?: number, planetId?: number, moonId?: number, wallpaperId?: number): string {
     switch (type) {
       case LikeableType.SOLAR_SYSTEM:
-        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/to-like`;
+        return `${this.apiConfigService.baseUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/to-like`;
 
       case LikeableType.PLANET:
-        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/to-like`;
+        return `${this.apiConfigService.baseUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/to-like`;
 
       case LikeableType.MOON:
-        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/moons/${moonId}/to-like`;
+        return `${this.apiConfigService.baseUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/planets/${planetId}/moons/${moonId}/to-like`;
 
       case LikeableType.WALLPAPER:
-        return `${this.apiUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpapers/${wallpaperId}/to-like`;
+        return `${this.apiConfigService.baseUrl}/galaxies/${galaxyId}/solar-systems/${solarSystemId}/wallpapers/${wallpaperId}/to-like`;
     }
   }
 
   // Check likes on given objects for given user
   getUserLikes(ids: string, type: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/user-likes`, {
+    return this.http.get(`${this.apiConfigService.baseUrl}/user-likes`, {
       params: { ids: ids, type: type }
     });
   }
 
   // Get 10 most liked solarSystems in given galaxy
   getMostLikedSolarSystems(galaxyId: number, limit: number = 10): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/most-liked?limit=${limit}`);
+    return this.http.get(`${this.apiConfigService.baseUrl}/galaxies/${galaxyId}/most-liked?limit=${limit}`);
   }
 
   // Get most liked wallpapers in a given galaxy
   getMostLikedWallpapers(galaxyId: number, limit: number = 10): Observable<any> {
-    return this.http.get(`${this.apiUrl}/galaxies/${galaxyId}/wallpapers/most-liked?limit=${limit}`);
+    return this.http.get(`${this.apiConfigService.baseUrl}/galaxies/${galaxyId}/wallpapers/most-liked?limit=${limit}`);
   }
 }
