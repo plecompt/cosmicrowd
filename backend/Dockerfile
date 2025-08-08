@@ -22,15 +22,10 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 # Copy application code
 COPY . .
 
-# Create .env from example and generate key
+# Créer un .env provisoire juste pour key:generate (pas obligatoire en prod si Railway le gère)
 RUN cp .env.example .env && php artisan key:generate --no-interaction
 
-
-# Start command without seeding and migrations
 EXPOSE ${PORT:-8000}
-RUN php artisan config:clear && php artisan cache:clear
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
 
-
-#drop db + seeding
-#CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+# CMD au moment de l'exécution : vider le cache si nécessaire et démarrer Laravel
+CMD php artisan config:clear && php artisan cache:clear && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
