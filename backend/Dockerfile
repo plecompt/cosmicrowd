@@ -22,10 +22,12 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 # Copy application code
 COPY . .
 
-# Créer un .env provisoire juste pour key:generate (pas obligatoire en prod si Railway le gère)
-RUN cp .env.example .env && php artisan key:generate --no-interaction
+# Ne PAS créer de .env => Railway utilisera ses variables
+# Générer la clé Laravel directement depuis les variables Railway
+RUN php artisan key:generate --no-interaction --force
 
 EXPOSE ${PORT:-8000}
 
-# CMD au moment de l'exécution : vider le cache si nécessaire et démarrer Laravel
-CMD php artisan config:clear && php artisan cache:clear && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+CMD php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
