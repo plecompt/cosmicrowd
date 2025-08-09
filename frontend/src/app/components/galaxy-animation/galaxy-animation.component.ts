@@ -45,6 +45,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   private systems: THREE.Sprite[] = [];
   private systemsData: SolarSystemAnimation[] = [];
   private scaleFactor = 1;
+  private textureCache = new Map<string, THREE.Texture>();
 
   constructor(
     private galaxiesService: GalaxiesService,
@@ -138,39 +139,40 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   }
 
   private createSprites() {
-    // Create sprite for each solar system
-    this.systemsData.forEach(data => {
-      // Get star color and size based on type
-      const color = new THREE.Color(this.getStarColorMap()[data.type]);
-      const size = this.getStarSize(data.type);
-      // Create texture with gradient effect
-      const texture = this.createTexture(color);
-      // Create sprite material with additive blending for glow effect
-      const material = new THREE.SpriteMaterial({ map: texture, transparent: true, blending: THREE.AdditiveBlending });
-      const sprite = new THREE.Sprite(material);
-      // Set sprite size
-      sprite.scale.setScalar(size);
-      // Set sprite position in 3D space
-      sprite.position.set(data.x * this.scaleFactor || 0, data.y * this.scaleFactor || 0, data.z * this.scaleFactor || 0);
-      // Store system data in sprite for later reference
-      sprite.userData = data;
-      // Add sprite to scene and array
-      this.scene.add(sprite);
-      this.systems.push(sprite);
-    });
-  }
-
-  private createSkyBox() {
-    const loader = new THREE.CubeTextureLoader();
-    const skybox = loader.load([
-      'skybox/galaxy/right.png',
-      'skybox/galaxy/left.png',
-      'skybox/galaxy/top.png',
-      'skybox/galaxy/bottom.png',
-      'skybox/galaxy/front.png',
-      'skybox/galaxy/back.png'
-    ]);
-    this.scene.background = skybox;
+      const spritesToAdd: THREE.Sprite[] = [];
+      
+      this.systemsData.forEach(data => {
+          const color = new THREE.Color(this.getStarColorMap()[data.type]);
+          const size = this.getStarSize(data.type);
+          
+          // Use cached texture or create new one
+          let texture = this.textureCache.get(data.type);
+          if (!texture) {
+              texture = this.createTexture(color);
+              this.textureCache.set(data.type, texture);
+          }
+          
+          const material = new THREE.SpriteMaterial({ 
+              map: texture, 
+              transparent: true, 
+              blending: THREE.AdditiveBlending 
+          });
+          
+          const sprite = new THREE.Sprite(material);
+          sprite.scale.setScalar(size);
+          sprite.position.set(
+              data.x * this.scaleFactor || 0, 
+              data.y * this.scaleFactor || 0, 
+              data.z * this.scaleFactor || 0
+          );
+          sprite.userData = data;
+          
+          spritesToAdd.push(sprite);
+          this.systems.push(sprite);
+      });
+      
+      // Add all sprites at once
+      spritesToAdd.forEach(sprite => this.scene.add(sprite));
   }
 
   private createTexture(color: THREE.Color): THREE.Texture {
@@ -208,6 +210,19 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       'hypergiant': 0xFFB347, 'neutron_star': 0xE0E0FF, 'pulsar': 0x7FFFD4, 'variable': 0xFFE135,
       'binary': 0xFF9500, 'ternary': 0xFFB84D, 'black_hole': 0xFF4500
     };
+  }
+
+  private createSkyBox() {
+    const loader = new THREE.CubeTextureLoader();
+    const skybox = loader.load([
+      'skybox/galaxy/right.png',
+      'skybox/galaxy/left.png',
+      'skybox/galaxy/top.png',
+      'skybox/galaxy/bottom.png',
+      'skybox/galaxy/front.png',
+      'skybox/galaxy/back.png'
+    ]);
+    this.scene.background = skybox;
   }
 
   private animate(): void {
