@@ -60,14 +60,21 @@ class GalaxyController
         try {
             $galaxy = Galaxy::findOrFail($id);
             $solarSystems = $galaxy->solarSystems()
-                ->leftJoin('user', 'solar_system.user_id', '=', 'user.user_id')
-                ->select('solar_system.*', 'user.user_login')
+                ->select(
+                    'solar_system_id as id',
+                    'solar_system_type as type',
+                    'solar_system_initial_x as x',
+                    'solar_system_initial_y as y',
+                    'solar_system_initial_z as z'
+                )
                 ->get();
+            
             return $this->success($solarSystems, 'Solar systems for animation retrieved');
         } catch (\Exception $e) {
             return $this->error('Error retrieving solar systems for animation', 500);
         }
     }
+
 
     /**
      * Get most liked solar systems in galaxy

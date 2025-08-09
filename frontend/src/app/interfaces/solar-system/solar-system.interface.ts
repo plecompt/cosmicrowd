@@ -25,6 +25,14 @@ export interface SolarSystem {
   moonsCount?: number;
 }
 
+export interface SolarSystemAnimation {
+  id: number;
+  type: SolarSystemType;
+  x: number;
+  y: number;
+  z: number;
+}
+
 // Enum types for solar system
 export type SolarSystemType = 
   | 'brown_dwarf' 

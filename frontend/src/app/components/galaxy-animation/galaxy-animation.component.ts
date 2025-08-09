@@ -6,7 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { GalaxiesService } from '../../services/galaxies/galaxies.service';
 import { ModalService } from '../../services/modal/modal.service';
-import { SolarSystem } from '../../interfaces/solar-system/solar-system.interface';
+import { SolarSystem, SolarSystemAnimation } from '../../interfaces/solar-system/solar-system.interface';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { firstValueFrom } from 'rxjs';
@@ -43,7 +43,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
 
   // Solar systems data and sprites
   private systems: THREE.Sprite[] = [];
-  private systemsData: SolarSystem[] = [];
+  private systemsData: SolarSystemAnimation[] = [];
   private scaleFactor = 1;
 
   constructor(
@@ -141,8 +141,8 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
     // Create sprite for each solar system
     this.systemsData.forEach(data => {
       // Get star color and size based on type
-      const color = new THREE.Color(this.getStarColorMap()[data.solar_system_type]);
-      const size = this.getStarSize(data.solar_system_type);
+      const color = new THREE.Color(this.getStarColorMap()[data.type]);
+      const size = this.getStarSize(data.type);
       // Create texture with gradient effect
       const texture = this.createTexture(color);
       // Create sprite material with additive blending for glow effect
@@ -151,7 +151,7 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
       // Set sprite size
       sprite.scale.setScalar(size);
       // Set sprite position in 3D space
-      sprite.position.set(data.solar_system_initial_x * this.scaleFactor || 0, data.solar_system_initial_y * this.scaleFactor || 0, data.solar_system_initial_z * this.scaleFactor || 0);
+      sprite.position.set(data.x * this.scaleFactor || 0, data.y * this.scaleFactor || 0, data.z * this.scaleFactor || 0);
       // Store system data in sprite for later reference
       sprite.userData = data;
       // Add sprite to scene and array
@@ -222,29 +222,27 @@ export class GalaxyAnimationComponent implements AfterViewInit, OnDestroy {
   }
 
   private onClick = (event: MouseEvent) => {
-    // Calculate mouse position in normalized device coordinates
-    const bounds = this.renderer.domElement.getBoundingClientRect();
-    this.mouse.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
-    this.mouse.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
+      const bounds = this.renderer.domElement.getBoundingClientRect();
+      this.mouse.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+      this.mouse.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
 
-    // Check for intersections with solar system sprites
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.systems);
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const intersects = this.raycaster.intersectObjects(this.systems);
 
-    // If a sprite is clicked, show modal with system information
-    if (intersects.length > 0) {
-      const selectedSprite = intersects[0].object;
-      const starData = selectedSprite.userData;
-      //we need to load detailed data...
-      this.solarSystemsService.getSolarSystem(starData['galaxy_id'], starData['solar_system_id']).subscribe({
-        next: (systemInformation) => {
-          this.showModal(systemInformation.data.solar_system);
-        },
-        error: () => {
-          this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
-        }
-      })
-    }
+      if (intersects.length > 0) {
+        const selectedSprite = intersects[0].object;
+        const starData = selectedSprite.userData;
+        
+        // Utilisez les nouvelles propriétés raccourcies
+        this.solarSystemsService.getSolarSystem(1, starData['id']).subscribe({
+          next: (systemInformation) => {
+            this.showModal(systemInformation.data.solar_system);
+          },
+          error: () => {
+            this.notificationService.showError('Something went wrong, please try again later.', 2500, '/home');
+          }
+        });
+      }
   };
 
 private async showModal(starData: any): Promise<void> {
