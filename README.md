@@ -1,5 +1,9 @@
 # CosmiCrowd - Collaborative Galaxy
 
+## URL
+
+You can access CosmiCrowd here : https://cosmicrowd.netlify.app
+
 ## Description
 
 CosmiCrowd is a revolutionary collaborative web application where users can create their own solar systems in a participatory galaxy!
